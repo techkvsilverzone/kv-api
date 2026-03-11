@@ -51,6 +51,10 @@ app.use(
   })
 );
 
+app.get('/', (_req: Request, res: Response) => {
+  res.send('API is running 🚀');
+});
+
 // Routes
 app.use('/api/v1', routes);
 
