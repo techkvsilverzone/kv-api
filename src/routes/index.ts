@@ -1,0 +1,34 @@
+import { Router } from 'express';
+import healthRoutes from './health.routes';
+import userRoutes from './user.routes';
+import authRoutes from './auth.routes';
+import productRoutes from './product.routes';
+import orderRoutes from './order.routes';
+import savingsRoutes from './savings.routes';
+import cartRoutes from './cart.routes';
+import adminRoutes from './admin.routes';
+import miscRoutes from './misc.routes';
+import couponRoutes from './coupon.routes';
+import paymentRoutes from './payment.routes';
+import wishlistRoutes from './wishlist.routes';
+import silverRateRoutes from './silverrate.routes';
+import returnRoutes from './return.routes';
+
+const router = Router();
+
+router.use('/health', healthRoutes);
+router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
+router.use('/products', productRoutes);
+router.use('/orders', orderRoutes);
+router.use('/savings', savingsRoutes);
+router.use('/cart', cartRoutes);
+router.use('/coupons', couponRoutes);
+router.use('/payments', paymentRoutes);
+router.use('/wishlist', wishlistRoutes);
+router.use('/silver-rates', silverRateRoutes);
+router.use('/returns', returnRoutes);
+router.use('/admin', adminRoutes);
+router.use('/', miscRoutes);
+
+export default router;

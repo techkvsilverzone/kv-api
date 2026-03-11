@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"D:\\\\KraftLabs\\\\KV Silver Zone\\\\Source\\\\kv-api\" && npx tsc --noEmit 2>&1)",
+      "Bash(cd \"D:\\\\KraftLabs\\\\KV Silver Zone\\\\Source\\\\kv-api\" && npm run seed:images 2>&1)",
+      "Bash(cd \"D:\\\\KraftLabs\\\\KV Silver Zone\\\\Source\\\\kv-api\" && npm run migrate 2>&1)",
+      "Bash(cd \"D:\\\\KraftLabs\\\\KV Silver Zone\\\\Source\\\\kv-api\" && npm run seed 2>&1)"
+    ]
+  }
+}
