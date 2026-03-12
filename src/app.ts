@@ -55,6 +55,13 @@ app.get('/', (_req: Request, res: Response) => {
   res.send('API is running 🚀');
 });
 
+app.get('/health', (_req: Request, res: Response) => {
+  res.status(200).json({
+    status: 'UP',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Routes
 app.use('/api/v1', routes);
 
