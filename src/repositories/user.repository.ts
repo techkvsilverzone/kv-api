@@ -50,4 +50,8 @@ export class UserRepository {
   public async findAll(): Promise<IUser[]> {
     return User.find({ isActive: true }).sort({ createdAt: -1 }).exec();
   }
+
+  public async findRegularCustomers(): Promise<IUser[]> {
+    return User.find({ isActive: true, isAdmin: false }).sort({ createdAt: -1 }).exec();
+  }
 }

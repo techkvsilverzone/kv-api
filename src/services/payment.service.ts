@@ -3,15 +3,20 @@ import https from 'https';
 import { config } from '../config';
 import { OrderRepository } from '../repositories/order.repository';
 import { CouponRepository } from '../repositories/coupon.repository';
+import { UserRepository } from '../repositories/user.repository';
 import { AppError } from '../utils/appError';
+import { sendPaymentCompletedEmails } from '../utils/emailNotifications';
+import Logger from '../utils/logger';
 
 export class PaymentService {
   private orderRepository: OrderRepository;
   private couponRepository: CouponRepository;
+  private userRepository: UserRepository;
 
   constructor() {
     this.orderRepository = new OrderRepository();
     this.couponRepository = new CouponRepository();
+    this.userRepository = new UserRepository();
   }
 
   public async createRazorpayOrder(amount: number, currency = 'INR'): Promise<any> {
@@ -104,6 +109,21 @@ export class PaymentService {
       const coupon = await this.couponRepository.findByCode(orderData.couponCode);
       if (coupon) {
         await this.couponRepository.incrementUsedCount(coupon._id);
+      }
+    }
+
+    if (!isCod) {
+      try {
+        const user = await this.userRepository.findById(userId);
+        await sendPaymentCompletedEmails({
+          userEmail: user?.email,
+          userName: user?.name,
+          orderId: order._id.toString(),
+          amount: Number(order.totalAmount || orderData.totalAmount || 0),
+          paymentMethod: String(order.paymentMethod || orderData.paymentMethod || 'online').toUpperCase(),
+        });
+      } catch (error) {
+        Logger.error(`Payment email dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
 

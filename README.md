@@ -34,6 +34,9 @@ A Node.js Express TypeScript API with a clean architecture.
    SQL_SERVER_PASSWORD=
    SQL_SERVER_ENCRYPT=false
    SQL_SERVER_TRUST_CERT=true
+   BREVO_API_KEY=
+   BREVO_SENDER_EMAIL=
+   BREVO_SENDER_NAME=KV Silver Zone
    ```
 
 For SQL login instead of Windows auth, set `SQL_SERVER_AUTH_TYPE=sql` and provide `SQL_SERVER_USER` and `SQL_SERVER_PASSWORD`.

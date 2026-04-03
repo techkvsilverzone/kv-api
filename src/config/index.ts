@@ -24,4 +24,7 @@ export const config = {
   jwtExpire: process.env.JWT_EXPIRE || '30d',
   razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',
   razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || '',
+  brevoApiKey: process.env.BREVO_API_KEY || '',
+  brevoSenderEmail: process.env.BREVO_SENDER_EMAIL || '',
+  brevoSenderName: process.env.BREVO_SENDER_NAME || 'KV Silver Zone',
 };

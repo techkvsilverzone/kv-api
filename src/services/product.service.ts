@@ -1,20 +1,54 @@
 import { ProductRepository } from '../repositories/product.repository';
+import { UserRepository } from '../repositories/user.repository';
 import { AppError } from '../utils/appError';
+import { sendNewProductPromotion } from '../utils/emailNotifications';
+import Logger from '../utils/logger';
+import { config } from '../config';
 
 export class ProductService {
   private productRepository: ProductRepository;
+  private userRepository: UserRepository;
 
   constructor() {
     this.productRepository = new ProductRepository();
+    this.userRepository = new UserRepository();
   }
 
   public async createProduct(data: any) {
     const payload = this.validateCreatePayload(data);
     try {
-      return await this.productRepository.create(payload);
+      const product = await this.productRepository.create(payload);
+
+      this.dispatchPromotionalEmails(product);
+
+      return product;
     } catch (error) {
       throw this.mapPersistenceError(error);
     }
+  }
+
+  private dispatchPromotionalEmails(product: { name: string; material: string; price: number }): void {
+    if (!config.brevoApiKey) {
+      return;
+    }
+
+    void (async () => {
+      try {
+        const regularUsers = await this.userRepository.findRegularCustomers();
+        const recipientEmails = regularUsers
+          .map((u) => u.email)
+          .filter((email) => typeof email === 'string' && email.length > 0);
+
+        await sendNewProductPromotion({
+          productName: product.name,
+          category: product.material,
+          price: product.price,
+          recipients: recipientEmails,
+        });
+      } catch (emailError) {
+        Logger.error(`Promotional email dispatch failed: ${emailError instanceof Error ? emailError.message : String(emailError)}`);
+      }
+    })();
   }
 
   public async getProducts(filters: any) {
