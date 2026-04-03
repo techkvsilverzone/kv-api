@@ -14,6 +14,8 @@ export interface IProduct extends Document {
   material: string;
   weight: number;
   price: number;
+  originalPrice?: number;
+  purity?: string;
   quantity: number;
   isActive: boolean;
   images: IProductImage[];
@@ -39,6 +41,8 @@ const ProductSchema = new Schema<IProduct>(
     weight: { type: Number, required: true },
     price: { type: Number, required: true },
     quantity: { type: Number, required: true, default: 0 },
+    originalPrice: { type: Number },
+    purity: { type: String },
     isActive: { type: Boolean, default: true },
     images: { type: [ProductImageSchema], default: [] },
   },

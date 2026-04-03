@@ -43,7 +43,7 @@ export interface IOrder extends Document {
 const OrderItemSchema = new Schema<IOrderItem>(
   {
     productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
-    productGroupCode: { type: String, required: true },
+    productGroupCode: { type: String, default: '' },
     productName: { type: String, required: true },
     quantity: { type: Number, required: true },
     weight: { type: Number, required: true },
@@ -79,7 +79,8 @@ const OrderSchema = new Schema<IOrder>(
     paymentMethod: {
       type: String,
       required: true,
-      enum: ['cod', 'razorpay'],
+      enum: ['cod', 'razorpay', 'COD', 'RAZORPAY', 'Razorpay'],
+      set: (v: string) => (typeof v === 'string' ? v.toLowerCase() : v),
     },
     paymentStatus: {
       type: String,

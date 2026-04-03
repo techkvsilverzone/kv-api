@@ -31,9 +31,13 @@ export class ReviewController {
     }
   };
 
-  public deleteReview = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public deleteReview = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      await this.reviewService.deleteReview(req.params.reviewId as string);
+      await this.reviewService.deleteReview(
+        req.params.reviewId as string,
+        req.user!._id.toString(),
+        Boolean(req.user?.isAdmin),
+      );
       res.status(204).send();
     } catch (error) {
       next(error);

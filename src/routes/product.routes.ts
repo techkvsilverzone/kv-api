@@ -67,11 +67,11 @@ router.post('/:productId/reviews', protect, reviewController.createReview);
  * @openapi
  * /products/{productId}/reviews/{reviewId}:
  *   delete:
- *     summary: Delete a review (admin only)
+ *     summary: Delete a review (owner or admin)
  *     tags: [Reviews]
  *     security:
  *       - bearerAuth: []
  */
-router.delete('/:productId/reviews/:reviewId', protect, admin, reviewController.deleteReview);
+router.delete('/:productId/reviews/:reviewId', protect, reviewController.deleteReview);
 
 export default router;

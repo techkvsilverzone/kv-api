@@ -13,6 +13,7 @@ import paymentRoutes from './payment.routes';
 import wishlistRoutes from './wishlist.routes';
 import silverRateRoutes from './silverrate.routes';
 import returnRoutes from './return.routes';
+import metalRateRoutes from './metalrate.routes';
 
 const router = Router();
 
@@ -27,6 +28,7 @@ router.use('/coupons', couponRoutes);
 router.use('/payments', paymentRoutes);
 router.use('/wishlist', wishlistRoutes);
 router.use('/silver-rates', silverRateRoutes);
+router.use('/metal-rates', metalRateRoutes);
 router.use('/returns', returnRoutes);
 router.use('/admin', adminRoutes);
 router.use('/', miscRoutes);

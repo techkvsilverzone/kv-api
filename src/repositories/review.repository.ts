@@ -60,6 +60,13 @@ export class ReviewRepository {
     return result !== null;
   }
 
+  public async findById(reviewId: string): Promise<{ userId: string } | null> {
+    if (!mongoose.Types.ObjectId.isValid(reviewId)) return null;
+    const review = await Review.findById(reviewId).exec();
+    if (!review) return null;
+    return { userId: review.userId.toString() };
+  }
+
   public async getAverageRating(productId: string): Promise<{ averageRating: number; totalReviews: number }> {
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return { averageRating: 0, totalReviews: 0 };

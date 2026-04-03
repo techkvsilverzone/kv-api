@@ -9,14 +9,18 @@ export class CouponService {
   }
 
   public async applyCoupon(code: string, orderAmount: number) {
-    const coupon = await this.couponRepository.findByCode(code);
+    if (!code || typeof code !== 'string' || !code.trim()) {
+      throw new AppError('Coupon code is required', 400);
+    }
+
+    const coupon = await this.couponRepository.findByCode(code.trim().toUpperCase());
 
     if (!coupon) {
-      return { valid: false, discount: 0, message: 'Coupon not found' };
+      throw new AppError('Coupon code is invalid', 400);
     }
 
     if (!coupon.isActive) {
-      return { valid: false, discount: 0, message: 'Coupon is inactive' };
+      throw new AppError('Coupon is inactive', 400);
     }
 
     const now = new Date();
@@ -24,25 +28,20 @@ export class CouponService {
     expiryDate.setHours(23, 59, 59, 999);
 
     if (now > expiryDate) {
-      return { valid: false, discount: 0, message: 'Coupon has expired' };
+      throw new AppError('Coupon has expired', 400);
     }
 
     if (coupon.maxUses > 0 && coupon.usedCount >= coupon.maxUses) {
-      return { valid: false, discount: 0, message: 'Coupon usage limit reached' };
+      throw new AppError('Coupon usage limit reached', 400);
     }
 
     if (orderAmount < coupon.minOrderAmount) {
-      return {
-        valid: false,
-        discount: 0,
-        message: `Minimum order amount of ₹${coupon.minOrderAmount} required`,
-      };
+      throw new AppError(`Minimum order amount of ₹${coupon.minOrderAmount} required`, 400);
     }
 
     let discount = 0;
     if (coupon.discountType === 'percentage') {
       discount = Math.round((orderAmount * coupon.discountValue) / 100);
-      // no maxDiscount cap in current schema
     } else {
       discount = coupon.discountValue;
     }

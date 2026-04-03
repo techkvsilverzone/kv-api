@@ -4,6 +4,7 @@ import { OrderController } from '../controllers/order.controller';
 import { UserController } from '../controllers/user.controller';
 import { CouponController } from '../controllers/coupon.controller';
 import { SilverRateController } from '../controllers/silverrate.controller';
+import { MetalRateController } from '../controllers/metalrate.controller';
 import { ReturnController } from '../controllers/return.controller';
 import { SavingsController } from '../controllers/savings.controller';
 import { protect, admin } from '../middlewares/auth.middleware';
@@ -14,6 +15,7 @@ const orderController = new OrderController();
 const userController = new UserController();
 const couponController = new CouponController();
 const silverRateController = new SilverRateController();
+const metalRateController = new MetalRateController();
 const returnController = new ReturnController();
 const savingsController = new SavingsController();
 
@@ -158,6 +160,7 @@ router.delete('/coupons/:id', couponController.deleteCoupon);
  *   get:
  *     summary: Get all silver rate records
  *     tags: [Admin]
+ *     deprecated: true
  *     security:
  *       - bearerAuth: []
  */
@@ -169,10 +172,33 @@ router.get('/silver-rates', silverRateController.getAllRates);
  *   post:
  *     summary: Upsert today's silver rate for a purity
  *     tags: [Admin]
+ *     deprecated: true
  *     security:
  *       - bearerAuth: []
  */
 router.post('/silver-rates', silverRateController.upsertRate);
+
+/**
+ * @openapi
+ * /admin/metal-rates:
+ *   get:
+ *     summary: Get all metal rate records
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get('/metal-rates', metalRateController.getAllRates);
+
+/**
+ * @openapi
+ * /admin/metal-rates:
+ *   post:
+ *     summary: Upsert metal rate for date + metal + karat
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.post('/metal-rates', metalRateController.upsertRate);
 
 /**
  * @openapi

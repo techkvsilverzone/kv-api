@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { Product, IProduct } from '../models/product.model';
+import { AppError } from '../utils/appError';
 
 export class ProductRepository {
   public async create(data: any): Promise<IProduct> {
@@ -7,7 +8,7 @@ export class ProductRepository {
     const name = String(data.itemName || data.name || '').trim();
 
     if (!productGroupCode || !name) {
-      throw new Error('productGroupCode and name are required');
+      throw new AppError('productGroupCode and name are required', 400);
     }
 
     const image = data.imageBase64 || data.image || data.imageUrl || '';
@@ -18,7 +19,7 @@ export class ProductRepository {
     if (existing) {
       existing.name = name;
       existing.material = String(data.material || data.category || existing.material).trim();
-      existing.weight = data.weightGm !== undefined ? Number(data.weightGm) : existing.weight;
+      existing.weight = data.weight !== undefined ? Number(data.weight) : existing.weight;
       existing.price = data.price !== undefined ? Number(data.price) : existing.price;
       existing.quantity = data.quantity !== undefined ? Number(data.quantity) : existing.quantity;
       if (image) {
@@ -36,7 +37,7 @@ export class ProductRepository {
       name,
       description: data.description,
       material: String(data.material || data.category || 'Silver').trim(),
-      weight: Number(data.weightGm ?? data.weight ?? 0),
+      weight: Number(data.weight ?? 0),
       price: Number(data.price || 0),
       quantity: Number(data.quantity || 1),
       images: image
@@ -86,13 +87,16 @@ export class ProductRepository {
     if (!mongoose.Types.ObjectId.isValid(id)) return null;
 
     const updateData: any = {};
-    if (data.name || data.itemName) updateData.name = data.name || data.itemName;
-    if (data.material || data.category) updateData.material = data.material || data.category;
+    if (data.name !== undefined || data.itemName !== undefined) updateData.name = String(data.name ?? data.itemName);
+    if (data.material !== undefined || data.category !== undefined)
+      updateData.material = String(data.material ?? data.category);
     if (data.weight !== undefined || data.weightGm !== undefined)
-      updateData.weight = data.weightGm ?? data.weight;
-    if (data.price !== undefined) updateData.price = data.price;
-    if (data.quantity !== undefined) updateData.quantity = data.quantity;
+      updateData.weight = Number(data.weight ?? data.weightGm);
+    if (data.price !== undefined) updateData.price = Number(data.price);
+    if (data.quantity !== undefined) updateData.quantity = Number(data.quantity);
     if (data.description !== undefined) updateData.description = data.description;
+    if (data.originalPrice !== undefined) updateData.originalPrice = Number(data.originalPrice);
+    if (data.purity !== undefined) updateData.purity = String(data.purity);
     if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
     return Product.findByIdAndUpdate(id, updateData, { new: true }).exec();

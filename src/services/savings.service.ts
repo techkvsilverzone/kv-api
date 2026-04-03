@@ -9,10 +9,23 @@ export class SavingsService {
   }
 
   public async enroll(userId: string, data: any) {
-    const bonusAmount = data.duration === 11 ? Number(data.monthlyAmount || 0) : 0;
+    const monthlyAmount = Number(data.monthlyAmount);
+    if (!Number.isInteger(monthlyAmount) || monthlyAmount < 1000) {
+      throw new AppError('monthlyAmount must be a whole number and at least 1000', 400);
+    }
+
+    const duration = Number(data.duration);
+    const allowedDurations = [6, 11, 12];
+    if (!allowedDurations.includes(duration)) {
+      throw new AppError('duration must be one of 6, 11, or 12', 400);
+    }
+
+    const bonusAmount = duration === 11 ? monthlyAmount : 0;
     return await this.savingsRepository.create({
       user: userId,
       ...data,
+      monthlyAmount,
+      duration,
       totalPaid: 0,
       bonusAmount,
     });

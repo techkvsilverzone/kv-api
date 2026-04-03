@@ -36,8 +36,14 @@ export class ReviewService {
     });
   }
 
-  public async deleteReview(reviewId: string) {
-    const deleted = await this.reviewRepository.deleteById(reviewId);
-    if (!deleted) throw new AppError('Review not found', 404);
+  public async deleteReview(reviewId: string, requestingUserId: string, isAdmin: boolean) {
+    const review = await this.reviewRepository.findById(reviewId);
+    if (!review) throw new AppError('Review not found', 404);
+
+    if (!isAdmin && review.userId !== requestingUserId) {
+      throw new AppError('Not authorized to delete this review', 403);
+    }
+
+    await this.reviewRepository.deleteById(reviewId);
   }
 }

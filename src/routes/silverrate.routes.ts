@@ -10,6 +10,7 @@ const silverRateController = new SilverRateController();
  *   get:
  *     summary: Get today's silver rates for all purities
  *     tags: [SilverRates]
+ *     deprecated: true
  */
 router.get('/today', silverRateController.getTodayRates);
 
@@ -19,6 +20,7 @@ router.get('/today', silverRateController.getTodayRates);
  *   get:
  *     summary: Get historical silver rates
  *     tags: [SilverRates]
+ *     deprecated: true
  *     parameters:
  *       - in: query
  *         name: days
