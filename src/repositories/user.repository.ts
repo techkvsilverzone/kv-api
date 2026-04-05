@@ -13,6 +13,7 @@ export class UserRepository {
     email: string;
     password: string;
     phone?: string;
+    isStallRegistration?: boolean;
   }): Promise<IUser> {
     const passwordHash = await bcrypt.hash(data.password, 10);
     const user = new User({
@@ -20,6 +21,7 @@ export class UserRepository {
       email: data.email,
       passwordHash,
       phone: data.phone,
+      isStallRegistration: data.isStallRegistration ?? false,
     });
     return user.save();
   }

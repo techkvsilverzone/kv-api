@@ -1,0 +1,1155 @@
+{
+  "version": 1,
+  "created_at": "2026-04-03T18:52:55.260Z",
+  "lifetime": {
+    "total_tokens_estimated": 56529,
+    "total_reads": 102,
+    "total_writes": 84,
+    "total_sessions": 4,
+    "anatomy_hits": 81,
+    "anatomy_misses": 17,
+    "repeated_reads_blocked": 2,
+    "estimated_savings_vs_bare_cli": 16200
+  },
+  "sessions": [
+    {
+      "id": "session-2026-04-03-0023",
+      "started": "2026-04-03T18:53:06.304Z",
+      "ended": "2026-04-03T18:54:46.089Z",
+      "reads": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.wolf/anatomy.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 57,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.wolf/cerebrum.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 421,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.github/copilot-instructions.md",
+          "tokens_estimated": 347,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 564,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/jest.config.js",
+          "tokens_estimated": 58,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 1447,
+        "output_tokens_estimated": 0,
+        "reads_count": 7,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 5
+      }
+    },
+    {
+      "id": "session-2026-04-03-0023",
+      "started": "2026-04-03T18:53:06.304Z",
+      "ended": "2026-04-03T18:55:46.055Z",
+      "reads": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.wolf/anatomy.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 57,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.wolf/cerebrum.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 421,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.github/copilot-instructions.md",
+          "tokens_estimated": 347,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 564,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/jest.config.js",
+          "tokens_estimated": 58,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 755,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 1447,
+        "output_tokens_estimated": 755,
+        "reads_count": 7,
+        "writes_count": 1,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 5
+      }
+    },
+    {
+      "id": "session-2026-04-03-0023",
+      "started": "2026-04-03T18:53:06.304Z",
+      "ended": "2026-04-03T19:00:21.419Z",
+      "reads": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.wolf/anatomy.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 57,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.wolf/cerebrum.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 421,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.github/copilot-instructions.md",
+          "tokens_estimated": 347,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 564,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/jest.config.js",
+          "tokens_estimated": 58,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 464,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.env",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/sql.ts",
+          "tokens_estimated": 588,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/db.ts",
+          "tokens_estimated": 100,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/user.repository.ts",
+          "tokens_estimated": 488,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/server.ts",
+          "tokens_estimated": 161,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 755,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 20,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 9,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 7,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 155,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 41,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 104,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 3248,
+        "output_tokens_estimated": 1131,
+        "reads_count": 13,
+        "writes_count": 8,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 10
+      }
+    },
+    {
+      "id": "session-2026-04-03-0023",
+      "started": "2026-04-03T18:53:06.304Z",
+      "ended": "2026-04-03T19:04:55.390Z",
+      "reads": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.wolf/anatomy.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 57,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.wolf/cerebrum.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 421,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.github/copilot-instructions.md",
+          "tokens_estimated": 347,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 564,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/jest.config.js",
+          "tokens_estimated": 58,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 464,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.env",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/sql.ts",
+          "tokens_estimated": 588,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/db.ts",
+          "tokens_estimated": 100,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/user.repository.ts",
+          "tokens_estimated": 488,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/server.ts",
+          "tokens_estimated": 161,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/plans/api_changes_plan.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 891,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 484,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/order.repository.ts",
+          "tokens_estimated": 979,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 1354,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 652,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 1309,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/order.controller.ts",
+          "tokens_estimated": 507,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 198,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 386,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/user.model.ts",
+          "tokens_estimated": 227,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 408,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 755,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 20,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 9,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 7,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 155,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 41,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 104,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 81,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 51,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 81,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/order.repository.ts",
+          "tokens_estimated": 87,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 125,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/order.controller.ts",
+          "tokens_estimated": 133,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 121,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 101,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 171,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 240,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/delivery.controller.ts",
+          "tokens_estimated": 309,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/delivery.routes.ts",
+          "tokens_estimated": 183,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 36,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 33,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 10643,
+        "output_tokens_estimated": 2995,
+        "reads_count": 25,
+        "writes_count": 24,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 21
+      }
+    },
+    {
+      "id": "session-2026-04-03-0023",
+      "started": "2026-04-03T18:53:06.304Z",
+      "ended": "2026-04-03T19:05:18.147Z",
+      "reads": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.wolf/anatomy.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 57,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.wolf/cerebrum.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 421,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.github/copilot-instructions.md",
+          "tokens_estimated": 347,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 564,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/jest.config.js",
+          "tokens_estimated": 58,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 464,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.env",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/sql.ts",
+          "tokens_estimated": 588,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/db.ts",
+          "tokens_estimated": 100,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/user.repository.ts",
+          "tokens_estimated": 488,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/server.ts",
+          "tokens_estimated": 161,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/plans/api_changes_plan.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 891,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 484,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/order.repository.ts",
+          "tokens_estimated": 979,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 1354,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 652,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 1309,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/order.controller.ts",
+          "tokens_estimated": 507,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 198,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 386,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/user.model.ts",
+          "tokens_estimated": 227,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 408,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 755,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 20,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 9,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 7,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 155,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 41,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 104,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 81,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 51,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 81,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/order.repository.ts",
+          "tokens_estimated": 87,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 72,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 125,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/order.controller.ts",
+          "tokens_estimated": 133,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 121,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 101,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 171,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 240,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/delivery.controller.ts",
+          "tokens_estimated": 309,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/delivery.routes.ts",
+          "tokens_estimated": 183,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 36,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 33,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 10643,
+        "output_tokens_estimated": 2995,
+        "reads_count": 25,
+        "writes_count": 24,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 21
+      }
+    },
+    {
+      "id": "session-2026-04-05-1202",
+      "started": "2026-04-05T06:32:00.006Z",
+      "ended": "2026-04-05T06:40:40.178Z",
+      "reads": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.wolf/anatomy.md",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.wolf/cerebrum.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/plans/API_CHANGES.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 561,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 2435,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 1651,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/user.model.ts",
+          "tokens_estimated": 227,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/user.repository.ts",
+          "tokens_estimated": 488,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/savings.model.ts",
+          "tokens_estimated": 448,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/savings.repository.ts",
+          "tokens_estimated": 526,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 954,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/order.repository.ts",
+          "tokens_estimated": 1022,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 747,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/savings.service.ts",
+          "tokens_estimated": 506,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/order.controller.ts",
+          "tokens_estimated": 615,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 412,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 301,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/user.controller.ts",
+          "tokens_estimated": 585,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/user.service.ts",
+          "tokens_estimated": 518,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 1517,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/coupon.model.ts",
+          "tokens_estimated": 297,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/coupon.repository.ts",
+          "tokens_estimated": 534,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 408,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/.wolf/memory.md",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "C:/Users/Gayathri/.claude/projects/d--KraftLabs-KV-Silver-Zone-Source-kv-api/memory/MEMORY.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/user.model.ts",
+          "tokens_estimated": 87,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/user.model.ts",
+          "tokens_estimated": 64,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/user.service.ts",
+          "tokens_estimated": 139,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/user.service.ts",
+          "tokens_estimated": 669,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/user.repository.ts",
+          "tokens_estimated": 128,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 131,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 75,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 172,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 100,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 92,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/order.repository.ts",
+          "tokens_estimated": 488,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 126,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 460,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/savings.model.ts",
+          "tokens_estimated": 110,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/savings.model.ts",
+          "tokens_estimated": 54,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/savings.repository.ts",
+          "tokens_estimated": 232,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/pincodeRate.model.ts",
+          "tokens_estimated": 175,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/pincodeRate.repository.ts",
+          "tokens_estimated": 242,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/shipping.controller.ts",
+          "tokens_estimated": 438,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/shipping.routes.ts",
+          "tokens_estimated": 343,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/filterConfig.model.ts",
+          "tokens_estimated": 270,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/filterConfig.repository.ts",
+          "tokens_estimated": 221,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 240,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 323,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 28,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "C:/Users/Gayathri/.claude/projects/d--KraftLabs-KV-Silver-Zone-Source-kv-api/memory/MEMORY.md",
+          "tokens_estimated": 1042,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 14752,
+        "output_tokens_estimated": 6473,
+        "reads_count": 25,
+        "writes_count": 27,
+        "repeated_reads_blocked": 2,
+        "anatomy_lookups": 19
+      }
+    }
+  ],
+  "daemon_usage": [],
+  "waste_flags": [],
+  "optimization_report": {
+    "last_generated": null,
+    "patterns": []
+  }
+}

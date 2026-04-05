@@ -18,6 +18,19 @@ export class OrderController {
     }
   };
 
+  public getOrderById = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const order = await this.orderService.getOrderById(
+        req.params.id as string,
+        req.user!._id.toString(),
+        req.user!.isAdmin,
+      );
+      res.status(200).json(order);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public getMyOrders = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const orders = await this.orderService.getUserOrders(req.user!._id.toString());

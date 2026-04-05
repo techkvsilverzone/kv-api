@@ -9,6 +9,7 @@ export interface ISavingsPayment {
 export interface ISavings extends Document {
   _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
+  passbookNumber: string;
   planName: string;
   monthlyAmount: number;
   duration: number;
@@ -33,6 +34,7 @@ const SavingsPaymentSchema = new Schema<ISavingsPayment>(
 const SavingsSchema = new Schema<ISavings>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    passbookNumber: { type: String, unique: true, sparse: true },
     planName: { type: String, required: true },
     monthlyAmount: { type: Number, required: true },
     duration: { type: Number, required: true },

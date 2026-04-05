@@ -16,6 +16,7 @@ export class OrderRepository {
         weight: Number(item?.weight || item?.weightGm || 0),
         unitPrice: Number(item?.price || item?.unitPrice || 0),
         totalPrice: Number(item?.price || item?.unitPrice || 0) * Number(item?.quantity || 1),
+        isGiftVoucher: Boolean(item?.isGiftVoucher || false),
       };
     });
 
@@ -27,6 +28,14 @@ export class OrderRepository {
       razorpayPaymentId: data.razorpayPaymentId || undefined,
       couponCode: data.couponCode || undefined,
       couponDiscount: Number(data.couponDiscount || 0),
+      giftWrap: Boolean(data.giftWrap || false),
+      giftMessage: data.giftMessage || undefined,
+      giftWrapFee: Number(data.giftWrapFee || 0),
+      subtotal: Number(data.subtotal || 0),
+      taxAmount: Number(data.taxAmount || 0),
+      totalWithTax: Number(data.totalWithTax || 0),
+      deliveryFee: Number(data.deliveryFee || 0),
+      grandTotal: Number(data.grandTotal || 0),
       totalAmount: Number(data.totalAmount || 0),
       tax: Number(data.tax || 0),
       shippingAddress: {

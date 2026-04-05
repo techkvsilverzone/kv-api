@@ -1,0 +1,229 @@
+{
+  "version": 1,
+  "bugs": [
+    {
+      "id": "bug-001",
+      "timestamp": "2026-04-03T18:58:38.991Z",
+      "error_message": "Incorrect value in code",
+      "file": "package.json",
+      "root_cause": "Had \"@types/mssql\"",
+      "fix": "Changed to \"@types/node\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "json"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-04-03T18:58:47.854Z"
+    },
+    {
+      "id": "bug-002",
+      "timestamp": "2026-04-03T18:59:47.458Z",
+      "error_message": "Significant refactor of ",
+      "file": "CLAUDE.md",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 12→10 lines (6 removed) | Also: - Schema prefix: `kv` (all tables are `kv.[TableNa; - PKs: `UNIQUEIDENTIFIER` with `NEWSEQUENTIALID()` | Also: | `SQL_SERVER`, `SQL_DATABASE`, `SQL_USER`, `SQL_P; | `SMTP_*` | Nodemailer email config |",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-04-03T19:00:05.266Z"
+    },
+    {
+      "id": "bug-003",
+      "timestamp": "2026-04-03T19:03:15.838Z",
+      "error_message": "Missing guard clause",
+      "file": "src/services/order.service.ts",
+      "root_cause": "No early return/throw for edge case: !order",
+      "fix": "Added guard clause: if (!order)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-03T19:03:15.838Z"
+    },
+    {
+      "id": "bug-004",
+      "timestamp": "2026-04-03T19:03:21.350Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/controllers/order.controller.ts",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-03T19:03:21.350Z"
+    },
+    {
+      "id": "bug-005",
+      "timestamp": "2026-04-03T19:03:31.378Z",
+      "error_message": "Type error",
+      "file": "src/routes/order.routes.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-03T19:03:31.378Z"
+    },
+    {
+      "id": "bug-006",
+      "timestamp": "2026-04-03T19:04:01.921Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/repositories/product.repository.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-03T19:04:01.921Z"
+    },
+    {
+      "id": "bug-007",
+      "timestamp": "2026-04-03T19:04:30.176Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/routes/index.ts",
+      "root_cause": "Had '/admin'",
+      "fix": "Changed to '/delivery'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-03T19:04:30.176Z"
+    },
+    {
+      "id": "bug-008",
+      "timestamp": "2026-04-05T06:34:54.048Z",
+      "error_message": "Missing guard clause",
+      "file": "src/services/user.service.ts",
+      "root_cause": "No early return/throw for edge case: user.role === 'staff'",
+      "fix": "Added guard clause: if (user.role === 'staff')",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-05T06:34:54.048Z"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-04-05T06:35:07.870Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/services/user.service.ts",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 43→68 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-05T06:35:07.870Z"
+    },
+    {
+      "id": "bug-010",
+      "timestamp": "2026-04-05T06:35:14.476Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/repositories/user.repository.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-05T06:35:14.476Z"
+    },
+    {
+      "id": "bug-011",
+      "timestamp": "2026-04-05T06:35:29.452Z",
+      "error_message": "Type error",
+      "file": "src/repositories/product.repository.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-05T06:35:29.452Z"
+    },
+    {
+      "id": "bug-012",
+      "timestamp": "2026-04-05T06:36:43.730Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/services/order.service.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-05T06:36:43.730Z"
+    },
+    {
+      "id": "bug-013",
+      "timestamp": "2026-04-05T06:37:22.481Z",
+      "error_message": "Missing await",
+      "file": "src/repositories/savings.repository.ts",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-05T06:37:22.481Z"
+    },
+    {
+      "id": "bug-014",
+      "timestamp": "2026-04-05T06:38:35.770Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/routes/admin.routes.ts",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-05T06:38:35.770Z"
+    }
+  ]
+}

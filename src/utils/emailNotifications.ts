@@ -227,7 +227,6 @@ export async function sendNewProductPromotion(input: {
         to: batch.map((email) => ({ email })),
         subject,
         htmlContent,
-        tags: ['promotion', 'new-product'],
       });
     } catch (error) {
       Logger.error(`Promotional email batch failed: ${error instanceof Error ? error.message : String(error)}`);

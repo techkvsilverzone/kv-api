@@ -27,4 +27,21 @@ router.post('/', protect, orderController.createOrder);
  */
 router.get('/me', protect, orderController.getMyOrders);
 
+/**
+ * @openapi
+ * /orders/{id}:
+ *   get:
+ *     summary: Get a single order by ID
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ */
+router.get('/:id', protect, orderController.getOrderById);
+
 export default router;

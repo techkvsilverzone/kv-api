@@ -9,6 +9,7 @@ export interface IOrderItem {
   weight: number;
   unitPrice: number;
   totalPrice: number;
+  isGiftVoucher?: boolean;
 }
 
 export interface IShippingAddress {
@@ -32,6 +33,14 @@ export interface IOrder extends Document {
   razorpayPaymentId?: string;
   couponCode?: string;
   couponDiscount: number;
+  giftWrap: boolean;
+  giftMessage?: string;
+  giftWrapFee: number;
+  subtotal: number;
+  taxAmount: number;
+  totalWithTax: number;
+  deliveryFee: number;
+  grandTotal: number;
   totalAmount: number;
   tax: number;
   shippingAddress: IShippingAddress;
@@ -49,6 +58,7 @@ const OrderItemSchema = new Schema<IOrderItem>(
     weight: { type: Number, required: true },
     unitPrice: { type: Number, required: true },
     totalPrice: { type: Number, required: true },
+    isGiftVoucher: { type: Boolean, default: false },
   },
   { _id: true },
 );
@@ -92,6 +102,14 @@ const OrderSchema = new Schema<IOrder>(
     razorpayPaymentId: { type: String },
     couponCode: { type: String },
     couponDiscount: { type: Number, default: 0 },
+    giftWrap: { type: Boolean, default: false },
+    giftMessage: { type: String, maxlength: 200 },
+    giftWrapFee: { type: Number, default: 0 },
+    subtotal: { type: Number, default: 0 },
+    taxAmount: { type: Number, default: 0 },
+    totalWithTax: { type: Number, default: 0 },
+    deliveryFee: { type: Number, default: 0 },
+    grandTotal: { type: Number, default: 0 },
     totalAmount: { type: Number, required: true },
     tax: { type: Number, default: 0 },
     shippingAddress: { type: ShippingAddressSchema, required: true },

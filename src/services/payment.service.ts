@@ -100,6 +100,9 @@ export class PaymentService {
       razorpayPaymentId: razorpayPaymentId || null,
       couponCode: orderData.couponCode || null,
       couponDiscount: orderData.couponDiscount || 0,
+      giftWrap: orderData.giftWrap || false,
+      giftMessage: orderData.giftMessage || null,
+      giftWrapFee: orderData.giftWrapFee || 0,
     };
 
     const order = await this.orderRepository.create(orderToCreate);

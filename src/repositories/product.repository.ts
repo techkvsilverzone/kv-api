@@ -40,6 +40,12 @@ export class ProductRepository {
       weight: Number(data.weight ?? 0),
       price: Number(data.price || 0),
       quantity: Number(data.quantity || 1),
+      originalPrice: data.originalPrice !== undefined ? Number(data.originalPrice) : undefined,
+      purity: data.purity,
+      isSale: Boolean(data.isSale || false),
+      isFeatured: Boolean(data.isFeatured || false),
+      metalValue: data.metalValue !== undefined ? Number(data.metalValue) : undefined,
+      makingCharges: data.makingCharges !== undefined ? Number(data.makingCharges) : undefined,
       images: image
         ? [{ variantName, imageBase64: image, sortOrder: Number(data.sortOrder || 1) }]
         : [],
@@ -57,7 +63,13 @@ export class ProductRepository {
     const query: any = { isActive: true };
 
     if (filters.category) {
-      query.material = filters.category;
+      const cats = String(filters.category).split(',').map((c: string) => c.trim()).filter(Boolean);
+      query.material = cats.length === 1 ? cats[0] : { $in: cats };
+    }
+
+    if (filters.metal) {
+      const metals = String(filters.metal).split(',').map((m: string) => m.trim()).filter(Boolean);
+      query.purity = { $in: metals.map((m: string) => new RegExp(`^${m.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i')) };
     }
 
     if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
@@ -68,6 +80,14 @@ export class ProductRepository {
 
     if (filters.search) {
       query.$text = { $search: String(filters.search) };
+    }
+
+    if (filters.onSale === true || filters.onSale === 'true') {
+      query.$or = [{ isSale: true }, { originalPrice: { $exists: true, $ne: null } }];
+    }
+
+    if (filters.featured === true || filters.featured === 'true') {
+      query.isFeatured = true;
     }
 
     let sortOption: any = { productGroupCode: 1 };
@@ -97,6 +117,10 @@ export class ProductRepository {
     if (data.description !== undefined) updateData.description = data.description;
     if (data.originalPrice !== undefined) updateData.originalPrice = Number(data.originalPrice);
     if (data.purity !== undefined) updateData.purity = String(data.purity);
+    if (data.isSale !== undefined) updateData.isSale = Boolean(data.isSale);
+    if (data.isFeatured !== undefined) updateData.isFeatured = Boolean(data.isFeatured);
+    if (data.metalValue !== undefined) updateData.metalValue = Number(data.metalValue);
+    if (data.makingCharges !== undefined) updateData.makingCharges = Number(data.makingCharges);
     if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
     return Product.findByIdAndUpdate(id, updateData, { new: true }).exec();

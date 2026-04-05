@@ -8,6 +8,8 @@ export interface IUser extends Document {
   phone?: string;
   isAdmin: boolean;
   isActive: boolean;
+  role?: 'admin' | 'staff' | 'customer';
+  isStallRegistration?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,6 +22,8 @@ const UserSchema = new Schema<IUser>(
     phone: { type: String },
     isAdmin: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    role: { type: String, enum: ['admin', 'staff', 'customer'] },
+    isStallRegistration: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

@@ -28,7 +28,7 @@ export class ProductService {
   }
 
   private dispatchPromotionalEmails(product: { name: string; material: string; price: number }): void {
-    if (!config.brevoApiKey) {
+    if (!config.brevoSmtpUser || !config.brevoSmtpPassword) {
       return;
     }
 

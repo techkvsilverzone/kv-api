@@ -2,9 +2,17 @@ import mongoose from 'mongoose';
 import { Savings, ISavings } from '../models/savings.model';
 
 export class SavingsRepository {
+  private async generatePassbookNumber(): Promise<string> {
+    const count = await Savings.countDocuments();
+    const seq = (count + 1).toString().padStart(8, '0');
+    return `PB-${seq}`;
+  }
+
   public async create(data: any): Promise<ISavings> {
+    const passbookNumber = await this.generatePassbookNumber();
     const savings = new Savings({
       userId: new mongoose.Types.ObjectId(String(data.user || data.userId)),
+      passbookNumber,
       planName: String(data.planName || 'Silver Savings'),
       monthlyAmount: Number(data.monthlyAmount || 0),
       duration: Number(data.duration || 11),

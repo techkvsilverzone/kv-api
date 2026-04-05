@@ -1,4 +1,4 @@
-import https from 'https';
+import nodemailer from 'nodemailer';
 import { config } from '../config';
 import Logger from './logger';
 
@@ -20,8 +20,6 @@ export interface SendEmailInput {
   cc?: EmailAddress[];
   bcc?: EmailAddress[];
   replyTo?: EmailAddress;
-  params?: Record<string, unknown>;
-  tags?: string[];
   sender?: EmailAddress;
   attachments?: EmailAttachment[];
 }
@@ -30,12 +28,17 @@ interface BrevoSendResult {
   messageId?: string;
 }
 
-const BREVO_HOST = 'api.brevo.com';
-const BREVO_PATH = '/v3/smtp/email';
+function toAddressField(addresses: EmailAddress[]): string {
+  return addresses.map((a) => (a.name ? `"${a.name}" <${a.email}>` : a.email)).join(', ');
+}
 
 function validateInput(input: SendEmailInput): void {
-  if (!config.brevoApiKey) {
-    throw new Error('BREVO_API_KEY is missing');
+  if (!config.brevoSmtpUser) {
+    throw new Error('BREVO_SMTP_USER is missing');
+  }
+
+  if (!config.brevoSmtpPassword) {
+    throw new Error('BREVO_SMTP_PASSWORD is missing');
   }
 
   if (!config.brevoSenderEmail && !input.sender?.email) {
@@ -55,78 +58,38 @@ function validateInput(input: SendEmailInput): void {
   }
 }
 
-function parseResponseBody<T>(raw: string): T {
-  if (!raw) return {} as T;
-  return JSON.parse(raw) as T;
-}
+const transporter = nodemailer.createTransport({
+  host: 'smtp-relay.brevo.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: config.brevoSmtpUser,
+    pass: config.brevoSmtpPassword,
+  },
+});
 
 export async function sendEmail(input: SendEmailInput): Promise<BrevoSendResult> {
   validateInput(input);
 
-  const payload = {
-    sender: input.sender || {
-      email: config.brevoSenderEmail,
-      name: config.brevoSenderName,
-    },
-    to: input.to,
+  const senderEmail = input.sender?.email ?? config.brevoSenderEmail;
+  const senderName = input.sender?.name ?? config.brevoSenderName;
+  const from = senderName ? `"${senderName}" <${senderEmail}>` : senderEmail;
+
+  const info = await transporter.sendMail({
+    from,
+    to: toAddressField(input.to),
+    cc: input.cc ? toAddressField(input.cc) : undefined,
+    bcc: input.bcc ? toAddressField(input.bcc) : undefined,
+    replyTo: input.replyTo ? toAddressField([input.replyTo]) : undefined,
     subject: input.subject,
-    htmlContent: input.htmlContent,
-    textContent: input.textContent,
-    cc: input.cc,
-    bcc: input.bcc,
-    replyTo: input.replyTo,
-    params: input.params,
-    tags: input.tags,
-    attachment: input.attachments,
-  };
-
-  const body = JSON.stringify(payload);
-
-  return new Promise<BrevoSendResult>((resolve, reject) => {
-    const req = https.request(
-      {
-        hostname: BREVO_HOST,
-        path: BREVO_PATH,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'api-key': config.brevoApiKey,
-          'Content-Length': Buffer.byteLength(body),
-        },
-      },
-      (res) => {
-        let raw = '';
-
-        res.on('data', (chunk) => {
-          raw += chunk;
-        });
-
-        res.on('end', () => {
-          try {
-            const statusCode = res.statusCode || 500;
-            const parsed = parseResponseBody<{ messageId?: string; message?: string }>(raw);
-
-            if (statusCode >= 200 && statusCode < 300) {
-              resolve({ messageId: parsed.messageId });
-              return;
-            }
-
-            const brevoMessage = parsed.message || 'Unknown Brevo error';
-            Logger.error(`Brevo email send failed with status ${statusCode}: ${brevoMessage}`);
-            reject(new Error(`Brevo email send failed: ${brevoMessage}`));
-          } catch (err) {
-            reject(err instanceof Error ? err : new Error('Failed to parse Brevo response'));
-          }
-        });
-      },
-    );
-
-    req.on('error', (err) => {
-      Logger.error(`Brevo request error: ${err.message}`);
-      reject(err);
-    });
-
-    req.write(body);
-    req.end();
+    html: input.htmlContent,
+    text: input.textContent,
+    attachments: input.attachments?.map((a) => ({
+      filename: a.name,
+      content: Buffer.from(a.content, 'base64'),
+    })),
   });
+
+  Logger.info(`Email sent to ${toAddressField(input.to)} — messageId: ${info.messageId}`);
+  return { messageId: info.messageId };
 }

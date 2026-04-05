@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { ProductController } from '../controllers/product.controller';
 import { OrderController } from '../controllers/order.controller';
 import { UserController } from '../controllers/user.controller';
@@ -7,7 +7,10 @@ import { SilverRateController } from '../controllers/silverrate.controller';
 import { MetalRateController } from '../controllers/metalrate.controller';
 import { ReturnController } from '../controllers/return.controller';
 import { SavingsController } from '../controllers/savings.controller';
+import { FilterConfigRepository } from '../repositories/filterConfig.repository';
 import { protect, admin } from '../middlewares/auth.middleware';
+
+const filterConfigRepository = new FilterConfigRepository();
 
 const router = Router();
 const productController = new ProductController();
@@ -221,5 +224,45 @@ router.get('/returns', returnController.getAllReturns);
  *       - bearerAuth: []
  */
 router.put('/returns/:id', returnController.updateReturnStatus);
+
+/**
+ * @openapi
+ * /admin/filter-config:
+ *   get:
+ *     summary: Get shop filter configuration
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get('/filter-config', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const config = await filterConfigRepository.get();
+    res.status(200).json({
+      status: 'success',
+      data: config ?? { hiddenCategories: [], metals: [], priceRanges: [] },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @openapi
+ * /admin/filter-config:
+ *   put:
+ *     summary: Replace shop filter configuration
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.put('/filter-config', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { hiddenCategories, metals, priceRanges } = req.body;
+    const config = await filterConfigRepository.upsert({ hiddenCategories, metals, priceRanges });
+    res.status(200).json({ status: 'success', data: config });
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default router;

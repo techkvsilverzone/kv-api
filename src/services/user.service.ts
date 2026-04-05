@@ -1,13 +1,22 @@
 import { UserRepository } from '../repositories/user.repository';
+import { CouponRepository } from '../repositories/coupon.repository';
 import { AppError } from '../utils/appError';
 import { generateToken } from '../utils/jwt';
 import bcrypt from 'bcryptjs';
 
+function computeRole(user: { isAdmin: boolean; role?: string }): 'admin' | 'staff' | 'customer' {
+  if (user.role === 'staff') return 'staff';
+  if (user.role === 'admin' || user.isAdmin) return 'admin';
+  return 'customer';
+}
+
 export class UserService {
   private userRepository: UserRepository;
+  private couponRepository: CouponRepository;
 
   constructor() {
     this.userRepository = new UserRepository();
+    this.couponRepository = new CouponRepository();
   }
 
   public async signup(data: any) {
@@ -20,9 +29,31 @@ export class UserService {
       throw new AppError('Email already in use', 400);
     }
 
-    const user = await this.userRepository.create(data);
+    const user = await this.userRepository.create({
+      ...data,
+      isStallRegistration: data.stallEvent === true,
+    });
     const token = generateToken(user._id.toString());
-    return { user, token };
+    const { passwordHash, ...safeUser } = user.toObject ? user.toObject() : (user as any);
+
+    let promoCoupon: string | undefined;
+    if (data.stallEvent === true) {
+      const expiryDate = new Date();
+      expiryDate.setMonth(expiryDate.getMonth() + 3);
+      const code = `STALL${user._id.toString().slice(-6).toUpperCase()}`;
+      const coupon = await this.couponRepository.create({
+        code,
+        discountType: 'percentage',
+        discountValue: 10,
+        minOrderAmount: 0,
+        maxUses: 1,
+        expiryDate,
+        isActive: true,
+      });
+      promoCoupon = coupon.code;
+    }
+
+    return { user: { ...safeUser, role: computeRole(safeUser) }, token, ...(promoCoupon ? { promoCoupon } : {}) };
   }
 
   public async login(data: any) {
@@ -37,14 +68,15 @@ export class UserService {
     }
 
     const token = generateToken(user._id.toString());
-    const { passwordHash, ...safeUser } = user as any;
-    return { user: safeUser, token };
+    const { passwordHash, ...safeUser } = user.toObject ? user.toObject() : (user as any);
+    return { user: { ...safeUser, role: computeRole(safeUser) }, token };
   }
 
   public async getProfile(userId: string) {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new AppError('User not found', 404);
-    return user;
+    const { passwordHash, ...safeUser } = user.toObject ? user.toObject() : (user as any);
+    return { ...safeUser, role: computeRole(safeUser) };
   }
 
   public async updateProfile(userId: string, data: any) {

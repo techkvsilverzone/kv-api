@@ -16,6 +16,10 @@ export interface IProduct extends Document {
   price: number;
   originalPrice?: number;
   purity?: string;
+  isSale?: boolean;
+  isFeatured?: boolean;
+  metalValue?: number;
+  makingCharges?: number;
   quantity: number;
   isActive: boolean;
   images: IProductImage[];
@@ -43,6 +47,10 @@ const ProductSchema = new Schema<IProduct>(
     quantity: { type: Number, required: true, default: 0 },
     originalPrice: { type: Number },
     purity: { type: String },
+    isSale: { type: Boolean, default: false },
+    isFeatured: { type: Boolean, default: false },
+    metalValue: { type: Number },
+    makingCharges: { type: Number },
     isActive: { type: Boolean, default: true },
     images: { type: [ProductImageSchema], default: [] },
   },
