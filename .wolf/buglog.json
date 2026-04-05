@@ -224,6 +224,61 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-04-05T06:38:35.770Z"
+    },
+    {
+      "id": "bug-015",
+      "timestamp": "2026-04-05T13:54:38.000Z",
+      "error_message": "TypeScript build failed: Argument of type 'string | string[]' is not assignable to parameter of type 'string'",
+      "file": "src/controllers/user.controller.ts",
+      "root_cause": "Route param `req.params.userId` can be `string | string[]` and was passed directly to a service expecting `string`.",
+      "fix": "Normalized `req.params.userId` to a single string and added a 400 guard when missing.",
+      "tags": [
+        "build-failure",
+        "type-fix",
+        "controller",
+        "ts"
+      ],
+      "related_bugs": [
+        "bug-005",
+        "bug-011"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-04-05T13:54:38.000Z"
+    },
+    {
+      "id": "bug-016",
+      "timestamp": "2026-04-05T13:55:28.000Z",
+      "error_message": "Reset script initially cleared only loaded model collections",
+      "file": "temp-reset-data.ts",
+      "root_cause": "Used `mongoose.connection.collections`, which includes only collections for imported models, not all DB collections.",
+      "fix": "Switched to `db.listCollections().toArray()` and cleared each non-preserved collection via `db.collection(name).deleteMany({})`.",
+      "tags": [
+        "script-fix",
+        "mongodb",
+        "data-reset"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-05T13:55:28.000Z"
+    },
+    {
+      "id": "bug-017",
+      "timestamp": "2026-04-05T14:59:35.000Z",
+      "error_message": "POST /api/v1/admin/store-config returned 404 because the endpoint did not exist",
+      "file": "src/routes/admin.routes.ts",
+      "root_cause": "The API had filter-config endpoints but no persisted store-config model, repository, or admin route.",
+      "fix": "Added StoreConfig model/repository and implemented GET, PUT, and POST /admin/store-config with validation for { theme, isDark }.",
+      "tags": [
+        "api",
+        "route-fix",
+        "admin",
+        "store-config"
+      ],
+      "related_bugs": [
+        "bug-014"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-04-05T14:59:35.000Z"
     }
   ]
 }

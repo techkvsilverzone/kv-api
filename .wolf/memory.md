@@ -78,3 +78,9 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 13:53 | Added password update API flow | src/controllers/user.controller.ts, src/services/user.service.ts, src/routes/user.routes.ts | Self-or-admin authorization implemented | ~1100 |
+| 13:55 | Ran one-off DB reset preserving products/filterconfigs | temp-reset-data.ts | Cleared all other collections and recreated admin/staff users | ~650 |
+| 13:56 | Updated default seeding credentials | src/utils/seeder.ts | Seed now aligns with requested admin/staff credentials | ~320 |
+| 13:57 | Logged new bug fixes and learnings | .wolf/buglog.json, .wolf/cerebrum.md | Added bug-015 and bug-016, plus new conventions | ~300 |
+| 14:59 | Added persisted store-config admin API | src/models/storeConfig.model.ts, src/repositories/storeConfig.repository.ts, src/routes/admin.routes.ts | GET/PUT/POST /admin/store-config now supports theme + isDark | ~900 |
+| 15:01 | Added public store-config read API | src/routes/storeConfig.routes.ts, src/routes/index.ts | GET /store-config works without auth and returns persisted theme settings | ~420 |

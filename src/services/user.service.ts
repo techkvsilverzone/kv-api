@@ -88,4 +88,28 @@ export class UserService {
   public async getAllUsers() {
     return await this.userRepository.findAll();
   }
+
+  public async changePassword(requesterUserId: string, targetUserId: string, newPassword: string) {
+    if (!newPassword || typeof newPassword !== 'string' || newPassword.trim().length < 6) {
+      throw new AppError('New password must be at least 6 characters', 400);
+    }
+
+    const requester = await this.userRepository.findById(requesterUserId);
+    if (!requester) {
+      throw new AppError('Requesting user not found', 401);
+    }
+
+    const canChange = requester._id.toString() === targetUserId || requester.isAdmin;
+    if (!canChange) {
+      throw new AppError('You are not allowed to change this user password', 403);
+    }
+
+    const targetUser = await this.userRepository.findById(targetUserId);
+    if (!targetUser) {
+      throw new AppError('Target user not found', 404);
+    }
+
+    await this.userRepository.update(targetUserId, { password: newPassword.trim() });
+    return { message: 'Password updated successfully' };
+  }
 }

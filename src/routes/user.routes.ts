@@ -27,4 +27,15 @@ router.get('/me', protect, userController.getMe);
  */
 router.put('/me', protect, userController.updateMe);
 
+/**
+ * @openapi
+ * /users/{userId}/password:
+ *   put:
+ *     summary: Update user password (self or admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.put('/:userId/password', protect, userController.changePassword);
+
 export default router;

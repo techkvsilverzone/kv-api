@@ -62,4 +62,24 @@ export class UserController {
       next(error);
     }
   };
+
+  public changePassword = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const requesterUserId = req.user!._id.toString();
+      const targetUserId = Array.isArray(req.params.userId)
+        ? req.params.userId[0]
+        : req.params.userId;
+      const { newPassword } = req.body;
+
+      if (!targetUserId) {
+        res.status(400).json({ message: 'Target user id is required' });
+        return;
+      }
+
+      const result = await this.userService.changePassword(requesterUserId, targetUserId, newPassword);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
 }

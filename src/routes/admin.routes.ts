@@ -8,9 +8,11 @@ import { MetalRateController } from '../controllers/metalrate.controller';
 import { ReturnController } from '../controllers/return.controller';
 import { SavingsController } from '../controllers/savings.controller';
 import { FilterConfigRepository } from '../repositories/filterConfig.repository';
+import { StoreConfigRepository } from '../repositories/storeConfig.repository';
 import { protect, admin } from '../middlewares/auth.middleware';
 
 const filterConfigRepository = new FilterConfigRepository();
+const storeConfigRepository = new StoreConfigRepository();
 
 const router = Router();
 const productController = new ProductController();
@@ -259,6 +261,78 @@ router.put('/filter-config', async (req: Request, res: Response, next: NextFunct
   try {
     const { hiddenCategories, metals, priceRanges } = req.body;
     const config = await filterConfigRepository.upsert({ hiddenCategories, metals, priceRanges });
+    res.status(200).json({ status: 'success', data: config });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @openapi
+ * /admin/store-config:
+ *   get:
+ *     summary: Get store theme configuration
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get('/store-config', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const config = await storeConfigRepository.get();
+    res.status(200).json({
+      status: 'success',
+      data: config ?? { theme: 'icy-silver', isDark: false },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @openapi
+ * /admin/store-config:
+ *   put:
+ *     summary: Update store theme configuration
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.put('/store-config', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { theme, isDark } = req.body;
+
+    if (typeof theme !== 'string' || !theme.trim()) {
+      res.status(400).json({ message: 'theme is required' });
+      return;
+    }
+
+    if (typeof isDark !== 'boolean') {
+      res.status(400).json({ message: 'isDark must be a boolean' });
+      return;
+    }
+
+    const config = await storeConfigRepository.upsert({ theme: theme.trim(), isDark });
+    res.status(200).json({ status: 'success', data: config });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/store-config', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { theme, isDark } = req.body;
+
+    if (typeof theme !== 'string' || !theme.trim()) {
+      res.status(400).json({ message: 'theme is required' });
+      return;
+    }
+
+    if (typeof isDark !== 'boolean') {
+      res.status(400).json({ message: 'isDark must be a boolean' });
+      return;
+    }
+
+    const config = await storeConfigRepository.upsert({ theme: theme.trim(), isDark });
     res.status(200).json({ status: 'success', data: config });
   } catch (error) {
     next(error);

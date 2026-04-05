@@ -16,6 +16,7 @@ import returnRoutes from './return.routes';
 import metalRateRoutes from './metalrate.routes';
 import deliveryRoutes from './delivery.routes';
 import shippingRoutes from './shipping.routes';
+import storeConfigRoutes from './storeConfig.routes';
 
 const router = Router();
 
@@ -34,6 +35,7 @@ router.use('/metal-rates', metalRateRoutes);
 router.use('/returns', returnRoutes);
 router.use('/delivery', deliveryRoutes);
 router.use('/shipping', shippingRoutes);
+router.use('/store-config', storeConfigRoutes);
 router.use('/admin', adminRoutes);
 router.use('/', miscRoutes);
 
