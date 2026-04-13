@@ -10,7 +10,7 @@ export const config = {
   corsMethods: process.env.CORS_METHODS || 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
   corsAllowedHeaders:
     process.env.CORS_ALLOWED_HEADERS || 'Content-Type,Authorization,X-Requested-With',
-  mongoUri: process.env.MONGO_URI || 'mongodb://localhost:27017/kv-silver-zone',
+  mongoUri: process.env.MONGO_URI, //|| 'mongodb://localhost:27017/kv-silver-zone',
   jwtSecret: process.env.JWT_SECRET || 'super-secret-key',
   jwtExpire: process.env.JWT_EXPIRE || '30d',
   razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',

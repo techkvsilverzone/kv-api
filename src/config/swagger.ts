@@ -11,7 +11,8 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000/api/v1',
+        url: `${process.env.BASE_URL || 'http://localhost:5000'}/api/v1`,
+        description: process.env.BASE_URL ? 'Production' : 'Local',
       },
     ],
     components: {
