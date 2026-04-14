@@ -93,10 +93,11 @@
 - `cart.model.ts` — Exports ICartItem, ICart, Cart (~336 tok)
 - `coupon.model.ts` — Exports ICoupon, Coupon (~297 tok)
 - `filterConfig.model.ts` — Exports IPriceRange, IFilterConfig, FilterConfig (~270 tok)
+- `inventoryTransaction.model.ts` — Exports TransactionType, IInventoryTransaction, InventoryTransaction
 - `metalrate.model.ts` — Exports MetalType, IMetalRate, MetalRate (~287 tok)
 - `order.model.ts` — Exports IOrderItem, IShippingAddress, IOrder, Order (~1078 tok)
 - `pincodeRate.model.ts` — Exports IPincodeRate, PincodeRate (~175 tok)
-- `product.model.ts` — Exports IProductImage, IProduct, Product (~561 tok)
+- `product.model.ts` — Exports IProductImage, IProduct, Product. Added stockThreshold (default 5) (~561 tok)
 - `return.model.ts` — Exports IReturnItem, IReturn, Return (~437 tok)
 - `review.model.ts` — Exports IReview, Review (~239 tok)
 - `savings.model.ts` — Exports ISavingsPayment, ISavings, Savings (~475 tok)

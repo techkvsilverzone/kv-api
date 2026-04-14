@@ -1,0 +1,60 @@
+import mongoose from 'mongoose';
+import { InventoryTransaction, IInventoryTransaction, TransactionType } from '../models/inventoryTransaction.model';
+
+export interface CreateTransactionData {
+  type: TransactionType;
+  productId: string;
+  quantity: number;
+  reason: string;
+  performedBy: string;
+}
+
+export interface TransactionFilters {
+  productId?: string;
+  type?: TransactionType;
+  limit?: number;
+}
+
+export class InventoryRepository {
+  public async createTransaction(data: CreateTransactionData): Promise<IInventoryTransaction> {
+    const tx = new InventoryTransaction({
+      type: data.type,
+      productId: new mongoose.Types.ObjectId(data.productId),
+      quantity: data.quantity,
+      reason: data.reason,
+      performedBy: new mongoose.Types.ObjectId(data.performedBy),
+    });
+    return tx.save();
+  }
+
+  public async findTransactions(filters: TransactionFilters = {}): Promise<any[]> {
+    const query: any = {};
+
+    if (filters.productId) {
+      query.productId = new mongoose.Types.ObjectId(filters.productId);
+    }
+    if (filters.type === 'IN' || filters.type === 'OUT') {
+      query.type = filters.type;
+    }
+
+    const limit = filters.limit ? Number(filters.limit) : 100;
+
+    const transactions = await InventoryTransaction.find(query)
+      .sort({ date: -1 })
+      .limit(limit)
+      .populate('productId', 'name')
+      .populate('performedBy', '_id name email')
+      .lean();
+
+    return transactions.map((tx: any) => ({
+      id: tx._id.toString(),
+      type: tx.type,
+      productId: tx.productId?._id?.toString() ?? tx.productId?.toString(),
+      productName: tx.productId?.name ?? '',
+      quantity: tx.quantity,
+      reason: tx.reason,
+      date: tx.date,
+      performedBy: tx.performedBy?._id?.toString() ?? tx.performedBy?.toString(),
+    }));
+  }
+}

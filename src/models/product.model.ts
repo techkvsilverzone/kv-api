@@ -21,6 +21,7 @@ export interface IProduct extends Document {
   metalValue?: number;
   makingCharges?: number;
   quantity: number;
+  stockThreshold?: number;
   isActive: boolean;
   images: IProductImage[];
   createdAt: Date;
@@ -45,6 +46,7 @@ const ProductSchema = new Schema<IProduct>(
     weight: { type: Number, required: true },
     price: { type: Number, required: true },
     quantity: { type: Number, required: true, default: 0 },
+    stockThreshold: { type: Number, default: 5 },
     originalPrice: { type: Number },
     purity: { type: String },
     isSale: { type: Boolean, default: false },

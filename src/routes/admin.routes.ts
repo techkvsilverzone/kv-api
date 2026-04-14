@@ -9,10 +9,12 @@ import { ReturnController } from '../controllers/return.controller';
 import { SavingsController } from '../controllers/savings.controller';
 import { FilterConfigRepository } from '../repositories/filterConfig.repository';
 import { StoreConfigRepository } from '../repositories/storeConfig.repository';
+import { InventoryController } from '../controllers/inventory.controller';
 import { protect, admin } from '../middlewares/auth.middleware';
 
 const filterConfigRepository = new FilterConfigRepository();
 const storeConfigRepository = new StoreConfigRepository();
+const inventoryController = new InventoryController();
 
 const router = Router();
 const productController = new ProductController();
@@ -338,5 +340,71 @@ router.post('/store-config', async (req: Request, res: Response, next: NextFunct
     next(error);
   }
 });
+
+/**
+ * @openapi
+ * /admin/inventory/inward:
+ *   post:
+ *     summary: Record stock inward (supplier delivery, returns)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.post('/inventory/inward', inventoryController.inward);
+
+/**
+ * @openapi
+ * /admin/inventory/outward:
+ *   post:
+ *     summary: Record stock outward (damages, shrinkage)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.post('/inventory/outward', inventoryController.outward);
+
+/**
+ * @openapi
+ * /admin/inventory/transactions:
+ *   get:
+ *     summary: Get inventory transaction ledger
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get('/inventory/transactions', inventoryController.getTransactions);
+
+/**
+ * @openapi
+ * /admin/inventory/reconcile:
+ *   post:
+ *     summary: Reconcile stock with a physical count
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.post('/inventory/reconcile', inventoryController.reconcile);
+
+/**
+ * @openapi
+ * /admin/inventory/low-stock:
+ *   get:
+ *     summary: Get products below stock threshold
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get('/inventory/low-stock', inventoryController.getLowStock);
+
+/**
+ * @openapi
+ * /admin/inventory/summary:
+ *   get:
+ *     summary: Get inventory analytics summary
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get('/inventory/summary', inventoryController.getSummary);
 
 export default router;
