@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { InventoryTransaction, IInventoryTransaction, TransactionType } from '../models/inventoryTransaction.model';
+import { Inventory, IInventory } from '../models/inventory.model';
 
 export interface CreateTransactionData {
   type: TransactionType;
@@ -16,6 +17,33 @@ export interface TransactionFilters {
 }
 
 export class InventoryRepository {
+  // ── Inventory stock document ──────────────────────────────────────────
+
+  public async findByProductId(productId: string): Promise<IInventory | null> {
+    return Inventory.findOne({ productId: new mongoose.Types.ObjectId(productId) });
+  }
+
+  public async upsertStock(
+    productId: string,
+    currentStock: number,
+    stockThreshold?: number,
+  ): Promise<IInventory> {
+    const update: any = { currentStock };
+    if (stockThreshold !== undefined) update.stockThreshold = stockThreshold;
+
+    return Inventory.findOneAndUpdate(
+      { productId: new mongoose.Types.ObjectId(productId) },
+      { $set: update },
+      { upsert: true, new: true },
+    ) as Promise<IInventory>;
+  }
+
+  public async findAllStock(): Promise<IInventory[]> {
+    return Inventory.find().populate('productId', 'name isActive').lean() as Promise<IInventory[]>;
+  }
+
+  // ── Inventory transactions (audit log) ───────────────────────────────
+
   public async createTransaction(data: CreateTransactionData): Promise<IInventoryTransaction> {
     const tx = new InventoryTransaction({
       type: data.type,

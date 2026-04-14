@@ -10,12 +10,19 @@ export class InventoryService {
     this.inventoryRepository = new InventoryRepository();
   }
 
+  /** Ensure an Inventory doc exists for the product; returns current stock */
+  private async getOrInitStock(productId: string): Promise<number> {
+    const inv = await this.inventoryRepository.findByProductId(productId);
+    return inv ? inv.currentStock : 0;
+  }
+
   public async stockInward(productId: string, quantity: number, reason: string, performedBy: string) {
     const product = await Product.findById(productId);
     if (!product) throw new AppError('Product not found', 404);
 
-    product.quantity = product.quantity + quantity;
-    await product.save();
+    const currentStock = await this.getOrInitStock(productId);
+    const newStock = currentStock + quantity;
+    await this.inventoryRepository.upsertStock(productId, newStock);
 
     const transaction = await this.inventoryRepository.createTransaction({
       type: 'IN',
@@ -39,12 +46,12 @@ export class InventoryService {
     const product = await Product.findById(productId);
     if (!product) throw new AppError('Product not found', 404);
 
-    if (product.quantity < quantity) {
-      throw new AppError(`Insufficient stock. Available: ${product.quantity}`, 400);
+    const currentStock = await this.getOrInitStock(productId);
+    if (currentStock < quantity) {
+      throw new AppError(`Insufficient stock. Available: ${currentStock}`, 400);
     }
 
-    product.quantity = product.quantity - quantity;
-    await product.save();
+    await this.inventoryRepository.upsertStock(productId, currentStock - quantity);
 
     const transaction = await this.inventoryRepository.createTransaction({
       type: 'OUT',
@@ -72,7 +79,7 @@ export class InventoryService {
     const product = await Product.findById(productId);
     if (!product) throw new AppError('Product not found', 404);
 
-    const currentStock = product.quantity;
+    const currentStock = await this.getOrInitStock(productId);
     const delta = physicalCount - currentStock;
 
     if (delta === 0) {
@@ -87,8 +94,7 @@ export class InventoryService {
     const type = delta > 0 ? 'IN' : 'OUT';
     const adjustmentQty = Math.abs(delta);
 
-    product.quantity = physicalCount;
-    await product.save();
+    await this.inventoryRepository.upsertStock(productId, physicalCount);
 
     const transaction = await this.inventoryRepository.createTransaction({
       type: type as 'IN' | 'OUT',
@@ -113,33 +119,35 @@ export class InventoryService {
   }
 
   public async getLowStock() {
-    const products = await Product.find({ isActive: true }).lean();
-    return products
-      .filter((p: any) => {
-        const threshold = typeof p.stockThreshold === 'number' ? p.stockThreshold : 5;
-        return p.quantity <= threshold;
+    const stocks = await this.inventoryRepository.findAllStock();
+    return stocks
+      .filter((inv: any) => {
+        const product = inv.productId as any;
+        if (!product?.isActive) return false;
+        return inv.currentStock <= inv.stockThreshold;
       })
-      .map((p: any) => ({
-        productId: p._id.toString(),
-        productName: p.name,
-        currentStock: p.quantity,
-        threshold: typeof p.stockThreshold === 'number' ? p.stockThreshold : 5,
+      .map((inv: any) => ({
+        productId: inv.productId?._id?.toString() ?? inv.productId?.toString(),
+        productName: inv.productId?.name ?? '',
+        currentStock: inv.currentStock,
+        threshold: inv.stockThreshold,
       }));
   }
 
   public async getSummary() {
-    const products = await Product.find({ isActive: true }).lean();
+    const stocks = await this.inventoryRepository.findAllStock();
 
     let totalItemsInStock = 0;
     let lowStockCount = 0;
     let outOfStockCount = 0;
 
-    for (const p of products) {
-      const threshold = typeof (p as any).stockThreshold === 'number' ? (p as any).stockThreshold : 5;
-      totalItemsInStock += p.quantity;
-      if (p.quantity === 0) {
+    for (const inv of stocks) {
+      const product = (inv as any).productId as any;
+      if (!product?.isActive) continue;
+      totalItemsInStock += inv.currentStock;
+      if (inv.currentStock === 0) {
         outOfStockCount++;
-      } else if (p.quantity <= threshold) {
+      } else if (inv.currentStock <= inv.stockThreshold) {
         lowStockCount++;
       }
     }
