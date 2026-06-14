@@ -1,5 +1,6 @@
 import Logger from './logger';
 import { sendEmail } from './email';
+import { config } from '../config';
 
 const ADMIN_EMAIL = 'kvszchennai@gmail.com';
 
@@ -114,6 +115,190 @@ export async function sendOrderCreatedEmails(input: {
   results.forEach((result) => {
     if (result.status === 'rejected') {
       Logger.error(`Order email failed: ${result.reason instanceof Error ? result.reason.message : String(result.reason)}`);
+    }
+  });
+}
+
+interface OrderConfirmationItem {
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  isGiftVoucher?: boolean;
+}
+
+interface OrderConfirmationAddress {
+  name?: string;
+  phone?: string;
+  line1?: string;
+  line2?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  country?: string;
+}
+
+export interface OrderConfirmationInput {
+  userEmail?: string;
+  userName?: string;
+  orderId: string;
+  items: OrderConfirmationItem[];
+  subtotal: number;
+  taxAmount: number;
+  deliveryFee: number;
+  discount?: number;
+  grandTotal: number;
+  shippingAddress?: OrderConfirmationAddress;
+  paymentMethod?: string;
+  status?: string;
+  orderUrl?: string;
+}
+
+function buildItemsTable(items: OrderConfirmationItem[]): string {
+  const rows = items
+    .map(
+      (item) => `
+        <tr>
+          <td style="padding:10px 14px;font-size:13px;color:#111827;border-bottom:1px solid #e5e7eb;">${item.productName}${item.isGiftVoucher ? ' <span style="color:#0f766e;">(Gift Voucher)</span>' : ''}</td>
+          <td style="padding:10px 14px;font-size:13px;color:#6b7280;text-align:center;border-bottom:1px solid #e5e7eb;">${item.quantity}</td>
+          <td style="padding:10px 14px;font-size:13px;color:#111827;text-align:right;border-bottom:1px solid #e5e7eb;">${formatCurrency(item.totalPrice)}</td>
+        </tr>`,
+    )
+    .join('');
+
+  return `
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:16px;">
+      <tr>
+        <td style="padding:10px 14px;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;background:#f9fafb;border-bottom:1px solid #e5e7eb;">Item</td>
+        <td style="padding:10px 14px;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;text-align:center;background:#f9fafb;border-bottom:1px solid #e5e7eb;">Qty</td>
+        <td style="padding:10px 14px;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;text-align:right;background:#f9fafb;border-bottom:1px solid #e5e7eb;">Amount</td>
+      </tr>
+      ${rows}
+    </table>
+  `;
+}
+
+function formatAddress(address?: OrderConfirmationAddress): string {
+  if (!address) return '';
+  const parts = [
+    address.name,
+    address.line1,
+    address.line2,
+    [address.city, address.state, address.pincode].filter(Boolean).join(', '),
+    address.country,
+    address.phone ? `Phone: ${address.phone}` : '',
+  ].filter(Boolean);
+  return parts.join('<br/>');
+}
+
+/**
+ * Map a persisted order document into the confirmation email payload, including
+ * a storefront order link when FRONTEND_URL is configured.
+ */
+export function buildOrderConfirmationInput(
+  order: any,
+  opts: { userEmail?: string; userName?: string } = {},
+): OrderConfirmationInput {
+  const orderId = String(order?._id ?? order?.id ?? '');
+  const items: OrderConfirmationItem[] = Array.isArray(order?.items)
+    ? order.items.map((i: any) => ({
+        productName: i.productName || i.name || 'Item',
+        quantity: Number(i.quantity) || 1,
+        unitPrice: Number(i.unitPrice) || 0,
+        totalPrice: Number(i.totalPrice ?? (Number(i.unitPrice) || 0) * (Number(i.quantity) || 1)),
+        isGiftVoucher: Boolean(i.isGiftVoucher),
+      }))
+    : [];
+
+  const base = config.frontendUrl ? config.frontendUrl.replace(/\/$/, '') : '';
+
+  return {
+    userEmail: opts.userEmail,
+    userName: opts.userName,
+    orderId,
+    items,
+    subtotal: Number(order?.subtotal) || 0,
+    taxAmount: Number(order?.taxAmount ?? order?.tax) || 0,
+    deliveryFee: Number(order?.deliveryFee) || 0,
+    discount: Number(order?.couponDiscount) || 0,
+    grandTotal: Number(order?.grandTotal ?? order?.totalAmount) || 0,
+    shippingAddress: order?.shippingAddress,
+    paymentMethod: order?.paymentMethod ? String(order.paymentMethod).toUpperCase() : undefined,
+    status: order?.status,
+    orderUrl: base ? `${base}/order/${orderId}` : undefined,
+  };
+}
+
+/**
+ * Customer order confirmation (sent on order creation for both razorpay and COD).
+ * Includes line items, the totals breakdown, the shipping address, and a link to
+ * the order page. Best-effort: failures are logged, never thrown.
+ */
+export async function sendOrderConfirmationEmail(input: OrderConfirmationInput): Promise<void> {
+  const userName = input.userName || 'Customer';
+  const subject = `Order Confirmation: ${input.orderId}`;
+
+  const totalsRows: EmailDetailRow[] = [
+    { label: 'Subtotal', value: formatCurrency(input.subtotal) },
+    { label: 'Tax', value: formatCurrency(input.taxAmount) },
+  ];
+  if (input.discount && input.discount > 0) {
+    totalsRows.push({ label: 'Discount', value: `- ${formatCurrency(input.discount)}` });
+  }
+  totalsRows.push({ label: 'Delivery', value: formatCurrency(input.deliveryFee) });
+  totalsRows.push({ label: 'Grand Total', value: formatCurrency(input.grandTotal), highlight: true });
+
+  const addressHtml = formatAddress(input.shippingAddress);
+  const orderLink = input.orderUrl
+    ? `<p style="margin:18px 0 0 0;font-size:14px;"><a href="${input.orderUrl}" style="color:#0f766e;font-weight:600;text-decoration:none;">View your order &rarr;</a></p>`
+    : '';
+
+  const bodyHtml = `
+    ${buildItemsTable(input.items)}
+    ${buildDetailsTable(totalsRows)}
+    ${addressHtml ? `<p style="margin:18px 0 6px 0;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">Shipping to</p><p style="margin:0;font-size:14px;line-height:1.6;color:#374151;">${addressHtml}</p>` : ''}
+    ${orderLink}
+  `;
+
+  const userHtml = buildLightThemeEmail({
+    title: 'Order Confirmed',
+    intro: `Hi ${userName}, thank you for your order. Here is your confirmation${input.paymentMethod ? ` (paid via ${input.paymentMethod})` : ''}.`,
+    detailsTable: `${buildDetailsTable([{ label: 'Order ID', value: input.orderId }])}<div style="height:16px;"></div>${bodyHtml}`,
+    closing: 'We will notify you when your order ships. Thank you for shopping with KV Silver Zone.',
+  });
+
+  const adminHtml = buildLightThemeEmail({
+    title: 'New Order Received',
+    intro: `A new order has been placed by ${userName} (${input.userEmail || 'no-email'}).`,
+    detailsTable: `${buildDetailsTable([
+      { label: 'Order ID', value: input.orderId },
+      { label: 'Payment', value: input.paymentMethod || 'n/a' },
+      { label: 'Grand Total', value: formatCurrency(input.grandTotal), highlight: true },
+    ])}<div style="height:16px;"></div>${buildItemsTable(input.items)}`,
+  });
+
+  const tasks: Array<Promise<unknown>> = [
+    sendEmail({
+      to: [{ email: ADMIN_EMAIL, name: 'KV Silver Zone Admin' }],
+      subject: `[Admin] ${subject}`,
+      htmlContent: adminHtml,
+    }),
+  ];
+
+  if (input.userEmail) {
+    tasks.push(
+      sendEmail({
+        to: [{ email: input.userEmail, name: userName }],
+        subject,
+        htmlContent: userHtml,
+      }),
+    );
+  }
+
+  const results = await Promise.allSettled(tasks);
+  results.forEach((result) => {
+    if (result.status === 'rejected') {
+      Logger.error(`Order confirmation email failed: ${result.reason instanceof Error ? result.reason.message : String(result.reason)}`);
     }
   });
 }

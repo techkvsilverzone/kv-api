@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserService } from '../services/user.service';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { setAuthCookie, clearAuthCookie } from '../utils/authCookie';
 
 export class UserController {
   private userService: UserService;
@@ -12,6 +13,7 @@ export class UserController {
   public signup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const result = await this.userService.signup(req.body);
+      setAuthCookie(res, result.token);
       res.status(201).json(result);
     } catch (error) {
       next(error);
@@ -21,7 +23,17 @@ export class UserController {
   public login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const result = await this.userService.login(req.body);
+      setAuthCookie(res, result.token);
       res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public logout = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      clearAuthCookie(res);
+      res.status(200).json({ message: 'Logged out successfully' });
     } catch (error) {
       next(error);
     }
@@ -49,6 +61,48 @@ export class UserController {
     try {
       // Logic for forgot password (omitted for brevity, would usually involves email service)
       res.status(200).json({ message: 'Password reset link sent to your email' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // ── Address book ─────────────────────────────────────────────────────
+
+  public getAddresses = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const addresses = await this.userService.getAddresses(req.user!._id.toString());
+      res.status(200).json(addresses);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public addAddress = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const address = await this.userService.addAddress(req.user!._id.toString(), req.body);
+      res.status(201).json(address);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public updateAddress = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const address = await this.userService.updateAddress(
+        req.user!._id.toString(),
+        req.params.id as string,
+        req.body,
+      );
+      res.status(200).json(address);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public deleteAddress = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await this.userService.deleteAddress(req.user!._id.toString(), req.params.id as string);
+      res.status(204).send();
     } catch (error) {
       next(error);
     }

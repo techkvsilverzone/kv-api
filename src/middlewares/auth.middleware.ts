@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config';
 import { AppError } from '../utils/appError';
+import { readTokenFromRequest } from '../utils/authCookie';
 import { IUser, UserRepository } from '../repositories/user.repository';
 
 export interface AuthRequest extends Request {
@@ -15,11 +16,9 @@ interface JwtPayload {
 }
 
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  let token;
-
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    token = req.headers.authorization.split(' ')[1];
-  }
+  // Prefer the httpOnly auth cookie; fall back to the Authorization header for
+  // API clients (Swagger, mobile).
+  const token = readTokenFromRequest(req);
 
   if (!token) {
     return next(new AppError('You are not logged in! Please log in to get access.', 401));

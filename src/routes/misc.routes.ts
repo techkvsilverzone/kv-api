@@ -23,6 +23,21 @@ const router = Router();
  *               email: { type: string }
  *               subject: { type: string }
  *               message: { type: string }
+ *     responses:
+ *       200:
+ *         description: Message sent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MessageResponse'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       502:
+ *         description: Failed to send message
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/contact', async (req: Request, res: Response) => {
   const { name, email, subject, message } = req.body || {};

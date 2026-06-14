@@ -1,5 +1,7 @@
 import { ProductRepository } from '../repositories/product.repository';
 import { UserRepository } from '../repositories/user.repository';
+import { InventoryRepository } from '../repositories/inventory.repository';
+import { PricingService } from './pricing.service';
 import { AppError } from '../utils/appError';
 import { sendNewProductPromotion } from '../utils/emailNotifications';
 import Logger from '../utils/logger';
@@ -8,16 +10,28 @@ import { config } from '../config';
 export class ProductService {
   private productRepository: ProductRepository;
   private userRepository: UserRepository;
+  private inventoryRepository: InventoryRepository;
+  private pricingService: PricingService;
 
   constructor() {
     this.productRepository = new ProductRepository();
     this.userRepository = new UserRepository();
+    this.inventoryRepository = new InventoryRepository();
+    this.pricingService = new PricingService();
   }
 
   public async createProduct(data: any) {
     const payload = this.validateCreatePayload(data);
     try {
       const product = await this.productRepository.create(payload);
+
+      // Seed the inventory stock document from the product's listed quantity so
+      // Inventory.currentStock is the single source of truth from the start.
+      try {
+        await this.inventoryRepository.ensureStock(product._id.toString(), Number(product.quantity) || 0);
+      } catch (stockError) {
+        Logger.error(`Inventory init failed for ${product._id}: ${stockError instanceof Error ? stockError.message : String(stockError)}`);
+      }
 
       this.dispatchPromotionalEmails(product);
 
@@ -52,7 +66,9 @@ export class ProductService {
   }
 
   public async getProducts(filters: any) {
-    return await this.productRepository.findAll(filters);
+    const products = await this.productRepository.findAll(filters);
+    const enriched = await this.pricingService.enrichManyForDisplay(products);
+    return await this.attachStock(enriched);
   }
 
   public async getCategories() {
@@ -62,7 +78,22 @@ export class ProductService {
   public async getProductById(id: string) {
     const product = await this.productRepository.findById(id);
     if (!product) throw new AppError('Product not found', 404);
-    return product;
+    const enriched = await this.pricingService.enrichForDisplay(product);
+    return (await this.attachStock([enriched]))[0];
+  }
+
+  /**
+   * Attach live stock from the Inventory collection (source of truth). Falls
+   * back to the product's listed quantity when no inventory doc exists yet.
+   */
+  private async attachStock(items: Record<string, unknown>[]): Promise<Record<string, unknown>[]> {
+    const ids = items.map((i) => String((i as any)._id)).filter(Boolean);
+    const stockMap = await this.inventoryRepository.getStockMap(ids);
+    return items.map((i) => {
+      const id = String((i as any)._id);
+      const stock = stockMap[id] !== undefined ? stockMap[id] : Number((i as any).quantity) || 0;
+      return { ...i, stockAvailable: stock, inStock: stock > 0 };
+    });
   }
 
   public async updateProduct(id: string, data: any) {
@@ -84,7 +115,9 @@ export class ProductService {
   }
 
   public async getFeaturedProducts() {
-    return await this.productRepository.findFeatured();
+    const products = await this.productRepository.findFeatured();
+    const enriched = await this.pricingService.enrichManyForDisplay(products);
+    return await this.attachStock(enriched);
   }
 
   private validateCreatePayload(data: any) {
@@ -148,6 +181,22 @@ export class ProductService {
     if (payload.originalPrice !== undefined) result.originalPrice = Number(payload.originalPrice);
     if (payload.purity !== undefined) result.purity = String(payload.purity);
 
+    if (payload.makingChargePercent !== undefined) {
+      const pct = Number(payload.makingChargePercent);
+      if (!Number.isFinite(pct) || pct < 0) {
+        throw new AppError('makingChargePercent must be a non-negative number', 400);
+      }
+      result.makingChargePercent = pct;
+    }
+
+    if (payload.makingChargePerGram !== undefined) {
+      const perGram = Number(payload.makingChargePerGram);
+      if (!Number.isFinite(perGram) || perGram < 0) {
+        throw new AppError('makingChargePerGram must be a non-negative number', 400);
+      }
+      result.makingChargePerGram = perGram;
+    }
+
     return result;
   }
 
@@ -204,6 +253,22 @@ export class ProductService {
 
     if (payload.purity !== undefined) {
       update.purity = String(payload.purity);
+    }
+
+    if (payload.makingChargePercent !== undefined) {
+      const pct = Number(payload.makingChargePercent);
+      if (!Number.isFinite(pct) || pct < 0) {
+        throw new AppError('makingChargePercent must be a non-negative number', 400);
+      }
+      update.makingChargePercent = pct;
+    }
+
+    if (payload.makingChargePerGram !== undefined) {
+      const perGram = Number(payload.makingChargePerGram);
+      if (!Number.isFinite(perGram) || perGram < 0) {
+        throw new AppError('makingChargePerGram must be a non-negative number', 400);
+      }
+      update.makingChargePerGram = perGram;
     }
 
     if (payload.isActive !== undefined || payload.inStock !== undefined) {

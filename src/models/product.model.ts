@@ -20,6 +20,8 @@ export interface IProduct extends Document {
   isFeatured?: boolean;
   metalValue?: number;
   makingCharges?: number;
+  makingChargePercent?: number;
+  makingChargePerGram?: number;
   quantity: number;
   isActive: boolean;
   images: IProductImage[];
@@ -51,6 +53,8 @@ const ProductSchema = new Schema<IProduct>(
     isFeatured: { type: Boolean, default: false },
     metalValue: { type: Number },
     makingCharges: { type: Number },
+    makingChargePercent: { type: Number },
+    makingChargePerGram: { type: Number },
     isActive: { type: Boolean, default: true },
     images: { type: [ProductImageSchema], default: [] },
   },

@@ -13,6 +13,59 @@ const reviewController = new ReviewController();
  *   get:
  *     summary: Get all products with filtering
  *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Filter by category
+ *       - in: query
+ *         name: metal
+ *         schema:
+ *           type: string
+ *         description: Filter by metal/purity
+ *       - in: query
+ *         name: minPrice
+ *         schema:
+ *           type: number
+ *         description: Minimum price
+ *       - in: query
+ *         name: maxPrice
+ *         schema:
+ *           type: number
+ *         description: Maximum price
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Full-text search term
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [price_asc, price_desc, newest]
+ *         description: Sort order
+ *       - in: query
+ *         name: onSale
+ *         schema:
+ *           type: boolean
+ *         description: Only products on sale
+ *       - in: query
+ *         name: featured
+ *         schema:
+ *           type: boolean
+ *         description: Only featured products
+ *     responses:
+ *       200:
+ *         description: List of products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Product'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
  */
 router.get('/', productController.getProducts);
 
@@ -22,6 +75,15 @@ router.get('/', productController.getProducts);
  *   get:
  *     summary: Get featured products
  *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: List of featured products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Product'
  */
 router.get('/featured', productController.getFeatured);
 
@@ -31,6 +93,21 @@ router.get('/featured', productController.getFeatured);
  *   get:
  *     summary: Get all product categories
  *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: List of category names
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: string
  */
 router.get('/categories', productController.getCategories);
 
@@ -40,6 +117,21 @@ router.get('/categories', productController.getCategories);
  *   get:
  *     summary: Get product by ID
  *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Product
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
  */
 router.get('/:id', productController.getProductById);
 
@@ -49,6 +141,23 @@ router.get('/:id', productController.getProductById);
  *   get:
  *     summary: Get all reviews for a product
  *     tags: [Reviews]
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of reviews for the product
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Review'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
  */
 router.get('/:productId/reviews', reviewController.getProductReviews);
 
@@ -60,6 +169,33 @@ router.get('/:productId/reviews', reviewController.getProductReviews);
  *     tags: [Reviews]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ReviewInput'
+ *     responses:
+ *       201:
+ *         description: Review created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Review'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       409:
+ *         $ref: '#/components/responses/Conflict'
  */
 router.post('/:productId/reviews', protect, reviewController.createReview);
 
@@ -71,6 +207,26 @@ router.post('/:productId/reviews', protect, reviewController.createReview);
  *     tags: [Reviews]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: reviewId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: Review deleted
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
  */
 router.delete('/:productId/reviews/:reviewId', protect, reviewController.deleteReview);
 

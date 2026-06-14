@@ -18,6 +18,7 @@ npm run build        # rimraf dist && tsc
 npm start            # node dist/server.js
 npm test             # jest --runInBand (must be serial)
 npm run test:watch
+npm run seed         # ts-node src/seed.ts — seeds admin user + product images
 
 # Run a single test file
 npx jest src/tests/admin-orders.api.test.ts --runInBand
@@ -38,16 +39,20 @@ npx jest src/tests/admin-orders.api.test.ts --runInBand
 
 **Auth:** `src/middlewares/auth.middleware.ts` exports `protect` (JWT required) and `admin` (role check). Guards extend `express.Request` as `AuthRequest`.
 
-**Config:** All env vars centralized in `src/config/index.ts`. SQL Server supports both SQL auth and Windows auth.
+**Config:** All env vars centralized in `src/config/index.ts` — every value is read from `process.env` here and nowhere else. Import `config` rather than touching `process.env` directly.
 
 **Error handling:** Throw `AppError` from anywhere — `src/middlewares/error.middleware.ts` catches globally.
 
 **Swagger:** JSDoc annotations in route files → available at `http://localhost:5000/api-docs`.
 
+**Payments:** Razorpay integration has no `razorpay` SDK dependency — order creation and signature verification in `src/services/payment.service.ts` use Node's native `crypto` (HMAC-SHA256) directly.
+
+**Email:** Transactional email goes through Brevo SMTP via Nodemailer. `src/utils/email.ts` is the low-level sender; `src/utils/emailNotifications.ts` holds the templated senders (order created, payment completed, contact-us, new-product promo). These are best-effort — failures are logged, not thrown.
+
 ## Database
 
-- MongoDB Atlas — connection string via `MONGO_URI` env var
-- Default local fallback: `mongodb://localhost:27017/kv-silver-zone`
+- **MongoDB Atlas only** (Mongoose). Connection string via `MONGO_URI`; no fallback — `config.mongoUri` is undefined if unset.
+- **Legacy migration artifacts, not used at runtime:** `database/sqlserver/*.sql`, `src/utils/sql.ts`, and `src/utils/migrateSqlToMongo.ts` are leftovers from a one-time SQL Server → MongoDB migration. The live app never touches SQL Server. Ignore these unless explicitly working on migration tooling.
 
 ## Testing
 

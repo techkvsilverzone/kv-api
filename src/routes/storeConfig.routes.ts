@@ -10,6 +10,19 @@ const storeConfigRepository = new StoreConfigRepository();
  *   get:
  *     summary: Get public store theme configuration
  *     tags: [Store Config]
+ *     responses:
+ *       200:
+ *         description: Store configuration
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   $ref: '#/components/schemas/StoreConfig'
  */
 router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
   try {

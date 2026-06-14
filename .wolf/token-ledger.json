@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-04-03T18:52:55.260Z",
   "lifetime": {
-    "total_tokens_estimated": 56529,
-    "total_reads": 102,
-    "total_writes": 84,
-    "total_sessions": 4,
-    "anatomy_hits": 81,
-    "anatomy_misses": 17,
-    "repeated_reads_blocked": 2,
-    "estimated_savings_vs_bare_cli": 16200
+    "total_tokens_estimated": 451272,
+    "total_reads": 434,
+    "total_writes": 695,
+    "total_sessions": 5,
+    "anatomy_hits": 362,
+    "anatomy_misses": 68,
+    "repeated_reads_blocked": 38,
+    "estimated_savings_vs_bare_cli": 129001
   },
   "sessions": [
     {
@@ -1143,6 +1143,5189 @@
         "writes_count": 27,
         "repeated_reads_blocked": 2,
         "anatomy_lookups": 19
+      }
+    },
+    {
+      "id": "session-2026-06-14-1137",
+      "started": "2026-06-14T06:07:07.824Z",
+      "ended": "2026-06-14T06:08:10.619Z",
+      "reads": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 374,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 291,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 606,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 69,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 383,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 1271,
+        "output_tokens_estimated": 452,
+        "reads_count": 3,
+        "writes_count": 2,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 3
+      }
+    },
+    {
+      "id": "session-2026-06-14-1137",
+      "started": "2026-06-14T06:07:07.824Z",
+      "ended": "2026-06-14T06:21:24.439Z",
+      "reads": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 374,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 291,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 606,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 2435,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 564,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/error.middleware.ts",
+          "tokens_estimated": 416,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 69,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 383,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 86,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/error.middleware.ts",
+          "tokens_estimated": 101,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 4686,
+        "output_tokens_estimated": 639,
+        "reads_count": 6,
+        "writes_count": 4,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 6
+      }
+    },
+    {
+      "id": "session-2026-06-14-1137",
+      "started": "2026-06-14T06:07:07.824Z",
+      "ended": "2026-06-14T07:06:51.559Z",
+      "reads": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 374,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 291,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 606,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 2435,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 564,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/error.middleware.ts",
+          "tokens_estimated": 416,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 1350,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 1064,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 561,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/payment.controller.ts",
+          "tokens_estimated": 421,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 1762,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/coupon.service.ts",
+          "tokens_estimated": 640,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/silverrate.service.ts",
+          "tokens_estimated": 524,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/metalrate.service.ts",
+          "tokens_estimated": 1000,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/order.repository.ts",
+          "tokens_estimated": 1110,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/inventoryTransaction.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/coupon.model.ts",
+          "tokens_estimated": 297,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/payment.routes.ts",
+          "tokens_estimated": 221,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 438,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/coupon.repository.ts",
+          "tokens_estimated": 534,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 1078,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 1877,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/product.controller.ts",
+          "tokens_estimated": 663,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/metalrate.model.ts",
+          "tokens_estimated": 287,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/logger.ts",
+          "tokens_estimated": 308,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/inventory.repository.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/inventory.service.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 69,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 383,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 86,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/error.middleware.ts",
+          "tokens_estimated": 101,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 56,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 59,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 123,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 140,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 231,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 221,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/giftVoucher.model.ts",
+          "tokens_estimated": 250,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/giftVoucher.repository.ts",
+          "tokens_estimated": 565,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 3134,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 44,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 205,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 148,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 51,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 284,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 788,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 152,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 2442,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/payment.controller.ts",
+          "tokens_estimated": 175,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 860,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/giftVoucher.service.ts",
+          "tokens_estimated": 571,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/giftVoucher.controller.ts",
+          "tokens_estimated": 562,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/giftVoucher.routes.ts",
+          "tokens_estimated": 117,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 45,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 38,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 63,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 311,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 33,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/tests/pricing.service.test.ts",
+          "tokens_estimated": 776,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 18821,
+        "output_tokens_estimated": 13153,
+        "reads_count": 27,
+        "writes_count": 34,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 24
+      }
+    },
+    {
+      "id": "session-2026-06-14-1137",
+      "started": "2026-06-14T06:07:07.824Z",
+      "ended": "2026-06-14T08:20:01.588Z",
+      "reads": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 374,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 291,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 606,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 2435,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 564,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/error.middleware.ts",
+          "tokens_estimated": 416,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 1350,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 1064,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 561,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/payment.controller.ts",
+          "tokens_estimated": 421,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 1762,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/coupon.service.ts",
+          "tokens_estimated": 640,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/silverrate.service.ts",
+          "tokens_estimated": 524,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/metalrate.service.ts",
+          "tokens_estimated": 1000,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/order.repository.ts",
+          "tokens_estimated": 1110,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/inventoryTransaction.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/coupon.model.ts",
+          "tokens_estimated": 297,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/payment.routes.ts",
+          "tokens_estimated": 221,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 438,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/coupon.repository.ts",
+          "tokens_estimated": 534,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 1078,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 1877,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/product.controller.ts",
+          "tokens_estimated": 663,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/metalrate.model.ts",
+          "tokens_estimated": 287,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/logger.ts",
+          "tokens_estimated": 308,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/inventory.repository.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/inventory.service.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 408,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 461,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/storeConfig.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/storeConfig.repository.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/user.controller.ts",
+          "tokens_estimated": 585,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/inventory.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/user.service.ts",
+          "tokens_estimated": 918,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 69,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 383,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 86,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/error.middleware.ts",
+          "tokens_estimated": 101,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 56,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 59,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 123,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 140,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 231,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 221,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/giftVoucher.model.ts",
+          "tokens_estimated": 250,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/giftVoucher.repository.ts",
+          "tokens_estimated": 565,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 3134,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 44,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 205,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 148,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 51,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 284,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 788,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 152,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 2442,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/payment.controller.ts",
+          "tokens_estimated": 175,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 860,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/giftVoucher.service.ts",
+          "tokens_estimated": 571,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/giftVoucher.controller.ts",
+          "tokens_estimated": 562,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/giftVoucher.routes.ts",
+          "tokens_estimated": 117,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 45,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 38,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 63,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 311,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 33,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/tests/pricing.service.test.ts",
+          "tokens_estimated": 776,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/inventory.repository.ts",
+          "tokens_estimated": 694,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 938,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 481,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 370,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 67,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/seedInventory.ts",
+          "tokens_estimated": 445,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/pricingConfig.model.ts",
+          "tokens_estimated": 167,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/pricingConfig.repository.ts",
+          "tokens_estimated": 241,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 160,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 116,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/pricingConfig.routes.ts",
+          "tokens_estimated": 211,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 39,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 70,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 52,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 376,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 186,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/authCookie.ts",
+          "tokens_estimated": 424,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 88,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 103,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/user.controller.ts",
+          "tokens_estimated": 349,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 155,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 21193,
+        "output_tokens_estimated": 19236,
+        "reads_count": 34,
+        "writes_count": 60,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 28
+      }
+    },
+    {
+      "id": "session-2026-06-14-1137",
+      "started": "2026-06-14T06:07:07.824Z",
+      "ended": "2026-06-14T10:47:53.559Z",
+      "reads": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 374,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 291,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 606,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 2435,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 564,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/error.middleware.ts",
+          "tokens_estimated": 416,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 1350,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 1064,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 561,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/payment.controller.ts",
+          "tokens_estimated": 421,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 1762,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/coupon.service.ts",
+          "tokens_estimated": 640,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/silverrate.service.ts",
+          "tokens_estimated": 524,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/metalrate.service.ts",
+          "tokens_estimated": 1000,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/order.repository.ts",
+          "tokens_estimated": 1110,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/inventoryTransaction.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/coupon.model.ts",
+          "tokens_estimated": 297,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/payment.routes.ts",
+          "tokens_estimated": 221,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 438,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/coupon.repository.ts",
+          "tokens_estimated": 534,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 1078,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 1877,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/product.controller.ts",
+          "tokens_estimated": 663,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/metalrate.model.ts",
+          "tokens_estimated": 287,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/logger.ts",
+          "tokens_estimated": 308,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/inventory.repository.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/inventory.service.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 408,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 461,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/storeConfig.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/storeConfig.repository.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/user.controller.ts",
+          "tokens_estimated": 585,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/inventory.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/user.service.ts",
+          "tokens_estimated": 918,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/swagger.ts",
+          "tokens_estimated": 218,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 69,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 383,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 86,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/error.middleware.ts",
+          "tokens_estimated": 101,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 56,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 59,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 123,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 140,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 231,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 221,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/giftVoucher.model.ts",
+          "tokens_estimated": 250,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/giftVoucher.repository.ts",
+          "tokens_estimated": 565,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 3134,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 44,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 205,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 148,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 51,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 284,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 788,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 152,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 2442,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/payment.controller.ts",
+          "tokens_estimated": 175,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 860,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/giftVoucher.service.ts",
+          "tokens_estimated": 571,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/giftVoucher.controller.ts",
+          "tokens_estimated": 562,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/giftVoucher.routes.ts",
+          "tokens_estimated": 117,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 45,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 38,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 63,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 311,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 33,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/tests/pricing.service.test.ts",
+          "tokens_estimated": 776,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/inventory.repository.ts",
+          "tokens_estimated": 694,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 938,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 481,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 370,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 67,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/seedInventory.ts",
+          "tokens_estimated": 445,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/pricingConfig.model.ts",
+          "tokens_estimated": 167,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/pricingConfig.repository.ts",
+          "tokens_estimated": 241,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 160,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 116,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/pricingConfig.routes.ts",
+          "tokens_estimated": 211,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 39,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 70,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 52,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 376,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 186,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/authCookie.ts",
+          "tokens_estimated": 424,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 88,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 103,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/user.controller.ts",
+          "tokens_estimated": 349,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 155,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/exportOpenapi.ts",
+          "tokens_estimated": 170,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 42,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 21411,
+        "output_tokens_estimated": 19448,
+        "reads_count": 35,
+        "writes_count": 62,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 29
+      }
+    },
+    {
+      "id": "session-2026-06-14-1137",
+      "started": "2026-06-14T06:07:07.824Z",
+      "ended": "2026-06-14T10:58:37.212Z",
+      "reads": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 374,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 291,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 606,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 2435,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 564,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/error.middleware.ts",
+          "tokens_estimated": 416,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 1350,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 1064,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 561,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/payment.controller.ts",
+          "tokens_estimated": 467,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 1762,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/coupon.service.ts",
+          "tokens_estimated": 640,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/silverrate.service.ts",
+          "tokens_estimated": 524,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/metalrate.service.ts",
+          "tokens_estimated": 1000,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/order.repository.ts",
+          "tokens_estimated": 1110,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/inventoryTransaction.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/coupon.model.ts",
+          "tokens_estimated": 297,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/payment.routes.ts",
+          "tokens_estimated": 221,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 438,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/coupon.repository.ts",
+          "tokens_estimated": 534,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 1078,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 3681,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/product.controller.ts",
+          "tokens_estimated": 663,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/metalrate.model.ts",
+          "tokens_estimated": 287,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/logger.ts",
+          "tokens_estimated": 308,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/inventory.repository.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/inventory.service.ts",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 408,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 511,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/storeConfig.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/storeConfig.repository.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/user.controller.ts",
+          "tokens_estimated": 896,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/inventory.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/user.service.ts",
+          "tokens_estimated": 918,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/swagger.ts",
+          "tokens_estimated": 5374,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/user.routes.ts",
+          "tokens_estimated": 198,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/wishlist.controller.ts",
+          "tokens_estimated": 416,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/cart.controller.ts",
+          "tokens_estimated": 372,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 540,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/cart.routes.ts",
+          "tokens_estimated": 261,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/wishlist.routes.ts",
+          "tokens_estimated": 286,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/review.controller.ts",
+          "tokens_estimated": 400,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 301,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/coupon.routes.ts",
+          "tokens_estimated": 144,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/giftVoucher.routes.ts",
+          "tokens_estimated": 117,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/pricingConfig.routes.ts",
+          "tokens_estimated": 211,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/order.controller.ts",
+          "tokens_estimated": 615,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/coupon.controller.ts",
+          "tokens_estimated": 489,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/giftVoucher.controller.ts",
+          "tokens_estimated": 562,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/savings.routes.ts",
+          "tokens_estimated": 290,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/return.routes.ts",
+          "tokens_estimated": 203,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/shipping.routes.ts",
+          "tokens_estimated": 343,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/delivery.routes.ts",
+          "tokens_estimated": 183,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/silverrate.routes.ts",
+          "tokens_estimated": 244,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/metalrate.routes.ts",
+          "tokens_estimated": 227,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/storeConfig.routes.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/misc.routes.ts",
+          "tokens_estimated": 420,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/health.routes.ts",
+          "tokens_estimated": 226,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/savings.controller.ts",
+          "tokens_estimated": 492,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/return.controller.ts",
+          "tokens_estimated": 475,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/shipping.controller.ts",
+          "tokens_estimated": 438,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/delivery.controller.ts",
+          "tokens_estimated": 309,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/silverrate.controller.ts",
+          "tokens_estimated": 468,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/metalrate.controller.ts",
+          "tokens_estimated": 538,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/savings.service.ts",
+          "tokens_estimated": 506,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/return.service.ts",
+          "tokens_estimated": 293,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/inventory.controller.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/savings.model.ts",
+          "tokens_estimated": 475,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/return.model.ts",
+          "tokens_estimated": 437,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/silverrate.model.ts",
+          "tokens_estimated": 258,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 69,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 383,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 86,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/error.middleware.ts",
+          "tokens_estimated": 101,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 56,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 59,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 123,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 140,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 231,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 221,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/giftVoucher.model.ts",
+          "tokens_estimated": 250,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/giftVoucher.repository.ts",
+          "tokens_estimated": 565,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 3134,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 44,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 205,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 148,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 51,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 284,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 788,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 152,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 2442,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/payment.controller.ts",
+          "tokens_estimated": 175,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 860,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/giftVoucher.service.ts",
+          "tokens_estimated": 571,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/giftVoucher.controller.ts",
+          "tokens_estimated": 562,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/giftVoucher.routes.ts",
+          "tokens_estimated": 117,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 45,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 38,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 63,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 311,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 33,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/tests/pricing.service.test.ts",
+          "tokens_estimated": 776,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/inventory.repository.ts",
+          "tokens_estimated": 694,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 938,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 481,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 370,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 67,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/seedInventory.ts",
+          "tokens_estimated": 445,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/pricingConfig.model.ts",
+          "tokens_estimated": 167,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/pricingConfig.repository.ts",
+          "tokens_estimated": 241,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 160,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 116,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/pricingConfig.routes.ts",
+          "tokens_estimated": 211,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 39,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 70,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 52,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 376,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 186,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/authCookie.ts",
+          "tokens_estimated": 424,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 88,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 103,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/user.controller.ts",
+          "tokens_estimated": 349,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 155,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/exportOpenapi.ts",
+          "tokens_estimated": 170,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 42,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/swagger.ts",
+          "tokens_estimated": 5374,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 203,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 172,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 108,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 189,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/user.routes.ts",
+          "tokens_estimated": 156,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 464,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/user.routes.ts",
+          "tokens_estimated": 231,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 124,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 214,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/user.routes.ts",
+          "tokens_estimated": 353,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 175,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 153,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 156,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 170,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/payment.routes.ts",
+          "tokens_estimated": 245,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 209,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 291,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/payment.routes.ts",
+          "tokens_estimated": 239,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 229,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/savings.routes.ts",
+          "tokens_estimated": 358,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/coupon.routes.ts",
+          "tokens_estimated": 210,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 163,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/cart.routes.ts",
+          "tokens_estimated": 127,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/giftVoucher.routes.ts",
+          "tokens_estimated": 183,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 161,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/savings.routes.ts",
+          "tokens_estimated": 514,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/cart.routes.ts",
+          "tokens_estimated": 220,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/pricingConfig.routes.ts",
+          "tokens_estimated": 172,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 216,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/savings.routes.ts",
+          "tokens_estimated": 512,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/cart.routes.ts",
+          "tokens_estimated": 212,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 283,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/wishlist.routes.ts",
+          "tokens_estimated": 269,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/savings.routes.ts",
+          "tokens_estimated": 559,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 181,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/wishlist.routes.ts",
+          "tokens_estimated": 407,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/return.routes.ts",
+          "tokens_estimated": 441,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 329,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/wishlist.routes.ts",
+          "tokens_estimated": 340,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/return.routes.ts",
+          "tokens_estimated": 434,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 166,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/return.routes.ts",
+          "tokens_estimated": 459,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 166,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/shipping.routes.ts",
+          "tokens_estimated": 238,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 235,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/shipping.routes.ts",
+          "tokens_estimated": 380,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 283,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/shipping.routes.ts",
+          "tokens_estimated": 245,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 181,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/delivery.routes.ts",
+          "tokens_estimated": 336,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 272,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/silverrate.routes.ts",
+          "tokens_estimated": 276,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 376,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/silverrate.routes.ts",
+          "tokens_estimated": 279,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 175,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 229,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/metalrate.routes.ts",
+          "tokens_estimated": 126,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/metalrate.routes.ts",
+          "tokens_estimated": 136,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 163,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/storeConfig.routes.ts",
+          "tokens_estimated": 145,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 334,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/misc.routes.ts",
+          "tokens_estimated": 161,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 321,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 495,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 194,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 319,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 547,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 546,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 383,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 585,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 323,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 263,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 197,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 318,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 232,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 296,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 346,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 199,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 40515,
+        "output_tokens_estimated": 46311,
+        "reads_count": 70,
+        "writes_count": 142,
+        "repeated_reads_blocked": 11,
+        "anatomy_lookups": 62
+      }
+    },
+    {
+      "id": "session-2026-06-14-1137",
+      "started": "2026-06-14T06:07:07.824Z",
+      "ended": "2026-06-14T11:52:55.680Z",
+      "reads": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 374,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 291,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 606,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 2435,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 564,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/error.middleware.ts",
+          "tokens_estimated": 416,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 1350,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 1064,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 561,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/payment.controller.ts",
+          "tokens_estimated": 467,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 1762,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/coupon.service.ts",
+          "tokens_estimated": 640,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/silverrate.service.ts",
+          "tokens_estimated": 524,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/metalrate.service.ts",
+          "tokens_estimated": 1000,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/order.repository.ts",
+          "tokens_estimated": 1110,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/inventoryTransaction.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/coupon.model.ts",
+          "tokens_estimated": 297,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/payment.routes.ts",
+          "tokens_estimated": 221,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 438,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/coupon.repository.ts",
+          "tokens_estimated": 534,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 1078,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 3681,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/product.controller.ts",
+          "tokens_estimated": 663,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/metalrate.model.ts",
+          "tokens_estimated": 287,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/logger.ts",
+          "tokens_estimated": 308,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/inventory.repository.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/inventory.service.ts",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 408,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 511,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/storeConfig.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/storeConfig.repository.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/user.controller.ts",
+          "tokens_estimated": 896,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/inventory.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/user.service.ts",
+          "tokens_estimated": 918,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/swagger.ts",
+          "tokens_estimated": 5374,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/user.routes.ts",
+          "tokens_estimated": 198,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/wishlist.controller.ts",
+          "tokens_estimated": 416,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/cart.controller.ts",
+          "tokens_estimated": 372,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 540,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/cart.routes.ts",
+          "tokens_estimated": 261,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/wishlist.routes.ts",
+          "tokens_estimated": 286,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/review.controller.ts",
+          "tokens_estimated": 400,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 301,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/coupon.routes.ts",
+          "tokens_estimated": 144,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/giftVoucher.routes.ts",
+          "tokens_estimated": 117,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/pricingConfig.routes.ts",
+          "tokens_estimated": 211,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/order.controller.ts",
+          "tokens_estimated": 615,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/coupon.controller.ts",
+          "tokens_estimated": 489,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/giftVoucher.controller.ts",
+          "tokens_estimated": 562,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/savings.routes.ts",
+          "tokens_estimated": 290,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/return.routes.ts",
+          "tokens_estimated": 203,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/shipping.routes.ts",
+          "tokens_estimated": 343,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/delivery.routes.ts",
+          "tokens_estimated": 183,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/silverrate.routes.ts",
+          "tokens_estimated": 244,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/metalrate.routes.ts",
+          "tokens_estimated": 227,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/storeConfig.routes.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/misc.routes.ts",
+          "tokens_estimated": 420,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/health.routes.ts",
+          "tokens_estimated": 226,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/savings.controller.ts",
+          "tokens_estimated": 492,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/return.controller.ts",
+          "tokens_estimated": 475,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/shipping.controller.ts",
+          "tokens_estimated": 438,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/delivery.controller.ts",
+          "tokens_estimated": 309,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/silverrate.controller.ts",
+          "tokens_estimated": 468,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/metalrate.controller.ts",
+          "tokens_estimated": 538,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/savings.service.ts",
+          "tokens_estimated": 506,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/return.service.ts",
+          "tokens_estimated": 293,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/inventory.controller.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/savings.model.ts",
+          "tokens_estimated": 475,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/return.model.ts",
+          "tokens_estimated": 437,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/silverrate.model.ts",
+          "tokens_estimated": 258,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/docs/auth-cookie.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/docs/payments-create-order.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/docs/payments-verify.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/docs/gift-vouchers.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/docs/pricing-config.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/docs/products-pricing-stock.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 69,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 383,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 86,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/error.middleware.ts",
+          "tokens_estimated": 101,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 56,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 59,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 123,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 140,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 231,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 221,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/giftVoucher.model.ts",
+          "tokens_estimated": 250,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/giftVoucher.repository.ts",
+          "tokens_estimated": 565,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 3134,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 44,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 205,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 148,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 51,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 284,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 788,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 152,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 2442,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/payment.controller.ts",
+          "tokens_estimated": 175,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 860,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/giftVoucher.service.ts",
+          "tokens_estimated": 571,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/giftVoucher.controller.ts",
+          "tokens_estimated": 562,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/giftVoucher.routes.ts",
+          "tokens_estimated": 117,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 45,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 38,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 63,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 311,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 33,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/tests/pricing.service.test.ts",
+          "tokens_estimated": 776,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/inventory.repository.ts",
+          "tokens_estimated": 694,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 938,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 481,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 370,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 67,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/seedInventory.ts",
+          "tokens_estimated": 445,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/pricingConfig.model.ts",
+          "tokens_estimated": 167,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/pricingConfig.repository.ts",
+          "tokens_estimated": 241,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 160,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 116,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/pricingConfig.routes.ts",
+          "tokens_estimated": 211,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 39,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 70,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 52,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 376,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 186,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/authCookie.ts",
+          "tokens_estimated": 424,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 88,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 103,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/user.controller.ts",
+          "tokens_estimated": 349,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 155,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/exportOpenapi.ts",
+          "tokens_estimated": 170,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 42,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/swagger.ts",
+          "tokens_estimated": 5374,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 203,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 172,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 108,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 189,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/user.routes.ts",
+          "tokens_estimated": 156,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 464,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/user.routes.ts",
+          "tokens_estimated": 231,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 124,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 214,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/user.routes.ts",
+          "tokens_estimated": 353,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 175,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 153,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 156,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 170,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/payment.routes.ts",
+          "tokens_estimated": 245,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 209,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 291,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/payment.routes.ts",
+          "tokens_estimated": 239,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 229,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/savings.routes.ts",
+          "tokens_estimated": 358,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/coupon.routes.ts",
+          "tokens_estimated": 210,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 163,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/cart.routes.ts",
+          "tokens_estimated": 127,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/giftVoucher.routes.ts",
+          "tokens_estimated": 183,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 161,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/savings.routes.ts",
+          "tokens_estimated": 514,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/cart.routes.ts",
+          "tokens_estimated": 220,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/pricingConfig.routes.ts",
+          "tokens_estimated": 172,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 216,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/savings.routes.ts",
+          "tokens_estimated": 512,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/cart.routes.ts",
+          "tokens_estimated": 212,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 283,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/wishlist.routes.ts",
+          "tokens_estimated": 269,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/savings.routes.ts",
+          "tokens_estimated": 559,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 181,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/wishlist.routes.ts",
+          "tokens_estimated": 407,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/return.routes.ts",
+          "tokens_estimated": 441,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 329,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/wishlist.routes.ts",
+          "tokens_estimated": 340,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/return.routes.ts",
+          "tokens_estimated": 434,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 166,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/return.routes.ts",
+          "tokens_estimated": 459,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 166,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/shipping.routes.ts",
+          "tokens_estimated": 238,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 235,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/shipping.routes.ts",
+          "tokens_estimated": 380,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 283,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/shipping.routes.ts",
+          "tokens_estimated": 245,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 181,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/delivery.routes.ts",
+          "tokens_estimated": 336,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 272,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/silverrate.routes.ts",
+          "tokens_estimated": 276,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 376,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/silverrate.routes.ts",
+          "tokens_estimated": 279,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 175,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 229,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/metalrate.routes.ts",
+          "tokens_estimated": 126,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/metalrate.routes.ts",
+          "tokens_estimated": 136,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 163,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/storeConfig.routes.ts",
+          "tokens_estimated": 145,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 334,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/misc.routes.ts",
+          "tokens_estimated": 161,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 321,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 495,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 194,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 319,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 547,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 546,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 383,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 585,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 323,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 263,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 197,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 318,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 232,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 296,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 346,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 199,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 40515,
+        "output_tokens_estimated": 46311,
+        "reads_count": 76,
+        "writes_count": 142,
+        "repeated_reads_blocked": 11,
+        "anatomy_lookups": 62
+      }
+    },
+    {
+      "id": "session-2026-06-14-1137",
+      "started": "2026-06-14T06:07:07.824Z",
+      "ended": "2026-06-14T12:22:12.353Z",
+      "reads": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 374,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 291,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 606,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 2435,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 564,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/error.middleware.ts",
+          "tokens_estimated": 416,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 1350,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 1064,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 561,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/payment.controller.ts",
+          "tokens_estimated": 467,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 1762,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/coupon.service.ts",
+          "tokens_estimated": 640,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/silverrate.service.ts",
+          "tokens_estimated": 524,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/metalrate.service.ts",
+          "tokens_estimated": 1000,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/order.repository.ts",
+          "tokens_estimated": 1110,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/inventoryTransaction.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/coupon.model.ts",
+          "tokens_estimated": 297,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/payment.routes.ts",
+          "tokens_estimated": 221,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 438,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/coupon.repository.ts",
+          "tokens_estimated": 534,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/order.model.ts",
+          "tokens_estimated": 1078,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 3681,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/product.controller.ts",
+          "tokens_estimated": 663,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/metalrate.model.ts",
+          "tokens_estimated": 287,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/logger.ts",
+          "tokens_estimated": 308,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/inventory.repository.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/inventory.service.ts",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 408,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 511,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/storeConfig.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/storeConfig.repository.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/user.controller.ts",
+          "tokens_estimated": 896,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/inventory.model.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/user.service.ts",
+          "tokens_estimated": 918,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/swagger.ts",
+          "tokens_estimated": 5374,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/user.routes.ts",
+          "tokens_estimated": 857,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/wishlist.controller.ts",
+          "tokens_estimated": 416,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/cart.controller.ts",
+          "tokens_estimated": 372,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 540,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/cart.routes.ts",
+          "tokens_estimated": 261,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/wishlist.routes.ts",
+          "tokens_estimated": 286,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/review.controller.ts",
+          "tokens_estimated": 400,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 688,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/coupon.routes.ts",
+          "tokens_estimated": 144,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/giftVoucher.routes.ts",
+          "tokens_estimated": 117,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/pricingConfig.routes.ts",
+          "tokens_estimated": 211,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/order.controller.ts",
+          "tokens_estimated": 615,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/coupon.controller.ts",
+          "tokens_estimated": 489,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/giftVoucher.controller.ts",
+          "tokens_estimated": 562,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/savings.routes.ts",
+          "tokens_estimated": 290,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/return.routes.ts",
+          "tokens_estimated": 203,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/shipping.routes.ts",
+          "tokens_estimated": 343,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/delivery.routes.ts",
+          "tokens_estimated": 183,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/silverrate.routes.ts",
+          "tokens_estimated": 244,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/metalrate.routes.ts",
+          "tokens_estimated": 227,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/storeConfig.routes.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/misc.routes.ts",
+          "tokens_estimated": 420,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/health.routes.ts",
+          "tokens_estimated": 226,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/savings.controller.ts",
+          "tokens_estimated": 492,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/return.controller.ts",
+          "tokens_estimated": 475,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/shipping.controller.ts",
+          "tokens_estimated": 438,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/delivery.controller.ts",
+          "tokens_estimated": 309,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/silverrate.controller.ts",
+          "tokens_estimated": 468,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/metalrate.controller.ts",
+          "tokens_estimated": 538,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/savings.service.ts",
+          "tokens_estimated": 506,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/return.service.ts",
+          "tokens_estimated": 293,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/inventory.controller.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/savings.model.ts",
+          "tokens_estimated": 475,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/return.model.ts",
+          "tokens_estimated": 437,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/silverrate.model.ts",
+          "tokens_estimated": 258,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/docs/auth-cookie.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/docs/payments-create-order.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/docs/payments-verify.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/docs/gift-vouchers.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/docs/pricing-config.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/docs/products-pricing-stock.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/emailNotifications.ts",
+          "tokens_estimated": 2338,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/user.model.ts",
+          "tokens_estimated": 286,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/user.repository.ts",
+          "tokens_estimated": 516,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/email.ts",
+          "tokens_estimated": 777,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/tests/coupon-apply.api.test.ts",
+          "tokens_estimated": 793,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 69,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/CLAUDE.md",
+          "tokens_estimated": 383,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 86,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/error.middleware.ts",
+          "tokens_estimated": 101,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 56,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/product.model.ts",
+          "tokens_estimated": 59,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 123,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 140,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 231,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 221,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/giftVoucher.model.ts",
+          "tokens_estimated": 250,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/giftVoucher.repository.ts",
+          "tokens_estimated": 565,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 3134,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 44,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 205,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 148,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 51,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 284,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 788,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 152,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 2442,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/payment.controller.ts",
+          "tokens_estimated": 175,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 860,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/giftVoucher.service.ts",
+          "tokens_estimated": 571,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/giftVoucher.controller.ts",
+          "tokens_estimated": 562,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/giftVoucher.routes.ts",
+          "tokens_estimated": 117,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 45,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 38,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 63,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 40,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 311,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 33,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/tests/pricing.service.test.ts",
+          "tokens_estimated": 776,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/inventory.repository.ts",
+          "tokens_estimated": 694,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/stock.service.ts",
+          "tokens_estimated": 938,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/product.repository.ts",
+          "tokens_estimated": 30,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 481,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 370,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/product.service.ts",
+          "tokens_estimated": 67,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/seedInventory.ts",
+          "tokens_estimated": 445,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 37,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/pricingConfig.model.ts",
+          "tokens_estimated": 167,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/pricingConfig.repository.ts",
+          "tokens_estimated": 241,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 160,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/pricing.service.ts",
+          "tokens_estimated": 116,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/pricingConfig.routes.ts",
+          "tokens_estimated": 211,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/index.ts",
+          "tokens_estimated": 39,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 70,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 52,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 376,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 186,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/authCookie.ts",
+          "tokens_estimated": 424,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 88,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/middlewares/auth.middleware.ts",
+          "tokens_estimated": 103,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/user.controller.ts",
+          "tokens_estimated": 349,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/app.ts",
+          "tokens_estimated": 155,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/exportOpenapi.ts",
+          "tokens_estimated": 170,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/package.json",
+          "tokens_estimated": 42,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/swagger.ts",
+          "tokens_estimated": 5374,
+          "action": "create"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 203,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 172,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 108,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/auth.routes.ts",
+          "tokens_estimated": 189,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/user.routes.ts",
+          "tokens_estimated": 156,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 464,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/user.routes.ts",
+          "tokens_estimated": 231,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 124,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 214,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/user.routes.ts",
+          "tokens_estimated": 353,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 175,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 153,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 156,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 170,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 192,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/payment.routes.ts",
+          "tokens_estimated": 245,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 209,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 291,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/payment.routes.ts",
+          "tokens_estimated": 239,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/product.routes.ts",
+          "tokens_estimated": 229,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/savings.routes.ts",
+          "tokens_estimated": 358,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/coupon.routes.ts",
+          "tokens_estimated": 210,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 163,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/cart.routes.ts",
+          "tokens_estimated": 127,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/giftVoucher.routes.ts",
+          "tokens_estimated": 183,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 161,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/savings.routes.ts",
+          "tokens_estimated": 514,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/cart.routes.ts",
+          "tokens_estimated": 220,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/pricingConfig.routes.ts",
+          "tokens_estimated": 172,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 216,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/savings.routes.ts",
+          "tokens_estimated": 512,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/cart.routes.ts",
+          "tokens_estimated": 212,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 283,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/wishlist.routes.ts",
+          "tokens_estimated": 269,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/savings.routes.ts",
+          "tokens_estimated": 559,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 181,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/wishlist.routes.ts",
+          "tokens_estimated": 407,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/return.routes.ts",
+          "tokens_estimated": 441,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 329,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/wishlist.routes.ts",
+          "tokens_estimated": 340,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/return.routes.ts",
+          "tokens_estimated": 434,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 166,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/return.routes.ts",
+          "tokens_estimated": 459,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 166,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/shipping.routes.ts",
+          "tokens_estimated": 238,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 235,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/shipping.routes.ts",
+          "tokens_estimated": 380,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 283,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/shipping.routes.ts",
+          "tokens_estimated": 245,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 181,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/delivery.routes.ts",
+          "tokens_estimated": 336,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 272,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/silverrate.routes.ts",
+          "tokens_estimated": 276,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 376,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/silverrate.routes.ts",
+          "tokens_estimated": 279,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 175,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 229,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/metalrate.routes.ts",
+          "tokens_estimated": 126,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/metalrate.routes.ts",
+          "tokens_estimated": 136,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 163,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/storeConfig.routes.ts",
+          "tokens_estimated": 145,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 334,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/misc.routes.ts",
+          "tokens_estimated": 161,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 321,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 495,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 194,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 319,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 547,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 546,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 383,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 585,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 323,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 263,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 197,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 318,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 232,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 296,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 346,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/admin.routes.ts",
+          "tokens_estimated": 199,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/index.ts",
+          "tokens_estimated": 60,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/emailNotifications.ts",
+          "tokens_estimated": 1670,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/emailNotifications.ts",
+          "tokens_estimated": 43,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/utils/emailNotifications.ts",
+          "tokens_estimated": 441,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 54,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/payment.service.ts",
+          "tokens_estimated": 134,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 114,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 110,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 64,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 396,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/order.service.ts",
+          "tokens_estimated": 162,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/order.controller.ts",
+          "tokens_estimated": 135,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/order.routes.ts",
+          "tokens_estimated": 376,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/user.model.ts",
+          "tokens_estimated": 350,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/models/user.model.ts",
+          "tokens_estimated": 61,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/user.repository.ts",
+          "tokens_estimated": 93,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/repositories/user.repository.ts",
+          "tokens_estimated": 569,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/user.service.ts",
+          "tokens_estimated": 92,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/services/user.service.ts",
+          "tokens_estimated": 765,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/controllers/user.controller.ts",
+          "tokens_estimated": 404,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/routes/user.routes.ts",
+          "tokens_estimated": 860,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/config/swagger.ts",
+          "tokens_estimated": 388,
+          "action": "edit"
+        },
+        {
+          "file": "d:/KraftLabs/KV Silver Zone/Source/kv-api/src/tests/address-book.api.test.ts",
+          "tokens_estimated": 858,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 46271,
+        "output_tokens_estimated": 54510,
+        "reads_count": 81,
+        "writes_count": 165,
+        "repeated_reads_blocked": 14,
+        "anatomy_lookups": 67
       }
     }
   ],

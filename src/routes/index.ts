@@ -17,6 +17,8 @@ import metalRateRoutes from './metalrate.routes';
 import deliveryRoutes from './delivery.routes';
 import shippingRoutes from './shipping.routes';
 import storeConfigRoutes from './storeConfig.routes';
+import giftVoucherRoutes from './giftVoucher.routes';
+import pricingConfigRoutes from './pricingConfig.routes';
 
 const router = Router();
 
@@ -36,6 +38,8 @@ router.use('/returns', returnRoutes);
 router.use('/delivery', deliveryRoutes);
 router.use('/shipping', shippingRoutes);
 router.use('/store-config', storeConfigRoutes);
+router.use('/gift-vouchers', giftVoucherRoutes);
+router.use('/pricing-config', pricingConfigRoutes);
 router.use('/admin', adminRoutes);
 router.use('/', miscRoutes);
 

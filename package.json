@@ -9,6 +9,8 @@
     "build": "rimraf dist && tsc",
     "test": "jest --runInBand",
     "seed": "ts-node src/seed.ts",
+    "seed:inventory": "ts-node src/utils/seedInventory.ts",
+    "openapi": "ts-node src/utils/exportOpenapi.ts",
     "test:watch": "jest --watch"
   },
   "keywords": [],

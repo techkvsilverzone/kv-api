@@ -279,6 +279,554 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-04-05T14:59:35.000Z"
+    },
+    {
+      "id": "bug-018",
+      "timestamp": "2026-06-14T06:07:53.575Z",
+      "error_message": "Significant refactor of ",
+      "file": "CLAUDE.md",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 10→14 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T06:07:53.575Z"
+    },
+    {
+      "id": "bug-019",
+      "timestamp": "2026-06-14T06:20:23.678Z",
+      "error_message": "Type error",
+      "file": "src/app.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T06:20:23.678Z"
+    },
+    {
+      "id": "bug-020",
+      "timestamp": "2026-06-14T06:20:30.873Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/middlewares/error.middleware.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T06:20:30.874Z"
+    },
+    {
+      "id": "bug-021",
+      "timestamp": "2026-06-14T00:00:00.000Z",
+      "error_message": "POST /api/v1/admin/products fails (generic 500 Internal Server Error) when body contains a large base64 image",
+      "file": "src/app.ts",
+      "root_cause": "express.json() used the default 100kb body limit; a base64-encoded product image exceeds it, so body-parser throws PayloadTooLargeError (413) before reaching the controller. The error middleware had no case for entity.too.large, so it fell through to the generic 500 branch.",
+      "fix": "Raised the limit: express.json({ limit: '15mb' }) plus matching express.urlencoded limit in src/app.ts. Added an entity.too.large / status 413 case in src/middlewares/error.middleware.ts returning a clear 413 message.",
+      "tags": [
+        "api",
+        "admin",
+        "product",
+        "body-parser",
+        "payload-too-large",
+        "413",
+        "base64-image"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T00:00:00.000Z"
+    },
+    {
+      "id": "bug-022",
+      "timestamp": "2026-06-14T06:58:16.287Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/services/pricing.service.ts",
+      "root_cause": "Had '../repositories/coupon.repository'",
+      "fix": "Changed to '../repositories/pincodeRate.repository'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T06:58:16.287Z"
+    },
+    {
+      "id": "bug-023",
+      "timestamp": "2026-06-14T06:58:37.335Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/services/product.service.ts",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 13→14 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T06:58:37.335Z"
+    },
+    {
+      "id": "bug-024",
+      "timestamp": "2026-06-14T06:58:44.038Z",
+      "error_message": "Wrong return value",
+      "file": "src/services/product.service.ts",
+      "root_cause": "Was returning: await this.productRepository.findFeatured();",
+      "fix": "Now returns: await this.pricingService.enrichManyForDisplay(pro",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T06:58:44.038Z"
+    },
+    {
+      "id": "bug-025",
+      "timestamp": "2026-06-14T06:59:43.959Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/repositories/product.repository.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T06:59:43.959Z"
+    },
+    {
+      "id": "bug-026",
+      "timestamp": "2026-06-14T07:00:26.380Z",
+      "error_message": "Missing await",
+      "file": "src/services/stock.service.ts",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T07:00:26.380Z"
+    },
+    {
+      "id": "bug-027",
+      "timestamp": "2026-06-14T07:01:21.302Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/controllers/payment.controller.ts",
+      "root_cause": "4 lines replaced/restructured",
+      "fix": "Rewrote 12→13 lines (4 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T07:01:21.302Z"
+    },
+    {
+      "id": "bug-028",
+      "timestamp": "2026-06-14T07:02:32.238Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/routes/index.ts",
+      "root_cause": "Had '/admin'",
+      "fix": "Changed to '/gift-vouchers'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T07:02:32.238Z"
+    },
+    {
+      "id": "bug-029",
+      "timestamp": "2026-06-14T07:02:41.014Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/routes/admin.routes.ts",
+      "root_cause": "Had '../middlewares/auth.middleware'",
+      "fix": "Changed to '../controllers/giftVoucher.controller'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T07:02:41.014Z"
+    },
+    {
+      "id": "bug-030",
+      "timestamp": "2026-06-14T07:02:56.900Z",
+      "error_message": "Type error",
+      "file": "src/routes/admin.routes.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T07:02:56.900Z"
+    },
+    {
+      "id": "bug-031",
+      "timestamp": "2026-06-14T08:13:09.021Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/repositories/inventory.repository.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T08:13:09.021Z"
+    },
+    {
+      "id": "bug-032",
+      "timestamp": "2026-06-14T08:13:40.454Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/repositories/product.repository.ts",
+      "root_cause": "17 lines replaced/restructured",
+      "fix": "Rewrote 25→4 lines (17 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T08:13:40.454Z"
+    },
+    {
+      "id": "bug-033",
+      "timestamp": "2026-06-14T08:14:12.969Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/services/product.service.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T08:14:12.969Z"
+    },
+    {
+      "id": "bug-034",
+      "timestamp": "2026-06-14T08:14:21.672Z",
+      "error_message": "Wrong return value",
+      "file": "src/services/product.service.ts",
+      "root_cause": "Was returning: await this.pricingService.enrichManyForDisplay(pro",
+      "fix": "Now returns: await this.attachStock(enriched);",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T08:14:21.672Z"
+    },
+    {
+      "id": "bug-035",
+      "timestamp": "2026-06-14T08:14:41.609Z",
+      "error_message": "Incorrect value in code",
+      "file": "package.json",
+      "root_cause": "Had \"test:watch\"",
+      "fix": "Changed to \"seed:inventory\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "json"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T08:14:41.609Z"
+    },
+    {
+      "id": "bug-036",
+      "timestamp": "2026-06-14T08:15:34.360Z",
+      "error_message": "Missing await",
+      "file": "src/services/pricing.service.ts",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T08:15:34.360Z"
+    },
+    {
+      "id": "bug-037",
+      "timestamp": "2026-06-14T08:15:58.483Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/routes/index.ts",
+      "root_cause": "Had '/admin'",
+      "fix": "Changed to '/pricing-config'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T08:15:58.483Z"
+    },
+    {
+      "id": "bug-038",
+      "timestamp": "2026-06-14T08:16:24.105Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/routes/admin.routes.ts",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T08:16:24.105Z"
+    },
+    {
+      "id": "bug-039",
+      "timestamp": "2026-06-14T08:16:57.341Z",
+      "error_message": "Type error",
+      "file": "src/config/index.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T08:16:57.341Z"
+    },
+    {
+      "id": "bug-040",
+      "timestamp": "2026-06-14T08:17:51.031Z",
+      "error_message": "Type error",
+      "file": "src/routes/auth.routes.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T08:17:51.031Z"
+    },
+    {
+      "id": "bug-041",
+      "timestamp": "2026-06-14T10:47:21.017Z",
+      "error_message": "Incorrect value in code",
+      "file": "package.json",
+      "root_cause": "Had \"test:watch\"",
+      "fix": "Changed to \"openapi\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "json"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T10:47:21.017Z"
+    },
+    {
+      "id": "bug-042",
+      "timestamp": "2026-06-14T10:51:12.099Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/routes/auth.routes.ts",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 20→25 lines (7 removed) | Also: *             type: object; *             required: [email, password]",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-14T10:51:18.243Z"
+    },
+    {
+      "id": "bug-043",
+      "timestamp": "2026-06-14T12:14:33.991Z",
+      "error_message": "Missing guard clause",
+      "file": "src/utils/emailNotifications.ts",
+      "root_cause": "No early return/throw for edge case: !address",
+      "fix": "Added guard clause: if (!address)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T12:14:33.991Z"
+    },
+    {
+      "id": "bug-044",
+      "timestamp": "2026-06-14T12:15:05.065Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/utils/emailNotifications.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T12:15:05.065Z"
+    },
+    {
+      "id": "bug-045",
+      "timestamp": "2026-06-14T12:16:06.995Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/services/order.service.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: // userId is populated to a { _id, name, email } doc by the ; // resolve the owner id from either the populated doc or a r",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-14T12:16:37.896Z"
+    },
+    {
+      "id": "bug-046",
+      "timestamp": "2026-06-14T12:16:45.553Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/controllers/order.controller.ts",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T12:16:45.553Z"
+    },
+    {
+      "id": "bug-047",
+      "timestamp": "2026-06-14T12:16:55.278Z",
+      "error_message": "Type error",
+      "file": "src/routes/order.routes.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T12:16:55.278Z"
+    },
+    {
+      "id": "bug-048",
+      "timestamp": "2026-06-14T12:17:30.258Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/repositories/user.repository.ts",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 4→16 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T12:17:30.258Z"
+    },
+    {
+      "id": "bug-049",
+      "timestamp": "2026-06-14T12:17:48.816Z",
+      "error_message": "Missing guard clause",
+      "file": "src/repositories/user.repository.ts",
+      "root_cause": "No early return/throw for edge case: !user",
+      "fix": "Added guard clause: if (!user)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T12:17:48.816Z"
+    },
+    {
+      "id": "bug-050",
+      "timestamp": "2026-06-14T12:18:17.211Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/services/user.service.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T12:18:17.211Z"
+    },
+    {
+      "id": "bug-051",
+      "timestamp": "2026-06-14T12:18:27.336Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/controllers/user.controller.ts",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T12:18:27.336Z"
     }
   ]
 }

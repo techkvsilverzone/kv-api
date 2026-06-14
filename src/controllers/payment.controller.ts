@@ -12,11 +12,12 @@ export class PaymentController {
 
   public createOrder = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { amount, currency } = req.body;
-      if (!amount || isNaN(Number(amount))) {
-        throw new AppError('Valid amount is required', 400);
+      const { items, couponCode, pincode, currency } = req.body;
+      if (!Array.isArray(items) || items.length === 0) {
+        throw new AppError('items (array of { product, quantity }) is required', 400);
       }
-      const order = await this.paymentService.createRazorpayOrder(Number(amount), currency);
+      // Amount is computed server-side from the cart; any client amount is ignored.
+      const order = await this.paymentService.createRazorpayOrder({ items, couponCode, pincode, currency });
       res.status(201).json(order);
     } catch (error) {
       next(error);

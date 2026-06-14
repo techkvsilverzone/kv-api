@@ -13,6 +13,23 @@ const couponController = new CouponController();
  *     tags: [Coupons]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ApplyCouponInput'
+ *     responses:
+ *       200:
+ *         description: Coupon validation result
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApplyCouponResponse'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
  */
 router.post('/apply', protect, couponController.applyCoupon);
 

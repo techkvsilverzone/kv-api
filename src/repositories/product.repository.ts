@@ -46,6 +46,8 @@ export class ProductRepository {
       isFeatured: Boolean(data.isFeatured || false),
       metalValue: data.metalValue !== undefined ? Number(data.metalValue) : undefined,
       makingCharges: data.makingCharges !== undefined ? Number(data.makingCharges) : undefined,
+      makingChargePercent: data.makingChargePercent !== undefined ? Number(data.makingChargePercent) : undefined,
+      makingChargePerGram: data.makingChargePerGram !== undefined ? Number(data.makingChargePerGram) : undefined,
       images: image
         ? [{ variantName, imageBase64: image, sortOrder: Number(data.sortOrder || 1) }]
         : [],
@@ -121,6 +123,8 @@ export class ProductRepository {
     if (data.isFeatured !== undefined) updateData.isFeatured = Boolean(data.isFeatured);
     if (data.metalValue !== undefined) updateData.metalValue = Number(data.metalValue);
     if (data.makingCharges !== undefined) updateData.makingCharges = Number(data.makingCharges);
+    if (data.makingChargePercent !== undefined) updateData.makingChargePercent = Number(data.makingChargePercent);
+    if (data.makingChargePerGram !== undefined) updateData.makingChargePerGram = Number(data.makingChargePerGram);
     if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
     return Product.findByIdAndUpdate(id, updateData, { new: true }).exec();

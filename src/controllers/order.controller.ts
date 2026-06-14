@@ -58,6 +58,19 @@ export class OrderController {
     }
   };
 
+  public resendConfirmation = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this.orderService.resendConfirmation(
+        req.params.id as string,
+        req.user!._id.toString(),
+        req.user!.isAdmin,
+      );
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public getStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const stats = await this.orderService.getAdminStats();

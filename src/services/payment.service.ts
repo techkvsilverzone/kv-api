@@ -4,39 +4,208 @@ import { config } from '../config';
 import { OrderRepository } from '../repositories/order.repository';
 import { CouponRepository } from '../repositories/coupon.repository';
 import { UserRepository } from '../repositories/user.repository';
+import { PricingService, CheckoutBreakdown, CheckoutItemInput } from './pricing.service';
+import { StockService } from './stock.service';
 import { AppError } from '../utils/appError';
-import { sendPaymentCompletedEmails } from '../utils/emailNotifications';
+import { sendOrderConfirmationEmail, buildOrderConfirmationInput } from '../utils/emailNotifications';
 import Logger from '../utils/logger';
+
+export interface CreateOrderInput {
+  items: CheckoutItemInput[];
+  couponCode?: string | null;
+  pincode?: string | null;
+  currency?: string;
+}
 
 export class PaymentService {
   private orderRepository: OrderRepository;
   private couponRepository: CouponRepository;
   private userRepository: UserRepository;
+  private pricingService: PricingService;
+  private stockService: StockService;
 
   constructor() {
     this.orderRepository = new OrderRepository();
     this.couponRepository = new CouponRepository();
     this.userRepository = new UserRepository();
+    this.pricingService = new PricingService();
+    this.stockService = new StockService();
   }
 
-  public async createRazorpayOrder(amount: number, currency = 'INR'): Promise<any> {
+  /**
+   * B2: Create a Razorpay order for an amount the SERVER computes from the cart
+   * (DB prices x quantity + server tax + server-validated coupon + delivery).
+   * The client-supplied amount is never trusted.
+   */
+  public async createRazorpayOrder(input: CreateOrderInput): Promise<any> {
+    const breakdown = await this.pricingService.computeCheckout({
+      items: input.items,
+      couponCode: input.couponCode,
+      pincode: input.pincode,
+    });
+
+    if (breakdown.amountInPaise <= 0) {
+      throw new AppError('Computed order amount is zero — nothing to charge', 400);
+    }
+
+    const razorpayOrder = await this.callRazorpay(
+      'POST',
+      '/v1/orders',
+      {
+        amount: breakdown.amountInPaise,
+        currency: input.currency || 'INR',
+        receipt: `rcpt_${breakdown.amountInPaise}_${breakdown.items.length}`,
+      },
+    );
+
+    return {
+      id: razorpayOrder.id,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
+      // Authoritative breakdown for display; the client must not recompute it.
+      breakdown: this.publicBreakdown(breakdown),
+    };
+  }
+
+  /**
+   * B2 + I9: Verify the Razorpay signature, RECOMPUTE the order total server-side,
+   * confirm the amount actually charged matches, reserve stock atomically, and
+   * persist server-computed totals. Any client price/total is ignored.
+   */
+  public async verifyAndCreateOrder(userId: string, payload: any): Promise<any> {
+    const { razorpayOrderId, razorpayPaymentId, razorpaySignature, orderData } = payload;
+
+    if (!orderData || !Array.isArray(orderData.items) || orderData.items.length === 0) {
+      throw new AppError('orderData.items is required', 400);
+    }
+
+    const isCod =
+      !razorpayOrderId &&
+      !razorpayPaymentId &&
+      !razorpaySignature &&
+      orderData?.paymentMethod === 'cod';
+
+    if (!isCod) {
+      const expectedSignature = crypto
+        .createHmac('sha256', config.razorpayKeySecret)
+        .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+        .digest('hex');
+
+      if (expectedSignature !== razorpaySignature) {
+        throw new AppError('Payment verification failed — signature mismatch', 400);
+      }
+    }
+
+    // Recompute the authoritative total from items + coupon + pincode.
+    const breakdown = await this.pricingService.computeCheckout({
+      items: orderData.items,
+      couponCode: orderData.couponCode,
+      pincode: orderData.shippingAddress?.pincode,
+    });
+
+    // For online payments, confirm the amount Razorpay actually captured equals
+    // the freshly recomputed amount. Closes the price-tampering loop.
+    if (!isCod) {
+      const razorpayOrder = await this.callRazorpay('GET', `/v1/orders/${razorpayOrderId}`);
+      const chargedPaise = Number(razorpayOrder?.amount);
+      if (chargedPaise !== breakdown.amountInPaise) {
+        throw new AppError(
+          'Payment amount does not match the server-computed order total',
+          400,
+        );
+      }
+    }
+
+    // I9: reserve stock atomically before persisting the order.
+    await this.stockService.reserveForOrder(breakdown.items, userId, 'Customer order');
+
+    let order;
+    try {
+      order = await this.orderRepository.create({
+        user: userId,
+        items: breakdown.items,
+        shippingAddress: orderData.shippingAddress,
+        paymentMethod: orderData.paymentMethod,
+        status: isCod ? 'Pending' : 'Processing',
+        razorpayPaymentId: razorpayPaymentId || null,
+        razorpayOrderId: razorpayOrderId || null,
+        couponCode: breakdown.couponCode,
+        couponDiscount: breakdown.discount,
+        giftWrap: orderData.giftWrap || false,
+        giftMessage: orderData.giftMessage || null,
+        giftWrapFee: orderData.giftWrapFee || 0,
+        subtotal: breakdown.subtotal,
+        taxAmount: breakdown.taxAmount,
+        totalWithTax: Math.round((breakdown.subtotal + breakdown.taxAmount) * 100) / 100,
+        deliveryFee: breakdown.deliveryFee,
+        grandTotal: breakdown.grandTotal,
+        totalAmount: breakdown.grandTotal,
+        tax: breakdown.taxAmount,
+      });
+    } catch (error) {
+      // Compensate: order persistence failed after stock was reserved.
+      await this.stockService.releaseForOrder(breakdown.items, userId);
+      throw error;
+    }
+
+    // Increment coupon usage only after the order is persisted.
+    if (breakdown.couponCode) {
+      const coupon = await this.couponRepository.findByCode(breakdown.couponCode);
+      if (coupon) {
+        await this.couponRepository.incrementUsedCount(coupon._id);
+      }
+    }
+
+    // Send the order confirmation email for BOTH razorpay and COD (best-effort).
+    try {
+      const user = await this.userRepository.findById(userId);
+      await sendOrderConfirmationEmail(
+        buildOrderConfirmationInput(order, { userEmail: user?.email, userName: user?.name }),
+      );
+    } catch (error) {
+      Logger.error(`Order confirmation email dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+
+    return order;
+  }
+
+  private publicBreakdown(breakdown: CheckoutBreakdown) {
+    return {
+      items: breakdown.items.map((i) => ({
+        product: i.product,
+        name: i.name,
+        quantity: i.quantity,
+        unitPrice: i.price,
+        totalPrice: i.totalPrice,
+        isGiftVoucher: i.isGiftVoucher,
+      })),
+      subtotal: breakdown.subtotal,
+      taxAmount: breakdown.taxAmount,
+      discount: breakdown.discount,
+      couponCode: breakdown.couponCode,
+      deliveryFee: breakdown.deliveryFee,
+      grandTotal: breakdown.grandTotal,
+    };
+  }
+
+  /** Minimal Razorpay REST call using native https (no SDK dependency). */
+  private callRazorpay(method: 'GET' | 'POST', path: string, body?: Record<string, unknown>): Promise<any> {
     if (!config.razorpayKeyId || !config.razorpayKeySecret) {
       throw new AppError('Razorpay credentials not configured', 500);
     }
 
-    const receipt = `rcpt_${Date.now()}`;
-    const body = JSON.stringify({ amount, currency, receipt });
+    const payload = body ? JSON.stringify(body) : undefined;
     const auth = Buffer.from(`${config.razorpayKeyId}:${config.razorpayKeySecret}`).toString('base64');
 
     return new Promise((resolve, reject) => {
       const options: https.RequestOptions = {
         hostname: 'api.razorpay.com',
-        path: '/v1/orders',
-        method: 'POST',
+        path,
+        method,
         headers: {
           Authorization: `Basic ${auth}`,
           'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(body),
+          ...(payload ? { 'Content-Length': Buffer.byteLength(payload) } : {}),
         },
       };
 
@@ -58,78 +227,8 @@ export class PaymentService {
       });
 
       req.on('error', () => reject(new AppError('Failed to connect to Razorpay', 502)));
-      req.write(body);
+      if (payload) req.write(payload);
       req.end();
     });
-  }
-
-  public async verifyAndCreateOrder(userId: string, payload: any): Promise<any> {
-    const {
-      razorpayOrderId,
-      razorpayPaymentId,
-      razorpaySignature,
-      orderData,
-    } = payload;
-
-    const isCod =
-      !razorpayOrderId &&
-      !razorpayPaymentId &&
-      !razorpaySignature &&
-      orderData?.paymentMethod === 'cod';
-
-    if (!isCod) {
-      // Verify Razorpay signature
-      const expectedSignature = crypto
-        .createHmac('sha256', config.razorpayKeySecret)
-        .update(`${razorpayOrderId}|${razorpayPaymentId}`)
-        .digest('hex');
-
-      if (expectedSignature !== razorpaySignature) {
-        throw new AppError('Payment verification failed — signature mismatch', 400);
-      }
-    }
-
-    const orderToCreate = {
-      user: userId,
-      items: orderData.items,
-      shippingAddress: orderData.shippingAddress,
-      paymentMethod: orderData.paymentMethod,
-      totalAmount: orderData.totalAmount,
-      tax: orderData.totalAmount * 0.05,
-      status: isCod ? 'Pending' : 'Processing',
-      razorpayPaymentId: razorpayPaymentId || null,
-      couponCode: orderData.couponCode || null,
-      couponDiscount: orderData.couponDiscount || 0,
-      giftWrap: orderData.giftWrap || false,
-      giftMessage: orderData.giftMessage || null,
-      giftWrapFee: orderData.giftWrapFee || 0,
-    };
-
-    const order = await this.orderRepository.create(orderToCreate);
-
-    // Increment coupon usage if applied
-    if (orderData.couponCode) {
-      const coupon = await this.couponRepository.findByCode(orderData.couponCode);
-      if (coupon) {
-        await this.couponRepository.incrementUsedCount(coupon._id);
-      }
-    }
-
-    if (!isCod) {
-      try {
-        const user = await this.userRepository.findById(userId);
-        await sendPaymentCompletedEmails({
-          userEmail: user?.email,
-          userName: user?.name,
-          orderId: order._id.toString(),
-          amount: Number(order.totalAmount || orderData.totalAmount || 0),
-          paymentMethod: String(order.paymentMethod || orderData.paymentMethod || 'online').toUpperCase(),
-        });
-      } catch (error) {
-        Logger.error(`Payment email dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
-      }
-    }
-
-    return order;
   }
 }

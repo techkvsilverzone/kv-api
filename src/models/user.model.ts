@@ -1,5 +1,18 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
+export interface IAddress {
+  _id: mongoose.Types.ObjectId;
+  label?: string;
+  firstName: string;
+  lastName: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  phone: string;
+  isDefault: boolean;
+}
+
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   name: string;
@@ -10,9 +23,25 @@ export interface IUser extends Document {
   isActive: boolean;
   role?: 'admin' | 'staff' | 'customer';
   isStallRegistration?: boolean;
+  addresses: mongoose.Types.DocumentArray<IAddress>;
   createdAt: Date;
   updatedAt: Date;
 }
+
+const AddressSchema = new Schema<IAddress>(
+  {
+    label: { type: String, trim: true },
+    firstName: { type: String, required: true, trim: true },
+    lastName: { type: String, required: true, trim: true },
+    address: { type: String, required: true, trim: true },
+    city: { type: String, required: true, trim: true },
+    state: { type: String, required: true, trim: true },
+    pincode: { type: String, required: true, trim: true },
+    phone: { type: String, required: true, trim: true },
+    isDefault: { type: Boolean, default: false },
+  },
+  { _id: true },
+);
 
 const UserSchema = new Schema<IUser>(
   {
@@ -24,6 +53,7 @@ const UserSchema = new Schema<IUser>(
     isActive: { type: Boolean, default: true },
     role: { type: String, enum: ['admin', 'staff', 'customer'] },
     isStallRegistration: { type: Boolean, default: false },
+    addresses: { type: [AddressSchema], default: [] },
   },
   { timestamps: true },
 );

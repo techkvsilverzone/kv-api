@@ -17,16 +17,22 @@ const configuredOrigins = config.corsOrigins
 const allowAllOrigins = configuredOrigins.includes('*');
 
 const corsOptions: cors.CorsOptions = {
+  // `origin: true` reflects the request origin (never literal '*'), which lets
+  // the browser accept credentialed (cookie) requests even in allow-all mode.
   origin: allowAllOrigins ? true : configuredOrigins,
   methods: config.corsMethods.split(',').map((method) => method.trim()),
   allowedHeaders: config.corsAllowedHeaders.split(',').map((header) => header.trim()),
-  credentials: allowAllOrigins ? false : config.corsCredentials,
+  // Required for the httpOnly auth cookie to be sent/accepted cross-origin.
+  credentials: true,
   optionsSuccessStatus: 204,
 };
 
 // Middlewares
 app.use(cors(corsOptions));
-app.use(express.json());
+// Products store images as base64 strings, which easily exceed the default 100kb
+// body limit. Raise it so admin product create/update with embedded images succeeds.
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use(
   morgan(':method :url :status :res[content-length] - :response-time ms', {
     stream: { write: (message) => Logger.http(message.trim()) },

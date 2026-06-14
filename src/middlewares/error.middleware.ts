@@ -33,6 +33,9 @@ export const errorMiddleware = (
   } else if (unknownError instanceof SyntaxError && 'body' in unknownError) {
     statusCode = 400;
     message = 'Invalid JSON payload';
+  } else if (unknownError?.type === 'entity.too.large' || unknownError?.status === 413) {
+    statusCode = 413;
+    message = 'Request payload too large. Reduce the image size or upload a smaller file.';
   } else {
     Logger.error(`${err.name}: ${err.message}\n${err.stack}`);
   }

@@ -42,6 +42,65 @@ export class InventoryRepository {
     return Inventory.find().populate('productId', 'name isActive').lean() as Promise<IInventory[]>;
   }
 
+  /**
+   * Create the stock document only if it does not exist yet (lazy seed from the
+   * product's listed quantity). Never clobbers an existing currentStock.
+   */
+  public async ensureStock(
+    productId: string,
+    initialStock: number,
+    stockThreshold?: number,
+  ): Promise<IInventory> {
+    return Inventory.findOneAndUpdate(
+      { productId: new mongoose.Types.ObjectId(productId) },
+      {
+        $setOnInsert: {
+          currentStock: Math.max(0, Math.floor(initialStock) || 0),
+          ...(stockThreshold !== undefined ? { stockThreshold } : {}),
+        },
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    ).exec() as Promise<IInventory>;
+  }
+
+  /**
+   * Atomically decrement stock only when at least `qty` is available.
+   * Returns true on success, false if insufficient (no change). The conditional
+   * filter makes this race-safe under concurrent checkouts.
+   */
+  public async decrementStockAtomic(productId: string, qty: number): Promise<boolean> {
+    if (!mongoose.Types.ObjectId.isValid(productId)) return false;
+    const result = await Inventory.findOneAndUpdate(
+      { productId: new mongoose.Types.ObjectId(productId), currentStock: { $gte: qty } },
+      { $inc: { currentStock: -qty } },
+      { new: true },
+    ).exec();
+    return result !== null;
+  }
+
+  /** Restore stock (rollback of a partial reservation). */
+  public async incrementStock(productId: string, qty: number): Promise<void> {
+    if (!mongoose.Types.ObjectId.isValid(productId)) return;
+    await Inventory.findOneAndUpdate(
+      { productId: new mongoose.Types.ObjectId(productId) },
+      { $inc: { currentStock: qty } },
+    ).exec();
+  }
+
+  /** Map of productId -> currentStock for a set of products (for read enrichment). */
+  public async getStockMap(productIds: string[]): Promise<Record<string, number>> {
+    const ids = productIds
+      .filter((id) => mongoose.Types.ObjectId.isValid(id))
+      .map((id) => new mongoose.Types.ObjectId(id));
+    if (ids.length === 0) return {};
+    const docs = await Inventory.find({ productId: { $in: ids } }).lean();
+    const map: Record<string, number> = {};
+    for (const doc of docs as any[]) {
+      map[doc.productId.toString()] = doc.currentStock;
+    }
+    return map;
+  }
+
   // ── Inventory transactions (audit log) ───────────────────────────────
 
   public async createTransaction(data: CreateTransactionData): Promise<IInventoryTransaction> {
