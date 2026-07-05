@@ -36,6 +36,7 @@ export class OrderService {
     const breakdown = await this.pricingService.computeCheckout({
       items: data.items,
       couponCode: data.couponCode,
+      address: data.shippingAddress,
       pincode: data.shippingAddress?.pincode,
     });
 

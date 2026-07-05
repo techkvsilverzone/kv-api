@@ -12,6 +12,7 @@ import couponRoutes from './coupon.routes';
 import paymentRoutes from './payment.routes';
 import wishlistRoutes from './wishlist.routes';
 import silverRateRoutes from './silverrate.routes';
+import goldRateRoutes from './goldrate.routes';
 import returnRoutes from './return.routes';
 import metalRateRoutes from './metalrate.routes';
 import deliveryRoutes from './delivery.routes';
@@ -19,6 +20,7 @@ import shippingRoutes from './shipping.routes';
 import storeConfigRoutes from './storeConfig.routes';
 import giftVoucherRoutes from './giftVoucher.routes';
 import pricingConfigRoutes from './pricingConfig.routes';
+import deliveryConfigRoutes from './deliveryConfig.routes';
 
 const router = Router();
 
@@ -33,6 +35,7 @@ router.use('/coupons', couponRoutes);
 router.use('/payments', paymentRoutes);
 router.use('/wishlist', wishlistRoutes);
 router.use('/silver-rates', silverRateRoutes);
+router.use('/gold-rates', goldRateRoutes);
 router.use('/metal-rates', metalRateRoutes);
 router.use('/returns', returnRoutes);
 router.use('/delivery', deliveryRoutes);
@@ -40,6 +43,7 @@ router.use('/shipping', shippingRoutes);
 router.use('/store-config', storeConfigRoutes);
 router.use('/gift-vouchers', giftVoucherRoutes);
 router.use('/pricing-config', pricingConfigRoutes);
+router.use('/delivery-config', deliveryConfigRoutes);
 router.use('/admin', adminRoutes);
 router.use('/', miscRoutes);
 

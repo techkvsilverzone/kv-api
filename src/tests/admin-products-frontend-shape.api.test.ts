@@ -9,6 +9,7 @@ jest.mock('../middlewares/auth.middleware', () => ({
     next();
   },
   admin: (_req: unknown, _res: unknown, next: () => void) => next(),
+  adminOrStaff: (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
 describe('POST /admin/products – frontend-shaped payload', () => {

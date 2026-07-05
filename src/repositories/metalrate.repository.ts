@@ -39,6 +39,11 @@ export class MetalRateRepository {
     return MetalRate.find(filter).sort({ date: -1, metal: -1, karat: 1 }).exec();
   }
 
+  /** Most recent rate record for a metal (by date desc), or null if none exists. */
+  public async findLatest(metal: MetalType): Promise<IMetalRate | null> {
+    return MetalRate.findOne({ metal }).sort({ date: -1 }).exec();
+  }
+
   public async upsertRate(params: MetalRateUpsertParams): Promise<IMetalRate> {
     const keyDate = new Date(params.date);
     keyDate.setHours(0, 0, 0, 0);

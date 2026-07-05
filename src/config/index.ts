@@ -30,4 +30,13 @@ export const config = {
   brevoSmtpPassword: process.env.BREVO_SMTP_PASSWORD || '',
   brevoSenderEmail: process.env.BREVO_SENDER_EMAIL || '',
   brevoSenderName: process.env.BREVO_SENDER_NAME || 'KV Silver Zone',
+  // Daily price-update guard (#25). The metal rate becomes mandatory at this
+  // hour (IST). Before it, nothing is blocked (morning grace period).
+  rateUpdateCutoffHour: Number(process.env.RATE_UPDATE_CUTOFF_HOUR || 10),
+  // WhatsApp rate-reminder (Meta WhatsApp Cloud API). Best-effort, like email.
+  whatsappProvider: process.env.WHATSAPP_PROVIDER || 'meta',
+  whatsappToken: process.env.WHATSAPP_TOKEN || '',
+  whatsappPhoneId: process.env.WHATSAPP_PHONE_ID || '',
+  whatsappApiVersion: process.env.WHATSAPP_API_VERSION || 'v21.0',
+  rateAlertRecipient: process.env.RATE_ALERT_RECIPIENT || '+918825649680',
 };

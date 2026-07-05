@@ -270,3 +270,190 @@
 | 17:50 | Created src/tests/address-book.api.test.ts | — | ~858 |
 | 17:51 | Order confirmation email + resend endpoint + account address book | emailNotifications, payment.service, order.service/controller/routes, user.model/repository/service/controller/routes, swagger | rich confirmation on verify (razorpay+cod), POST /orders/:id/resend-confirmation (60s throttle), CRUD /users/me/addresses; fixed getOrderById owner check for populated userId; 41 tests green, openapi 66 paths | ~40k |
 | 17:52 | Session end: 165 writes across 52 files (CLAUDE.md, app.ts, error.middleware.ts, product.model.ts, product.repository.ts) | 81 reads | ~100781 tok |
+
+## Session: 2026-06-15 10:41
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:12 | Edited src/models/product.model.ts | expanded (+7 lines) | ~61 |
+| 11:12 | Edited src/models/product.model.ts | 6→7 lines | ~40 |
+| 11:13 | Edited src/models/product.model.ts | expanded (+10 lines) | ~102 |
+| 11:13 | Edited src/models/product.model.ts | 2→3 lines | ~35 |
+| 11:13 | Edited src/repositories/product.repository.ts | added 1 condition(s) | ~55 |
+| 11:13 | Edited src/repositories/product.repository.ts | modified Number() | ~58 |
+| 11:13 | Edited src/repositories/product.repository.ts | added 1 condition(s) | ~64 |
+| 11:13 | Edited src/services/product.service.ts | added 1 condition(s) | ~80 |
+| 11:14 | Edited src/services/product.service.ts | added nullish coalescing | ~501 |
+| 11:14 | Edited src/config/swagger.ts | 2→3 lines | ~74 |
+| 11:14 | Edited src/config/swagger.ts | expanded (+15 lines) | ~262 |
+
+## Session: 2026-06-15
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| --:-- | Added product `variants` field (label/weight/height/breadth) | product.model.ts, product.repository.ts, product.service.ts, swagger.ts | build clean, 14 product tests pass | ~6000 |
+| 11:16 | Session end: 11 writes across 4 files (product.model.ts, product.repository.ts, product.service.ts, swagger.ts) | 7 reads | ~27713 tok |
+
+## Session: 2026-06-15 12:06
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-15 12:07
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:07 | Edited src/models/product.model.ts | expanded (+7 lines) | ~72 |
+| 12:07 | Edited src/models/product.model.ts | 6→9 lines | ~63 |
+| 12:07 | Edited src/models/product.model.ts | expanded (+8 lines) | ~81 |
+| 12:08 | Edited src/models/product.model.ts | 3→6 lines | ~86 |
+| 12:08 | Edited src/repositories/product.repository.ts | added 3 condition(s) | ~99 |
+| 12:08 | Edited src/repositories/product.repository.ts | 2→5 lines | ~83 |
+| 12:08 | Edited src/repositories/product.repository.ts | added 3 condition(s) | ~115 |
+| 12:08 | Edited src/services/product.service.ts | added 1 import(s) | ~56 |
+| 12:08 | Edited src/services/product.service.ts | added 1 condition(s) | ~168 |
+| 12:08 | Edited src/services/product.service.ts | added 2 condition(s) | ~297 |
+| 12:09 | Edited src/services/product.service.ts | added 6 condition(s) | ~376 |
+| 12:09 | Edited src/config/swagger.ts | 2→5 lines | ~139 |
+| 12:09 | Edited src/config/swagger.ts | expanded (+15 lines) | ~303 |
+| --:-- | Added product pricing config (isFixedPrice, makingCharge, wastage) | product.model.ts, product.repository.ts, product.service.ts, swagger.ts | build clean, 14 product tests pass | ~6000 |
+| 12:11 | Session end: 13 writes across 4 files (product.model.ts, product.repository.ts, product.service.ts, swagger.ts) | 1 reads | ~2689 tok |
+| 12:32 | Created src/models/deliveryConfig.model.ts | — | ~221 |
+| 12:33 | Created src/repositories/deliveryConfig.repository.ts | — | ~371 |
+| 12:33 | Created src/routes/deliveryConfig.routes.ts | — | ~304 |
+| 12:33 | Edited src/routes/index.ts | added 1 import(s) | ~34 |
+| 12:33 | Edited src/routes/index.ts | 2→3 lines | ~40 |
+| 12:33 | Edited src/routes/admin.routes.ts | added 1 import(s) | ~49 |
+| 12:33 | Edited src/routes/admin.routes.ts | 1→2 lines | ~37 |
+| 12:33 | Edited src/routes/admin.routes.ts | added nullish coalescing | ~909 |
+| 12:34 | Edited src/config/swagger.ts | expanded (+9 lines) | ~188 |
+| --:-- | Added zone-based delivery-config (chennai/otherDistrict/otherState) — model, repo, public + admin routes | deliveryConfig.model.ts, deliveryConfig.repository.ts, deliveryConfig.routes.ts, admin.routes.ts, routes/index.ts, swagger.ts | build clean, 41 tests pass | ~7000 |
+| 12:36 | Edited C:/Users/Gayathri/.claude/projects/d--KraftLabs-KV-Silver-Zone-Source-kv-api/memory/MEMORY.md | modified config() | ~162 |
+| 12:36 | Session end: 23 writes across 10 files (product.model.ts, product.repository.ts, product.service.ts, swagger.ts, deliveryConfig.model.ts) | 8 reads | ~19111 tok |
+
+## Session: 2026-06-16 12:26
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-16 12:26
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:36 | Created docs/00-INDEX.md | — | ~408 |
+| 12:36 | Session end: 1 writes across 1 files (00-INDEX.md) | 0 reads | ~437 tok |
+
+## Session: 2026-06-16 13:02
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:03 | Edited src/services/product.service.ts | added 2 condition(s) | ~145 |
+| 13:04 | Edited src/services/product.service.ts | added nullish coalescing | ~280 |
+| 13:04 | Edited src/services/product.service.ts | added 4 condition(s) | ~370 |
+| 13:04 | Edited src/repositories/product.repository.ts | added 4 condition(s) | ~349 |
+| 13:04 | Edited src/repositories/product.repository.ts | added 1 condition(s) | ~143 |
+| 13:04 | Edited src/repositories/product.repository.ts | modified toImageDocs() | ~58 |
+| 13:04 | Edited src/repositories/product.repository.ts | added 1 condition(s) | ~76 |
+| 13:04 | Edited src/config/swagger.ts | expanded (+6 lines) | ~164 |
+| 13:06 | Created src/tests/admin-products-images.api.test.ts | — | ~880 |
+| 13:08 | Implement product multiple-images write side (images[] full-replace) | product.service.ts, product.repository.ts, swagger.ts, admin-products-images.api.test.ts | 18 product tests pass, tsc clean | ~9k |
+| 13:07 | Session end: 9 writes across 4 files (product.service.ts, product.repository.ts, swagger.ts, admin-products-images.api.test.ts) | 6 reads | ~30227 tok |
+
+## Session: 2026-06-16 14:02
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:03 | Edited src/repositories/product.repository.ts | added optional chaining | ~446 |
+| 14:03 | Edited src/routes/product.routes.ts | expanded (+13 lines) | ~188 |
+| 14:04 | Created src/tests/product-pagination.repo.test.ts | — | ~631 |
+
+## Session: 2026-06-16 — products pagination
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| —    | Add page/limit pagination to GET /products | product.repository.ts (findAll + parsePagination), product.routes.ts (swagger), product-pagination.repo.test.ts | build green, 5 tests pass | ~3k |
+| 14:05 | Session end: 3 writes across 3 files (product.repository.ts, product.routes.ts, product-pagination.repo.test.ts) | 5 reads | ~12536 tok |
+| 14:08 | Created C:/Users/Gayathri/.claude/projects/d--KraftLabs-KV-Silver-Zone-Source-kv-api/memory/repomix-output.md | — | ~182 |
+| 14:08 | Edited C:/Users/Gayathri/.claude/projects/d--KraftLabs-KV-Silver-Zone-Source-kv-api/memory/MEMORY.md | 3→5 lines | ~44 |
+| 14:09 | Session end: 5 writes across 5 files (product.repository.ts, product.routes.ts, product-pagination.repo.test.ts, repomix-output.md, MEMORY.md) | 6 reads | ~13825 tok |
+
+## Session: 2026-06-16 14:41
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:45 | Edited src/services/pricing.service.ts | added nullish coalescing | ~1094 |
+| 14:45 | Edited src/services/pricing.service.ts | PincodeRateRepository() → DeliveryConfigRepository() | ~204 |
+| 14:46 | Edited src/services/pricing.service.ts | added 2 condition(s) | ~892 |
+| 14:46 | Edited src/services/pricing.service.ts | added nullish coalescing | ~104 |
+| 14:46 | Edited src/services/pricing.service.ts | modified computeCheckout() | ~1406 |
+| 14:47 | Edited src/services/payment.service.ts | 12→14 lines | ~177 |
+| 14:47 | Edited src/services/payment.service.ts | modified if() | ~70 |
+| 14:47 | Edited src/services/payment.service.ts | 6→7 lines | ~91 |
+| 14:47 | Edited src/services/payment.service.ts | modified publicBreakdown() | ~232 |
+| 14:47 | Edited src/controllers/payment.controller.ts | expanded (+6 lines) | ~141 |
+| 14:47 | Edited src/services/order.service.ts | 5→6 lines | ~62 |
+| 14:48 | Edited src/services/pricing.service.ts | inline fix | ~19 |
+| 14:48 | Edited src/tests/pricing.service.test.ts | expanded (+83 lines) | ~985 |
+| 14:48 | Edited src/tests/pricing.service.test.ts | inline fix | ~30 |
+| 14:50 | Wired dynamic silver-rate pricing into money path: isFixedPrice + makingCharge/wastage config consumed by computeUnitPrice; discount-before-GST; zone delivery from delivery-config | pricing.service.ts, payment.service.ts, payment.controller.ts, order.service.ts | build green, 59 tests pass | ~3500 |
+| 14:51 | Edited C:/Users/Gayathri/.claude/projects/d--KraftLabs-KV-Silver-Zone-Source-kv-api/memory/MEMORY.md | modified config() | ~354 |
+| 14:51 | Session end: 15 writes across 6 files (pricing.service.ts, payment.service.ts, payment.controller.ts, order.service.ts, pricing.service.test.ts) | 10 reads | ~18482 tok |
+
+## Session: 2026-06-16 17:05
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 20:01 | Edited src/config/index.ts | expanded (+9 lines) | ~245 |
+| 20:01 | Created src/utils/time.ts | — | ~482 |
+| 20:01 | Created src/utils/scheduler.ts | — | ~407 |
+| 20:01 | Created src/utils/whatsapp.ts | — | ~1057 |
+| 20:02 | Created src/services/goldrate.service.ts | — | ~616 |
+| 20:02 | Created src/controllers/goldrate.controller.ts | — | ~447 |
+| 20:02 | Created src/routes/goldrate.routes.ts | — | ~667 |
+| 20:02 | Created src/models/rateStatus.model.ts | — | ~278 |
+| 20:02 | Created src/repositories/rateStatus.repository.ts | — | ~346 |
+| 20:02 | Edited src/repositories/metalrate.repository.ts | modified findAll() | ~134 |
+| 20:03 | Created src/services/rateGuard.service.ts | — | ~628 |
+| 20:03 | Edited src/routes/index.ts | added 1 import(s) | ~41 |
+| 20:03 | Edited src/routes/index.ts | 2→3 lines | ~39 |
+| 20:03 | Edited src/routes/admin.routes.ts | added 2 import(s) | ~83 |
+| 20:03 | Edited src/routes/admin.routes.ts | 2→4 lines | ~61 |
+| 20:03 | Edited src/routes/admin.routes.ts | added error handling | ~1179 |
+| 20:04 | Edited src/server.ts | expanded (+16 lines) | ~326 |
+| 20:04 | Created src/tests/gold-rates.api.test.ts | — | ~862 |
+| 20:04 | Created src/tests/rate-guard.service.test.ts | — | ~677 |
+| 20:05 | Created src/tests/time.test.ts | — | ~451 |
+| --:-- | Session: #25 daily price-update guard + gold rates backend | goldrate.{service,controller,routes}, rateStatus.{model,repository}, rateGuard.service, utils/{time,scheduler,whatsapp}, server.ts, admin.routes.ts, routes/index.ts, config | build clean, 71 tests pass | ~12k |
+| 20:07 | Created C:/Users/Gayathri/.claude/projects/d--KraftLabs-KV-Silver-Zone-Source-kv-api/memory/daily-rate-guard-25.md | — | ~470 |
+| 20:07 | Edited C:/Users/Gayathri/.claude/projects/d--KraftLabs-KV-Silver-Zone-Source-kv-api/memory/MEMORY.md | 1→2 lines | ~68 |
+| 20:08 | Session end: 22 writes across 18 files (index.ts, time.ts, scheduler.ts, whatsapp.ts, goldrate.service.ts) | 18 reads | ~31573 tok |
+
+## Session: 2026-07-01 09:34
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-01 09:44
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-01 11:43
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-01 11:43
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-01 11:46
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-04 12:56
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

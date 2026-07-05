@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-14T12:20:36.982Z
-> Files: 137 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-16T14:37:43.869Z
+> Files: 157 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -32,7 +32,9 @@
 
 ## C:/Users/Gayathri/.claude/projects/d--KraftLabs-KV-Silver-Zone-Source-kv-api/memory/
 
-- `MEMORY.md` — KV Silver Zone API — Project Memory (~912 tok)
+- `daily-rate-guard-25.md` (~436 tok)
+- `MEMORY.md` — KV Silver Zone API — Project Memory (~1308 tok)
+- `repomix-output.md` (~189 tok)
 
 ## database/sqlserver/
 
@@ -49,6 +51,10 @@
 - `006_image_mapping_generated.csv` (~1012 tok)
 - `006_unassigned_images.txt` (~63 tok)
 
+## docs/
+
+- `00-INDEX.md` — Documentation Index (~382 tok)
+
 ## logs/
 
 - `all.log` (~49292 tok)
@@ -58,12 +64,12 @@
 
 - `app.ts` — API routes: GET (3 endpoints) (~692 tok)
 - `seed.ts` — Declares seed (~145 tok)
-- `server.ts` — Declares PORT (~161 tok)
+- `server.ts` — Declares PORT (~371 tok)
 
 ## src/config/
 
-- `index.ts` — Exports config (~486 tok)
-- `swagger.ts` — Declares options (~5728 tok)
+- `index.ts` — Exports config (~664 tok)
+- `swagger.ts` — Declares options (~6535 tok)
 
 ## src/controllers/
 
@@ -71,10 +77,11 @@
 - `coupon.controller.ts` — Exports CouponController (~489 tok)
 - `delivery.controller.ts` — Non-serviceable pincode prefixes (remote areas: Andaman & Nicobar, Lakshadweep) (~309 tok)
 - `giftVoucher.controller.ts` — Exports GiftVoucherController (~562 tok)
+- `goldrate.controller.ts` — Exports GoldRateController (~447 tok)
 - `health.controller.ts` — Exports HealthController (~73 tok)
 - `metalrate.controller.ts` — Exports MetalRateController (~538 tok)
 - `order.controller.ts` — Exports OrderController (~726 tok)
-- `payment.controller.ts` — Exports PaymentController (~467 tok)
+- `payment.controller.ts` — Exports PaymentController (~492 tok)
 - `product.controller.ts` — Exports ProductController (~663 tok)
 - `return.controller.ts` — Exports ReturnController (~475 tok)
 - `review.controller.ts` — Exports ReviewController (~400 tok)
@@ -93,13 +100,15 @@
 
 - `cart.model.ts` — Exports ICartItem, ICart, Cart (~336 tok)
 - `coupon.model.ts` — Exports ICoupon, Coupon (~297 tok)
+- `deliveryConfig.model.ts` — Exports IDeliveryConfig, DeliveryConfig (single-doc zone charges) (~221 tok)
 - `filterConfig.model.ts` — Exports IPriceRange, IFilterConfig, FilterConfig (~270 tok)
 - `giftVoucher.model.ts` — Exports IGiftVoucher, GiftVoucher (~250 tok)
 - `metalrate.model.ts` — Exports MetalType, IMetalRate, MetalRate (~287 tok)
 - `order.model.ts` — Exports IOrderItem, IShippingAddress, IOrder, Order (~1078 tok)
 - `pincodeRate.model.ts` — Exports IPincodeRate, PincodeRate (~175 tok)
 - `pricingConfig.model.ts` — Exports IPricingConfig, PricingConfig (~167 tok)
-- `product.model.ts` — Exports IProductImage, IProduct, Product (~605 tok)
+- `product.model.ts` — Exports IProductImage, IProductVariant, ProductChargeType, IProductCharge + 2 more (~938 tok)
+- `rateStatus.model.ts` — Authoritative daily price-update block flag (#25 B4). A single global document (~278 tok)
 - `return.model.ts` — Exports IReturnItem, IReturn, Return (~437 tok)
 - `review.model.ts` — Exports IReview, Review (~239 tok)
 - `savings.model.ts` — Exports ISavingsPayment, ISavings, Savings (~475 tok)
@@ -111,14 +120,16 @@
 
 - `cart.repository.ts` — Exports CartRepository (~506 tok)
 - `coupon.repository.ts` — Exports CouponRepository (~534 tok)
+- `deliveryConfig.repository.ts` — Current zone delivery charges, falling back to defaults when unset. (~371 tok)
 - `filterConfig.repository.ts` — Exports FilterConfigRepository (~221 tok)
 - `giftVoucher.repository.ts` — Exports GiftVoucherRepository (~565 tok)
 - `inventory.repository.ts` — Create the stock document only if it does not exist yet (lazy seed from the (~1493 tok)
-- `metalrate.repository.ts` — Exports MetalRateUpsertParams, MetalRateRepository (~556 tok)
+- `metalrate.repository.ts` — Most recent rate record for a metal (by date desc), or null if none exists. (~624 tok)
 - `order.repository.ts` — Exports OrderRepository (~1110 tok)
 - `pincodeRate.repository.ts` — Exports PincodeRateRepository (~242 tok)
 - `pricingConfig.repository.ts` — Current GST percent, falling back to the 3% default when unset. (~241 tok)
-- `product.repository.ts` — Exports ProductRepository (~1894 tok)
+- `product.repository.ts` — Coerce an `images` payload into the stored sub-document shape (~2990 tok)
+- `rateStatus.repository.ts` — Current block flag, or a safe "never checked / unblocked" default when unset. (~346 tok)
 - `return.repository.ts` — Exports ReturnRepository (~582 tok)
 - `review.repository.ts` — Exports IReview, ReviewRepository (~822 tok)
 - `savings.repository.ts` — Exports SavingsRepository (~609 tok)
@@ -128,20 +139,22 @@
 
 ## src/routes/
 
-- `admin.routes.ts` — API routes: GET, POST, PUT, DELETE (12 endpoints) (~11610 tok)
+- `admin.routes.ts` — API routes: GET, POST, PUT, DELETE (12 endpoints) (~13777 tok)
 - `auth.routes.ts` — API routes: POST (4 endpoints) (~827 tok)
 - `cart.routes.ts` — API routes: GET, POST, DELETE (3 endpoints) (~660 tok)
 - `coupon.routes.ts` — API routes: POST (1 endpoints) (~300 tok)
 - `delivery.routes.ts` — API routes: GET (1 endpoints) (~480 tok)
+- `deliveryConfig.routes.ts` — API routes: GET (1 endpoints) (~304 tok)
 - `giftVoucher.routes.ts` — API routes: GET (1 endpoints) (~252 tok)
+- `goldrate.routes.ts` — API routes: GET (2 endpoints) (~667 tok)
 - `health.routes.ts` — API routes: GET (1 endpoints) (~226 tok)
-- `index.ts` — Declares router (~530 tok)
+- `index.ts` — Declares router (~590 tok)
 - `metalrate.routes.ts` — API routes: GET (2 endpoints) (~382 tok)
 - `misc.routes.ts` — API routes: POST (1 endpoints) (~559 tok)
 - `order.routes.ts` — API routes: POST, GET (4 endpoints) (~1052 tok)
 - `payment.routes.ts` — API routes: POST (2 endpoints) (~588 tok)
 - `pricingConfig.routes.ts` — API routes: GET (1 endpoints) (~211 tok)
-- `product.routes.ts` — API routes: GET, POST, DELETE (7 endpoints) (~1817 tok)
+- `product.routes.ts` — API routes: GET, POST, DELETE (7 endpoints) (~1963 tok)
 - `return.routes.ts` — API routes: POST, GET (2 endpoints) (~1342 tok)
 - `savings.routes.ts` — API routes: POST, GET (3 endpoints) (~1982 tok)
 - `shipping.routes.ts` — API routes: GET, POST, DELETE (3 endpoints) (~1004 tok)
@@ -155,11 +168,13 @@
 - `cart.service.ts` — Exports CartService (~388 tok)
 - `coupon.service.ts` — Exports CouponService (~640 tok)
 - `giftVoucher.service.ts` — Public storefront list — active denominations only. (~571 tok)
+- `goldrate.service.ts` — 22K gold hallmark. Mirrors how the silver service pins purity to '999'; (~616 tok)
 - `metalrate.service.ts` — Exports MetalRateResponse, MetalRateUpsertInput, MetalRateService (~1000 tok)
-- `order.service.ts` — Re-send the order confirmation email to the order owner. Authorised for the (~1664 tok)
-- `payment.service.ts` — B2: Create a Razorpay order for an amount the SERVER computes from the cart (~2420 tok)
-- `pricing.service.ts` — Resolve a product's `purity` field (e.g. "925", "999", "92.5", "Silver 925") (~3167 tok)
-- `product.service.ts` — Attach live stock from the Inventory collection (source of truth). Falls (~3319 tok)
+- `order.service.ts` — Re-send the order confirmation email to the order owner. Authorised for the (~1675 tok)
+- `payment.service.ts` — B2: Create a Razorpay order for an amount the SERVER computes from the cart (~2561 tok)
+- `pricing.service.ts` — Selected size-variant weight (free-text, e.g. "12.5" or "12.5 g"). Overrides product weight. (~4509 tok)
+- `product.service.ts` — Attach live stock from the Inventory collection (source of truth). Falls (~5281 tok)
+- `rateGuard.service.ts` — Daily price-update guard (#25 B2). Determines which metals are missing today's (~628 tok)
 - `return.service.ts` — Exports ReturnService (~293 tok)
 - `review.service.ts` — Exports ReviewService (~485 tok)
 - `savings.service.ts` — Exports SavingsService (~506 tok)
@@ -173,10 +188,15 @@
 - `address-book.api.test.ts` — Authenticated as a fixed user; admin guard unused here. (~858 tok)
 - `admin-orders.api.test.ts` — API routes: POST, GET (3 endpoints) (~770 tok)
 - `admin-products-frontend-shape.api.test.ts` — Stub the repository so the full validateCreatePayload logic runs but no DB call is made (~1107 tok)
+- `admin-products-images.api.test.ts` — Exercises the real create/update normalization (service + repository payload), (~880 tok)
 - `admin-products.api.test.ts` — API routes: POST, PUT, DELETE (7 endpoints) (~1140 tok)
 - `coupon-apply.api.test.ts` — API routes: POST (5 endpoints) (~793 tok)
-- `pricing.service.test.ts` — Declares makeProduct (~776 tok)
+- `gold-rates.api.test.ts` — API routes: GET, POST (5 endpoints) (~862 tok)
+- `pricing.service.test.ts` — Declares makeProduct (~1663 tok)
+- `product-pagination.repo.test.ts` — Verifies GET /products pagination (page/limit) is translated into the correct (~631 tok)
+- `rate-guard.service.test.ts` — Declares status (~677 tok)
 - `review-delete.api.test.ts` — API routes: DELETE (4 endpoints) (~724 tok)
+- `time.test.ts` — Declares ref (~451 tok)
 
 ## src/utils/
 
@@ -189,7 +209,10 @@
 - `jwt.ts` — Exports generateToken (~65 tok)
 - `logger.ts` — Declares levels (~308 tok)
 - `migrateSqlToMongo.ts` — Migration script: SQL Server → MongoDB Atlas (~4450 tok)
+- `scheduler.ts` — Run `task` every day at `hour:minute` IST (#25 cron, no external dependency). (~407 tok)
 - `seeder.ts` — Exports seedAdmin (~304 tok)
 - `seedImages.ts` — Exports seedImages (~2571 tok)
 - `seedInventory.ts` — One-time reconciliation: create an Inventory.currentStock document for every (~445 tok)
 - `sql.ts` — Exports getSqlPool, closeSqlPool (~588 tok)
+- `time.ts` — Returns the IST calendar day for a date as a 'YYYY-MM-DD' string. (~482 tok)
+- `whatsapp.ts` — Send a plain-text WhatsApp message via the Meta WhatsApp Cloud API. (~1057 tok)

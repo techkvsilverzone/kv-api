@@ -102,6 +102,10 @@ const options: swaggerJsdoc.Options = {
             stockAvailable: { type: 'integer', description: 'Live stock from Inventory', example: 7 },
             inStock: { type: 'boolean', example: true },
             images: { type: 'array', items: { $ref: '#/components/schemas/ProductImage' } },
+            variants: { type: 'array', items: { $ref: '#/components/schemas/ProductVariant' } },
+            isFixedPrice: { type: 'boolean', description: 'Flat price; no dynamic metal-rate calc', example: false },
+            makingCharge: { allOf: [{ $ref: '#/components/schemas/ProductCharge' }], nullable: true },
+            wastage: { allOf: [{ $ref: '#/components/schemas/ProductCharge' }], nullable: true },
             pricing: { $ref: '#/components/schemas/ProductPricing' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
@@ -121,11 +125,47 @@ const options: swaggerJsdoc.Options = {
             originalPrice: { type: 'number' },
             makingChargePercent: { type: 'number', example: 10 },
             makingChargePerGram: { type: 'number' },
-            image: { type: 'string', description: 'Base64 data URL or image URL' },
+            image: { type: 'string', description: 'Primary image (= images[0]); kept for backward compatibility' },
+            images: {
+              type: 'array',
+              description:
+                'Ordered gallery; images[0] is the primary image. Each entry is a base64 data URL (new upload) or an existing image reference echoed from a GET. Full replacement on update; empty array clears all images.',
+              items: { type: 'string' },
+            },
             productGroupCode: { type: 'string', description: 'Auto-generated from name if omitted' },
             isFeatured: { type: 'boolean' },
             isSale: { type: 'boolean' },
             isActive: { type: 'boolean' },
+            variants: {
+              type: 'array',
+              description: 'Full replacement array on update; empty array clears all variants',
+              items: { $ref: '#/components/schemas/ProductVariant' },
+            },
+            isFixedPrice: { type: 'boolean', description: 'When true, makingCharge/wastage are ignored/cleared' },
+            makingCharge: { allOf: [{ $ref: '#/components/schemas/ProductCharge' }], nullable: true },
+            wastage: { allOf: [{ $ref: '#/components/schemas/ProductCharge' }], nullable: true },
+          },
+        },
+        ProductCharge: {
+          type: 'object',
+          required: ['type', 'value'],
+          properties: {
+            type: {
+              type: 'string',
+              enum: ['percentage', 'amount'],
+              description: 'percentage = percent (0-100); amount = flat rupee amount',
+            },
+            value: { type: 'number', minimum: 0, description: 'Non-negative; <= 100 when type is percentage', example: 12 },
+          },
+        },
+        ProductVariant: {
+          type: 'object',
+          required: ['label', 'weight'],
+          properties: {
+            label: { type: 'string', description: 'Free-text size name', example: 'M' },
+            weight: { type: 'string', description: 'Per-variant weight (free-text)', example: '30g' },
+            height: { type: 'string', description: 'Display-only', example: '3cm' },
+            breadth: { type: 'string', description: 'Display-only', example: '2cm' },
           },
         },
         ShippingAddress: {
@@ -442,6 +482,15 @@ const options: swaggerJsdoc.Options = {
           type: 'object',
           properties: {
             gstPercent: { type: 'number', example: 3 },
+          },
+        },
+        DeliveryConfig: {
+          type: 'object',
+          required: ['chennai', 'otherDistrict', 'otherState'],
+          properties: {
+            chennai: { type: 'number', minimum: 0, description: 'Destination city is Chennai', example: 150 },
+            otherDistrict: { type: 'number', minimum: 0, description: 'Same state (Tamil Nadu), not Chennai', example: 200 },
+            otherState: { type: 'number', minimum: 0, description: 'Any other state', example: 250 },
           },
         },
         StoreConfig: {

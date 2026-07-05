@@ -12,12 +12,18 @@ export class PaymentController {
 
   public createOrder = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { items, couponCode, pincode, currency } = req.body;
+      const { items, couponCode, pincode, shippingAddress, currency } = req.body;
       if (!Array.isArray(items) || items.length === 0) {
         throw new AppError('items (array of { product, quantity }) is required', 400);
       }
       // Amount is computed server-side from the cart; any client amount is ignored.
-      const order = await this.paymentService.createRazorpayOrder({ items, couponCode, pincode, currency });
+      const order = await this.paymentService.createRazorpayOrder({
+        items,
+        couponCode,
+        pincode,
+        shippingAddress,
+        currency,
+      });
       res.status(201).json(order);
     } catch (error) {
       next(error);

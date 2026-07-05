@@ -3,6 +3,33 @@ import { Product, IProduct } from '../models/product.model';
 import { AppError } from '../utils/appError';
 
 export class ProductRepository {
+  /**
+   * Coerce an `images` payload into the stored sub-document shape
+   * ({ variantName, imageBase64, sortOrder }). Accepts either bare strings
+   * (base64/URL) or already-normalized objects, dropping blank/invalid entries.
+   * `sortOrder` falls back to the array position when not supplied.
+   */
+  private toImageDocs(images: any[]): Array<{ variantName: string; imageBase64: string; sortOrder: number }> {
+    const docs: Array<{ variantName: string; imageBase64: string; sortOrder: number }> = [];
+    images.forEach((img, i) => {
+      if (typeof img === 'string') {
+        const value = img.trim();
+        if (value) docs.push({ variantName: 'Default view', imageBase64: value, sortOrder: i });
+        return;
+      }
+      if (img && typeof img === 'object' && typeof img.imageBase64 === 'string') {
+        const value = img.imageBase64.trim();
+        if (!value) return;
+        docs.push({
+          variantName: String(img.variantName || 'Default view'),
+          imageBase64: value,
+          sortOrder: img.sortOrder !== undefined ? Number(img.sortOrder) : i,
+        });
+      }
+    });
+    return docs;
+  }
+
   public async create(data: any): Promise<IProduct> {
     const productGroupCode = String(data.productGroupCode || data.productGroup || '').trim().toUpperCase();
     const name = String(data.itemName || data.name || '').trim();
@@ -22,7 +49,14 @@ export class ProductRepository {
       existing.weight = data.weight !== undefined ? Number(data.weight) : existing.weight;
       existing.price = data.price !== undefined ? Number(data.price) : existing.price;
       existing.quantity = data.quantity !== undefined ? Number(data.quantity) : existing.quantity;
-      if (image) {
+      if (data.variants !== undefined) existing.variants = data.variants;
+      if (data.isFixedPrice !== undefined) existing.isFixedPrice = Boolean(data.isFixedPrice);
+      if (data.makingCharge !== undefined) existing.makingCharge = data.makingCharge;
+      if (data.wastage !== undefined) existing.wastage = data.wastage;
+      if (data.images !== undefined && Array.isArray(data.images)) {
+        // Full replace of the gallery (images[0] = primary).
+        existing.images = this.toImageDocs(data.images) as any;
+      } else if (image) {
         existing.images.push({
           variantName,
           imageBase64: image,
@@ -48,9 +82,15 @@ export class ProductRepository {
       makingCharges: data.makingCharges !== undefined ? Number(data.makingCharges) : undefined,
       makingChargePercent: data.makingChargePercent !== undefined ? Number(data.makingChargePercent) : undefined,
       makingChargePerGram: data.makingChargePerGram !== undefined ? Number(data.makingChargePerGram) : undefined,
-      images: image
-        ? [{ variantName, imageBase64: image, sortOrder: Number(data.sortOrder || 1) }]
-        : [],
+      variants: Array.isArray(data.variants) ? data.variants : [],
+      isFixedPrice: Boolean(data.isFixedPrice || false),
+      makingCharge: data.makingCharge !== undefined ? data.makingCharge : null,
+      wastage: data.wastage !== undefined ? data.wastage : null,
+      images: Array.isArray(data.images)
+        ? this.toImageDocs(data.images)
+        : image
+          ? [{ variantName, imageBase64: image, sortOrder: Number(data.sortOrder || 1) }]
+          : [],
     });
 
     return product.save();
@@ -97,7 +137,35 @@ export class ProductRepository {
     else if (filters.sortBy === 'price_desc') sortOption = { price: -1 };
     else if (filters.sortBy === 'newest') sortOption = { createdAt: -1 };
 
-    return Product.find(query).sort(sortOption).exec();
+    const cursor = Product.find(query).sort(sortOption);
+
+    // Optional pagination (infinite scroll). Filters/sort apply BEFORE paging, so
+    // each page is a slice of the already filtered+sorted result set. When `limit`
+    // is absent or invalid we return the full set (backward-compatible).
+    const { skip, limit } = this.parsePagination(filters);
+    if (limit !== undefined) cursor.skip(skip).limit(limit);
+
+    return cursor.exec();
+  }
+
+  /**
+   * Parse `page`/`limit` query params into a Mongo skip/limit. `page` is 1-indexed
+   * (defaults to 1); `limit` is the page size, capped at MAX_PAGE_SIZE to bound the
+   * payload. Returns `limit: undefined` (⇒ no pagination) when `limit` is missing or
+   * not a positive integer, preserving the legacy "return everything" behaviour.
+   */
+  private parsePagination(filters: any): { skip: number; limit: number | undefined } {
+    const MAX_PAGE_SIZE = 100;
+    const rawLimit = Number(filters?.limit);
+    if (!Number.isInteger(rawLimit) || rawLimit <= 0) {
+      return { skip: 0, limit: undefined };
+    }
+    const limit = Math.min(rawLimit, MAX_PAGE_SIZE);
+
+    const rawPage = Number(filters?.page);
+    const page = Number.isInteger(rawPage) && rawPage >= 1 ? rawPage : 1;
+
+    return { skip: (page - 1) * limit, limit };
   }
 
   public async findById(id: string): Promise<IProduct | null> {
@@ -126,6 +194,12 @@ export class ProductRepository {
     if (data.makingChargePercent !== undefined) updateData.makingChargePercent = Number(data.makingChargePercent);
     if (data.makingChargePerGram !== undefined) updateData.makingChargePerGram = Number(data.makingChargePerGram);
     if (data.isActive !== undefined) updateData.isActive = data.isActive;
+    if (data.variants !== undefined) updateData.variants = data.variants;
+    // Full replace of the gallery. An empty array clears all images.
+    if (data.images !== undefined) updateData.images = this.toImageDocs(Array.isArray(data.images) ? data.images : []);
+    if (data.isFixedPrice !== undefined) updateData.isFixedPrice = Boolean(data.isFixedPrice);
+    if (data.makingCharge !== undefined) updateData.makingCharge = data.makingCharge;
+    if (data.wastage !== undefined) updateData.wastage = data.wastage;
 
     return Product.findByIdAndUpdate(id, updateData, { new: true }).exec();
   }

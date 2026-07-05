@@ -46,3 +46,13 @@ export const admin = (req: AuthRequest, res: Response, next: NextFunction) => {
     next(new AppError('Not authorized as an admin', 403));
   }
 };
+
+// The mandatory daily metal-rate update (and its lock status) must be clearable by staff,
+// not just full admins — the RateUpdateGate is shown to admin AND staff.
+export const adminOrStaff = (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (req.user && (req.user.isAdmin || req.user.role === 'staff')) {
+    next();
+  } else {
+    next(new AppError('Not authorized as an admin or staff', 403));
+  }
+};

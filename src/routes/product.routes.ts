@@ -55,6 +55,19 @@ const reviewController = new ReviewController();
  *         schema:
  *           type: boolean
  *         description: Only featured products
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: 1-indexed page number (used with limit for infinite scroll). Filters/sort apply before paging.
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *         description: Page size. When omitted the full result set is returned. A page beyond the last yields an empty array.
  *     responses:
  *       200:
  *         description: List of products

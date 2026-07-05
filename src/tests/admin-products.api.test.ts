@@ -6,6 +6,7 @@ import { AppError } from '../utils/appError';
 jest.mock('../middlewares/auth.middleware', () => ({
   protect: (_req: unknown, _res: unknown, next: () => void) => next(),
   admin: (_req: unknown, _res: unknown, next: () => void) => next(),
+  adminOrStaff: (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
 describe('Admin Products API', () => {

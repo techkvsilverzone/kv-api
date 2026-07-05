@@ -827,6 +827,380 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-14T12:18:27.336Z"
+    },
+    {
+      "id": "bug-052",
+      "timestamp": "2026-06-15T05:43:26.015Z",
+      "error_message": "Wrong reference: image should be data",
+      "file": "src/repositories/product.repository.ts",
+      "root_cause": "Used \"image\" instead of \"data\"",
+      "fix": "Changed image → data",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-15T05:43:26.015Z"
+    },
+    {
+      "id": "bug-053",
+      "timestamp": "2026-06-15T05:44:01.845Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/services/product.service.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-15T05:44:01.845Z"
+    },
+    {
+      "id": "bug-054",
+      "timestamp": "2026-06-15T05:44:09.497Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/config/swagger.ts",
+      "root_cause": "Had '#/components/schemas/ProductPricing'",
+      "fix": "Changed to 'array'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-15T05:44:09.497Z"
+    },
+    {
+      "id": "bug-055",
+      "timestamp": "2026-06-15T06:38:15.101Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/repositories/product.repository.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-15T06:38:15.101Z"
+    },
+    {
+      "id": "bug-056",
+      "timestamp": "2026-06-15T06:38:29.424Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/services/product.service.ts",
+      "root_cause": "Had '../repositories/user.repository'",
+      "fix": "Changed to '../models/product.model'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-15T06:38:29.424Z"
+    },
+    {
+      "id": "bug-057",
+      "timestamp": "2026-06-15T06:38:37.072Z",
+      "error_message": "Type error",
+      "file": "src/services/product.service.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-15T06:38:37.072Z"
+    },
+    {
+      "id": "bug-058",
+      "timestamp": "2026-06-15T06:39:03.530Z",
+      "error_message": "Missing guard clause",
+      "file": "src/services/product.service.ts",
+      "root_cause": "No early return/throw for edge case: raw === undefined || raw === null",
+      "fix": "Added guard clause: if (raw === undefined || raw === null)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-15T06:39:03.530Z"
+    },
+    {
+      "id": "bug-059",
+      "timestamp": "2026-06-15T07:03:27.012Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/routes/index.ts",
+      "root_cause": "Had '/admin'",
+      "fix": "Changed to '/delivery-config'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-15T07:03:27.012Z"
+    },
+    {
+      "id": "bug-060",
+      "timestamp": "2026-06-15T07:03:56.933Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/routes/admin.routes.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-15T07:03:56.933Z"
+    },
+    {
+      "id": "bug-061",
+      "timestamp": "2026-06-16T07:33:59.207Z",
+      "error_message": "Type error",
+      "file": "src/services/product.service.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-16T07:33:59.207Z"
+    },
+    {
+      "id": "bug-062",
+      "timestamp": "2026-06-16T07:34:09.930Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/services/product.service.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-16T07:34:09.930Z"
+    },
+    {
+      "id": "bug-063",
+      "timestamp": "2026-06-16T07:34:19.799Z",
+      "error_message": "Missing guard clause",
+      "file": "src/services/product.service.ts",
+      "root_cause": "No early return/throw for edge case: !Array.isArray(raw",
+      "fix": "Added guard clause: if (!Array.isArray(raw)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-16T07:34:19.799Z"
+    },
+    {
+      "id": "bug-064",
+      "timestamp": "2026-06-16T07:34:29.922Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/repositories/product.repository.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-16T07:34:29.922Z"
+    },
+    {
+      "id": "bug-065",
+      "timestamp": "2026-06-16T07:34:36.630Z",
+      "error_message": "Type error",
+      "file": "src/repositories/product.repository.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation | Also: // Full replace of the gallery. An empty array clears all im; if (data.images !== undefined) updateData.images = this.toIm",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-16T07:34:47.860Z"
+    },
+    {
+      "id": "bug-066",
+      "timestamp": "2026-06-16T08:33:22.422Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/repositories/product.repository.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-16T08:33:22.422Z"
+    },
+    {
+      "id": "bug-067",
+      "timestamp": "2026-06-16T09:15:45.521Z",
+      "error_message": "Null/undefined access in ",
+      "file": "src/services/pricing.service.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: isFixedPrice: product.isFixedPrice ?? false,; wastage: breakdown.wastage,",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-16T09:16:25.521Z"
+    },
+    {
+      "id": "bug-068",
+      "timestamp": "2026-06-16T09:16:18.504Z",
+      "error_message": "Significant refactor of ",
+      "file": "src/services/pricing.service.ts",
+      "root_cause": "11 lines replaced/restructured",
+      "fix": "Rewrote 48→85 lines (11 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-16T09:16:18.504Z"
+    },
+    {
+      "id": "bug-069",
+      "timestamp": "2026-06-16T09:18:49.240Z",
+      "error_message": "Type error",
+      "file": "src/tests/pricing.service.test.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-16T09:18:49.240Z"
+    },
+    {
+      "id": "bug-022",
+      "timestamp": "2026-06-16T14:48:00.000Z",
+      "error_message": "src/services/pricing.service.ts(356,17): error TS5076: '??' and '||' operations cannot be mixed without parentheses.",
+      "file": "src/services/pricing.service.ts",
+      "root_cause": "Wrote `weightOverride ?? Number(product.weight) || 0` — TS forbids mixing ?? and || without explicit grouping.",
+      "fix": "Parenthesized the || operand: `weightOverride ?? (Number(product.weight) || 0)`.",
+      "tags": [
+        "typescript",
+        "ts5076",
+        "nullish-coalescing",
+        "pricing"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-16T14:48:00.000Z"
+    },
+    {
+      "id": "bug-071",
+      "timestamp": "2026-06-16T14:33:17.112Z",
+      "error_message": "Incorrect value in code",
+      "file": "src/routes/index.ts",
+      "root_cause": "Had './return.routes'",
+      "fix": "Changed to './goldrate.routes'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-16T14:33:22.617Z"
+    },
+    {
+      "id": "bug-072",
+      "timestamp": "2026-06-16T14:33:55.267Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/routes/admin.routes.ts",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-16T14:33:55.267Z"
+    },
+    {
+      "id": "bug-073",
+      "timestamp": "2026-06-16T14:34:07.145Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "src/server.ts",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-16T14:34:07.145Z"
+    },
+    {
+      "id": "bug-089",
+      "timestamp": "2026-07-05T00:00:00.000Z",
+      "error_message": "Admin panel stayed locked (RateUpdateGate) even after the user entered today's silver/gold rate and clicked Update Rate",
+      "file": "src/routes/admin.routes.ts, src/middlewares/auth.middleware.ts",
+      "root_cause": "admin.routes.ts applies a blanket `router.use(protect, admin)` to every route in the file, and `admin` middleware only checks `req.user.isAdmin`. The rate-update endpoints (`POST /admin/silver-rates`, `POST /admin/gold-rates`) and `GET /admin/rate-status` lived under that blanket gate, so a `staff` user's update request 403'd silently (frontend shows a generic toast) and the rate was never actually persisted — the lock could never clear for staff, no matter how many times they 'updated' it. The frontend's own RateUpdateGate explicitly says the lock applies to 'all admin and staff' and renders the update form to both, so this was a genuine spec/implementation mismatch, not just the previously-documented 'staff carve-out not shipped yet' limitation.",
+      "fix": "Added `adminOrStaff` middleware (isAdmin OR role==='staff') in auth.middleware.ts. Registered GET/POST /silver-rates, GET/POST /gold-rates, and GET /rate-status with `protect, adminOrStaff` explicitly, positioned before the blanket `router.use(protect, admin)` in the same router so they match first and never hit the stricter blanket gate. All other /admin/* routes remain isAdmin-only. Updated 6 existing test files' auth.middleware mocks to stub adminOrStaff (route registration otherwise throws at import time), and added src/tests/rate-staff-access.api.test.ts using the real middleware to regression-test staff access + confirm plain customers still get 403.",
+      "tags": [
+        "auth",
+        "rbac",
+        "staff",
+        "admin-panel",
+        "rate-lock",
+        "silver-rate",
+        "gold-rate",
+        "403"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T00:00:00.000Z"
     }
   ]
 }

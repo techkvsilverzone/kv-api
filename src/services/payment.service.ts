@@ -4,7 +4,7 @@ import { config } from '../config';
 import { OrderRepository } from '../repositories/order.repository';
 import { CouponRepository } from '../repositories/coupon.repository';
 import { UserRepository } from '../repositories/user.repository';
-import { PricingService, CheckoutBreakdown, CheckoutItemInput } from './pricing.service';
+import { PricingService, CheckoutBreakdown, CheckoutItemInput, CheckoutAddress } from './pricing.service';
 import { StockService } from './stock.service';
 import { AppError } from '../utils/appError';
 import { sendOrderConfirmationEmail, buildOrderConfirmationInput } from '../utils/emailNotifications';
@@ -13,6 +13,8 @@ import Logger from '../utils/logger';
 export interface CreateOrderInput {
   items: CheckoutItemInput[];
   couponCode?: string | null;
+  // Shipping address drives the zone delivery charge; pincode kept for back-compat.
+  shippingAddress?: CheckoutAddress | null;
   pincode?: string | null;
   currency?: string;
 }
@@ -41,6 +43,7 @@ export class PaymentService {
     const breakdown = await this.pricingService.computeCheckout({
       items: input.items,
       couponCode: input.couponCode,
+      address: input.shippingAddress,
       pincode: input.pincode,
     });
 
@@ -96,10 +99,11 @@ export class PaymentService {
       }
     }
 
-    // Recompute the authoritative total from items + coupon + pincode.
+    // Recompute the authoritative total from items + coupon + shipping address.
     const breakdown = await this.pricingService.computeCheckout({
       items: orderData.items,
       couponCode: orderData.couponCode,
+      address: orderData.shippingAddress,
       pincode: orderData.shippingAddress?.pincode,
     });
 
@@ -175,14 +179,21 @@ export class PaymentService {
         product: i.product,
         name: i.name,
         quantity: i.quantity,
+        weight: i.weight,
         unitPrice: i.price,
         totalPrice: i.totalPrice,
+        metalValue: i.metalValue,
+        makingCharge: i.makingCharge,
+        wastage: i.wastage,
         isGiftVoucher: i.isGiftVoucher,
       })),
       subtotal: breakdown.subtotal,
-      taxAmount: breakdown.taxAmount,
+      taxableSubtotal: breakdown.taxableSubtotal,
       discount: breakdown.discount,
       couponCode: breakdown.couponCode,
+      gstPercent: breakdown.gstPercent,
+      taxAmount: breakdown.taxAmount,
+      deliveryZone: breakdown.deliveryZone,
       deliveryFee: breakdown.deliveryFee,
       grandTotal: breakdown.grandTotal,
     };

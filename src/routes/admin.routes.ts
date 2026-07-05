@@ -4,19 +4,23 @@ import { OrderController } from '../controllers/order.controller';
 import { UserController } from '../controllers/user.controller';
 import { CouponController } from '../controllers/coupon.controller';
 import { SilverRateController } from '../controllers/silverrate.controller';
+import { GoldRateController } from '../controllers/goldrate.controller';
 import { MetalRateController } from '../controllers/metalrate.controller';
+import { RateGuardService } from '../services/rateGuard.service';
 import { ReturnController } from '../controllers/return.controller';
 import { SavingsController } from '../controllers/savings.controller';
 import { FilterConfigRepository } from '../repositories/filterConfig.repository';
 import { StoreConfigRepository } from '../repositories/storeConfig.repository';
 import { PricingConfigRepository } from '../repositories/pricingConfig.repository';
+import { DeliveryConfigRepository } from '../repositories/deliveryConfig.repository';
 import { InventoryController } from '../controllers/inventory.controller';
 import { GiftVoucherController } from '../controllers/giftVoucher.controller';
-import { protect, admin } from '../middlewares/auth.middleware';
+import { protect, admin, adminOrStaff } from '../middlewares/auth.middleware';
 
 const filterConfigRepository = new FilterConfigRepository();
 const storeConfigRepository = new StoreConfigRepository();
 const pricingConfigRepository = new PricingConfigRepository();
+const deliveryConfigRepository = new DeliveryConfigRepository();
 const inventoryController = new InventoryController();
 const giftVoucherController = new GiftVoucherController();
 
@@ -26,11 +30,242 @@ const orderController = new OrderController();
 const userController = new UserController();
 const couponController = new CouponController();
 const silverRateController = new SilverRateController();
+const goldRateController = new GoldRateController();
 const metalRateController = new MetalRateController();
+const rateGuardService = new RateGuardService();
 const returnController = new ReturnController();
 const savingsController = new SavingsController();
 
-// Apply protect and admin to all routes
+// The mandatory daily rate update (and its lock status) must be usable by staff, not just
+// full admins — RateUpdateGate on the frontend is shown to (and must be clearable by) both.
+// Registered ahead of the blanket admin-only gate below so these specific routes use the
+// looser adminOrStaff check instead.
+
+/**
+ * @openapi
+ * /admin/silver-rates:
+ *   get:
+ *     summary: Get all silver rate records
+ *     tags: [Admin]
+ *     deprecated: true
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all silver rate records
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   ratePerGram:
+ *                     type: number
+ *                   purity:
+ *                     type: string
+ *                   updatedBy:
+ *                     type: string
+ *                   date:
+ *                     type: string
+ *                     format: date-time
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.get('/silver-rates', protect, adminOrStaff, silverRateController.getAllRates);
+
+/**
+ * @openapi
+ * /admin/silver-rates:
+ *   post:
+ *     summary: Upsert today's silver rate for a purity
+ *     tags: [Admin]
+ *     deprecated: true
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ratePerGram
+ *               - purity
+ *             properties:
+ *               ratePerGram:
+ *                 type: number
+ *               purity:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Silver rate upserted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ratePerGram:
+ *                   type: number
+ *                 purity:
+ *                   type: string
+ *                 updatedBy:
+ *                   type: string
+ *                 date:
+ *                   type: string
+ *                   format: date-time
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.post('/silver-rates', protect, adminOrStaff, silverRateController.upsertRate);
+
+/**
+ * @openapi
+ * /admin/gold-rates:
+ *   get:
+ *     summary: Get all gold rate records
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all gold rate records
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   date:
+ *                     type: string
+ *                     format: date
+ *                   rateDate:
+ *                     type: string
+ *                     format: date
+ *                   purity:
+ *                     type: string
+ *                   ratePerGram:
+ *                     type: number
+ *                   ratePerKg:
+ *                     type: number
+ *                   updatedBy:
+ *                     type: string
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.get('/gold-rates', protect, adminOrStaff, goldRateController.getAllRates);
+
+/**
+ * @openapi
+ * /admin/gold-rates:
+ *   post:
+ *     summary: Upsert today's gold rate
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ratePerGram
+ *               - purity
+ *             properties:
+ *               ratePerGram:
+ *                 type: number
+ *               purity:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Gold rate upserted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 date:
+ *                   type: string
+ *                   format: date
+ *                 rateDate:
+ *                   type: string
+ *                   format: date
+ *                 purity:
+ *                   type: string
+ *                 ratePerGram:
+ *                   type: number
+ *                 ratePerKg:
+ *                   type: number
+ *                 updatedBy:
+ *                   type: string
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.post('/gold-rates', protect, adminOrStaff, goldRateController.upsertRate);
+
+/**
+ * @openapi
+ * /admin/rate-status:
+ *   get:
+ *     summary: Authoritative daily price-update block flag (#25)
+ *     description: >
+ *       Returns whether the admin panel should be locked because today's
+ *       (IST) silver and/or gold rate has not been recorded. Computed by the
+ *       10:00 IST cron; safe for the client to use as the source of truth.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current block status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 blocked:
+ *                   type: boolean
+ *                 staleMetals:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                     enum: ['silver', 'gold']
+ *                 checkedAt:
+ *                   type: string
+ *                   format: date-time
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.get('/rate-status', protect, adminOrStaff, async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const status = await rateGuardService.getStatus();
+    res.status(200).json(status);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Apply protect and admin to all remaining routes
 router.use(protect, admin);
 
 /**
@@ -396,90 +631,6 @@ router.put('/coupons/:id', couponController.updateCoupon);
  *         $ref: '#/components/responses/NotFound'
  */
 router.delete('/coupons/:id', couponController.deleteCoupon);
-
-/**
- * @openapi
- * /admin/silver-rates:
- *   get:
- *     summary: Get all silver rate records
- *     tags: [Admin]
- *     deprecated: true
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of all silver rate records
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   ratePerGram:
- *                     type: number
- *                   purity:
- *                     type: string
- *                   updatedBy:
- *                     type: string
- *                   date:
- *                     type: string
- *                     format: date-time
- *       401:
- *         $ref: '#/components/responses/Unauthorized'
- *       403:
- *         $ref: '#/components/responses/Forbidden'
- */
-router.get('/silver-rates', silverRateController.getAllRates);
-
-/**
- * @openapi
- * /admin/silver-rates:
- *   post:
- *     summary: Upsert today's silver rate for a purity
- *     tags: [Admin]
- *     deprecated: true
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - ratePerGram
- *               - purity
- *             properties:
- *               ratePerGram:
- *                 type: number
- *               purity:
- *                 type: string
- *     responses:
- *       201:
- *         description: Silver rate upserted
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 ratePerGram:
- *                   type: number
- *                 purity:
- *                   type: string
- *                 updatedBy:
- *                   type: string
- *                 date:
- *                   type: string
- *                   format: date-time
- *       400:
- *         $ref: '#/components/responses/BadRequest'
- *       401:
- *         $ref: '#/components/responses/Unauthorized'
- *       403:
- *         $ref: '#/components/responses/Forbidden'
- */
-router.post('/silver-rates', silverRateController.upsertRate);
 
 /**
  * @openapi
@@ -1248,6 +1399,106 @@ router.put('/pricing-config', async (req: Request, res: Response, next: NextFunc
     }
     const config = await pricingConfigRepository.upsert({ gstPercent });
     res.status(200).json({ status: 'success', data: { gstPercent: config.gstPercent } });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @openapi
+ * /admin/delivery-config:
+ *   get:
+ *     summary: Get zone-based delivery charges
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Delivery charge configuration
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/DeliveryConfig'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.get('/delivery-config', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await deliveryConfigRepository.getConfig();
+    res.status(200).json({ status: 'success', data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @openapi
+ * /admin/delivery-config:
+ *   put:
+ *     summary: Update zone-based delivery charges (full replace)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/DeliveryConfig'
+ *     responses:
+ *       200:
+ *         description: Delivery configuration updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/DeliveryConfig'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.put('/delivery-config', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const body = req.body ?? {};
+    const zones: Array<'chennai' | 'otherDistrict' | 'otherState'> = ['chennai', 'otherDistrict', 'otherState'];
+    const values = {} as { chennai: number; otherDistrict: number; otherState: number };
+
+    for (const zone of zones) {
+      if (body[zone] === undefined || body[zone] === null) {
+        res.status(400).json({ message: `${zone} is required` });
+        return;
+      }
+      const value = Number(body[zone]);
+      if (!Number.isFinite(value) || value < 0) {
+        res.status(400).json({ message: `${zone} must be a non-negative number` });
+        return;
+      }
+      values[zone] = value;
+    }
+
+    const config = await deliveryConfigRepository.upsert(values);
+    res.status(200).json({
+      status: 'success',
+      data: {
+        chennai: config.chennai,
+        otherDistrict: config.otherDistrict,
+        otherState: config.otherState,
+      },
+    });
   } catch (error) {
     next(error);
   }

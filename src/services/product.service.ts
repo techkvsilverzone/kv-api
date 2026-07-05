@@ -1,4 +1,5 @@
 import { ProductRepository } from '../repositories/product.repository';
+import { IProductCharge } from '../models/product.model';
 import { UserRepository } from '../repositories/user.repository';
 import { InventoryRepository } from '../repositories/inventory.repository';
 import { PricingService } from './pricing.service';
@@ -181,6 +182,27 @@ export class ProductService {
     if (payload.originalPrice !== undefined) result.originalPrice = Number(payload.originalPrice);
     if (payload.purity !== undefined) result.purity = String(payload.purity);
 
+    if (payload.variants !== undefined) result.variants = this.normalizeVariants(payload.variants);
+
+    // Multiple images (ordered). The client sends `images: string[]` (images[0] = primary)
+    // alongside the redundant single `image`. Prefer the array; fall back to the single field.
+    if (payload.images !== undefined) {
+      result.images = this.normalizeImages(payload.images);
+    } else if (typeof image === 'string' && image.trim()) {
+      result.images = this.normalizeImages([image]);
+    }
+
+    // Pricing config: a fixed-price product has no making charge / wastage.
+    const isFixedPrice = payload.isFixedPrice !== undefined ? Boolean(payload.isFixedPrice) : false;
+    result.isFixedPrice = isFixedPrice;
+    if (isFixedPrice) {
+      result.makingCharge = null;
+      result.wastage = null;
+    } else {
+      result.makingCharge = this.normalizeCharge(payload.makingCharge, 'makingCharge');
+      result.wastage = this.normalizeCharge(payload.wastage, 'wastage');
+    }
+
     if (payload.makingChargePercent !== undefined) {
       const pct = Number(payload.makingChargePercent);
       if (!Number.isFinite(pct) || pct < 0) {
@@ -279,11 +301,147 @@ export class ProductService {
       update.isActive = activeVal;
     }
 
+    // Full replace of the variants array. An empty array clears all variants.
+    if (payload.variants !== undefined) {
+      update.variants = this.normalizeVariants(payload.variants);
+    }
+
+    // Full replace of the images array (images[0] = primary). An empty array clears
+    // all images. The client sends `images: string[]` plus a redundant single `image`;
+    // prefer the array, fall back to the single field for backward-compatible edits.
+    if (payload.images !== undefined) {
+      update.images = this.normalizeImages(payload.images);
+    } else {
+      const single = payload.imageBase64 ?? payload.image ?? payload.imageUrl;
+      if (single !== undefined) {
+        if (single !== null && typeof single !== 'string') {
+          throw new AppError('image must be a string (base64 or URL)', 400);
+        }
+        const value = typeof single === 'string' ? single.trim() : '';
+        update.images = value ? this.normalizeImages([value]) : [];
+      }
+    }
+
+    // Pricing config (full replace): an omitted/absent charge clears it, and a
+    // fixed-price product always clears both charges. Gated so a PUT that does
+    // not touch pricing leaves the existing config untouched.
+    const touchesPricingConfig =
+      payload.isFixedPrice !== undefined ||
+      payload.makingCharge !== undefined ||
+      payload.wastage !== undefined;
+    if (touchesPricingConfig) {
+      const isFixedPrice = Boolean(payload.isFixedPrice);
+      update.isFixedPrice = isFixedPrice;
+      if (isFixedPrice) {
+        update.makingCharge = null;
+        update.wastage = null;
+      } else {
+        update.makingCharge = this.normalizeCharge(payload.makingCharge, 'makingCharge');
+        update.wastage = this.normalizeCharge(payload.wastage, 'wastage');
+      }
+    }
+
     if (Object.keys(update).length === 0) {
       throw new AppError('No valid fields provided for update', 400);
     }
 
     return update;
+  }
+
+  /**
+   * Normalize a free-text variants array. Drops fully-empty rows (no label and
+   * no weight), trims all fields. `label` and `weight` are required per row;
+   * `height`/`breadth` are optional and omitted when empty. Returns [] when
+   * nothing remains so an empty array clears existing variants.
+   */
+  private normalizeVariants(raw: unknown): Array<Record<string, string>> {
+    if (!Array.isArray(raw)) {
+      throw new AppError('variants must be an array', 400);
+    }
+
+    const normalized: Array<Record<string, string>> = [];
+    for (const entry of raw) {
+      if (!entry || typeof entry !== 'object') {
+        throw new AppError('each variant must be an object', 400);
+      }
+      const e = entry as Record<string, unknown>;
+      const label = String(e.label ?? '').trim();
+      const weight = String(e.weight ?? '').trim();
+      const height = String(e.height ?? '').trim();
+      const breadth = String(e.breadth ?? '').trim();
+
+      // Drop fully-empty rows (mirrors the frontend normalization).
+      if (!label && !weight && !height && !breadth) continue;
+
+      if (!label || !weight) {
+        throw new AppError('each variant requires both label and weight', 400);
+      }
+
+      const row: Record<string, string> = { label, weight };
+      if (height) row.height = height;
+      if (breadth) row.breadth = breadth;
+      normalized.push(row);
+    }
+
+    return normalized;
+  }
+
+  /**
+   * Normalize the ordered `images` array sent by the admin panel. Each entry is a
+   * string — either a newly uploaded base64 data URI or an existing image reference
+   * echoed back from a previous GET. `images[0]` is the primary image. Blank entries
+   * are dropped; `sortOrder` is assigned from the (0-based) array position so the read
+   * side ([{ imageBase64, sortOrder }]) preserves the admin-chosen order. An empty
+   * array clears all images.
+   */
+  private normalizeImages(raw: unknown): Array<{ variantName: string; imageBase64: string; sortOrder: number }> {
+    if (!Array.isArray(raw)) {
+      throw new AppError('images must be an array of strings', 400);
+    }
+
+    const normalized: Array<{ variantName: string; imageBase64: string; sortOrder: number }> = [];
+    for (const entry of raw) {
+      if (entry === undefined || entry === null) continue;
+      if (typeof entry !== 'string') {
+        throw new AppError('each image must be a string (base64 or URL)', 400);
+      }
+      const value = entry.trim();
+      if (!value) continue;
+      normalized.push({ variantName: 'Default view', imageBase64: value, sortOrder: normalized.length });
+    }
+
+    return normalized;
+  }
+
+  /**
+   * Normalize an admin pricing charge ({ type, value }). Returns null when the
+   * charge is absent or has no finite value (mirrors the frontend `normalizeCharge`,
+   * which drops empty charges). An unknown `type` defaults to 'percentage'.
+   * Validates: value >= 0, and value <= 100 when type is 'percentage'.
+   */
+  private normalizeCharge(raw: unknown, field: string): IProductCharge | null {
+    if (raw === undefined || raw === null) return null;
+    if (typeof raw !== 'object') {
+      throw new AppError(`${field} must be an object with type and value`, 400);
+    }
+
+    const c = raw as Record<string, unknown>;
+
+    // Drop charges without a finite numeric value (empty/unset is allowed).
+    if (c.value === undefined || c.value === null || c.value === '') return null;
+    const value = Number(c.value);
+    if (!Number.isFinite(value)) return null;
+
+    if (value < 0) {
+      throw new AppError(`${field}.value must be a non-negative number`, 400);
+    }
+
+    const type: 'percentage' | 'amount' = c.type === 'amount' ? 'amount' : 'percentage';
+    if (type === 'percentage' && value > 100) {
+      throw new AppError(`${field}.value must be between 0 and 100 for percentage type`, 400);
+    }
+
+    return { type, value };
   }
 
   private mapPersistenceError(error: unknown): AppError {

@@ -6,6 +6,20 @@ export interface IProductImage {
   sortOrder: number;
 }
 
+export interface IProductVariant {
+  label: string;
+  weight: string;
+  height?: string;
+  breadth?: string;
+}
+
+export type ProductChargeType = 'percentage' | 'amount';
+
+export interface IProductCharge {
+  type: ProductChargeType;
+  value: number;
+}
+
 export interface IProduct extends Document {
   _id: mongoose.Types.ObjectId;
   productGroupCode: string;
@@ -25,6 +39,10 @@ export interface IProduct extends Document {
   quantity: number;
   isActive: boolean;
   images: IProductImage[];
+  variants: IProductVariant[];
+  isFixedPrice?: boolean;
+  makingCharge?: IProductCharge | null;
+  wastage?: IProductCharge | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +52,24 @@ const ProductImageSchema = new Schema<IProductImage>(
     variantName: { type: String, required: true },
     imageBase64: { type: String, default: '' },
     sortOrder: { type: Number, default: 1 },
+  },
+  { _id: false },
+);
+
+const ProductVariantSchema = new Schema<IProductVariant>(
+  {
+    label: { type: String, required: true, trim: true },
+    weight: { type: String, required: true, trim: true },
+    height: { type: String, trim: true },
+    breadth: { type: String, trim: true },
+  },
+  { _id: false },
+);
+
+const ProductChargeSchema = new Schema<IProductCharge>(
+  {
+    type: { type: String, enum: ['percentage', 'amount'], required: true },
+    value: { type: Number, required: true, min: 0 },
   },
   { _id: false },
 );
@@ -57,6 +93,10 @@ const ProductSchema = new Schema<IProduct>(
     makingChargePerGram: { type: Number },
     isActive: { type: Boolean, default: true },
     images: { type: [ProductImageSchema], default: [] },
+    variants: { type: [ProductVariantSchema], default: [] },
+    isFixedPrice: { type: Boolean, default: false },
+    makingCharge: { type: ProductChargeSchema, default: null },
+    wastage: { type: ProductChargeSchema, default: null },
   },
   { timestamps: true },
 );
