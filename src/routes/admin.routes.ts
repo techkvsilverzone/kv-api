@@ -265,8 +265,12 @@ router.get('/rate-status', protect, adminOrStaff, async (_req: Request, res: Res
   }
 });
 
-// Apply protect and admin to all remaining routes
-router.use(protect, admin);
+// Apply protect + adminOrStaff to all remaining routes. The frontend Admin.tsx panel treats
+// almost every tab (products, orders, customers, savings, coupons, returns, inventory,
+// delivery/filter config) as admin-and-staff — only a handful of routes above (store-config,
+// pricing-config, gift-vouchers) are deliberately kept stricter via an explicit `admin`
+// middleware on top of this, since they have no staff-facing UI and/or are financially sensitive.
+router.use(protect, adminOrStaff);
 
 /**
  * @openapi
@@ -899,7 +903,9 @@ router.put('/filter-config', async (req: Request, res: Response, next: NextFunct
  *       403:
  *         $ref: '#/components/responses/Forbidden'
  */
-router.get('/store-config', async (req: Request, res: Response, next: NextFunction) => {
+// Theme/branding is admin-only in the UI (Theme tab is hidden from staff) — kept stricter
+// than the blanket adminOrStaff default below.
+router.get('/store-config', admin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const config = await storeConfigRepository.get();
     res.status(200).json({
@@ -952,7 +958,7 @@ router.get('/store-config', async (req: Request, res: Response, next: NextFuncti
  *       403:
  *         $ref: '#/components/responses/Forbidden'
  */
-router.put('/store-config', async (req: Request, res: Response, next: NextFunction) => {
+router.put('/store-config', admin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { theme, isDark } = req.body;
 
@@ -973,7 +979,7 @@ router.put('/store-config', async (req: Request, res: Response, next: NextFuncti
   }
 });
 
-router.post('/store-config', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/store-config', admin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { theme, isDark } = req.body;
 
@@ -1058,7 +1064,9 @@ router.post('/store-config', async (req: Request, res: Response, next: NextFunct
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.post('/inventory/inward', inventoryController.inward);
+// Inventory (stock ledger) is admin-only per product decision — kept stricter than the
+// blanket adminOrStaff default below.
+router.post('/inventory/inward', admin, inventoryController.inward);
 
 /**
  * @openapi
@@ -1124,7 +1132,7 @@ router.post('/inventory/inward', inventoryController.inward);
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.post('/inventory/outward', inventoryController.outward);
+router.post('/inventory/outward', admin, inventoryController.outward);
 
 /**
  * @openapi
@@ -1173,7 +1181,7 @@ router.post('/inventory/outward', inventoryController.outward);
  *       403:
  *         $ref: '#/components/responses/Forbidden'
  */
-router.get('/inventory/transactions', inventoryController.getTransactions);
+router.get('/inventory/transactions', admin, inventoryController.getTransactions);
 
 /**
  * @openapi
@@ -1243,7 +1251,7 @@ router.get('/inventory/transactions', inventoryController.getTransactions);
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.post('/inventory/reconcile', inventoryController.reconcile);
+router.post('/inventory/reconcile', admin, inventoryController.reconcile);
 
 /**
  * @openapi
@@ -1281,7 +1289,7 @@ router.post('/inventory/reconcile', inventoryController.reconcile);
  *       403:
  *         $ref: '#/components/responses/Forbidden'
  */
-router.get('/inventory/low-stock', inventoryController.getLowStock);
+router.get('/inventory/low-stock', admin, inventoryController.getLowStock);
 
 /**
  * @openapi
@@ -1314,7 +1322,7 @@ router.get('/inventory/low-stock', inventoryController.getLowStock);
  *       403:
  *         $ref: '#/components/responses/Forbidden'
  */
-router.get('/inventory/summary', inventoryController.getSummary);
+router.get('/inventory/summary', admin, inventoryController.getSummary);
 
 /**
  * @openapi
@@ -1341,7 +1349,8 @@ router.get('/inventory/summary', inventoryController.getSummary);
  *       403:
  *         $ref: '#/components/responses/Forbidden'
  */
-router.get('/pricing-config', async (req: Request, res: Response, next: NextFunction) => {
+// GST rate is financially sensitive and has no staff-facing UI — kept admin-only.
+router.get('/pricing-config', admin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const config = await pricingConfigRepository.get();
     res.status(200).json({ status: 'success', data: { gstPercent: config?.gstPercent ?? 3 } });
@@ -1390,7 +1399,7 @@ router.get('/pricing-config', async (req: Request, res: Response, next: NextFunc
  *       403:
  *         $ref: '#/components/responses/Forbidden'
  */
-router.put('/pricing-config', async (req: Request, res: Response, next: NextFunction) => {
+router.put('/pricing-config', admin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const gstPercent = Number(req.body?.gstPercent);
     if (!Number.isFinite(gstPercent) || gstPercent < 0 || gstPercent > 100) {
@@ -1531,7 +1540,9 @@ router.put('/delivery-config', async (req: Request, res: Response, next: NextFun
  *       403:
  *         $ref: '#/components/responses/Forbidden'
  */
-router.get('/gift-vouchers', giftVoucherController.getAllVouchers);
+// Gift voucher denominations affect real discount/refund amounts and have no staff-facing
+// UI yet — kept admin-only.
+router.get('/gift-vouchers', admin, giftVoucherController.getAllVouchers);
 
 /**
  * @openapi
@@ -1568,7 +1579,7 @@ router.get('/gift-vouchers', giftVoucherController.getAllVouchers);
  *       409:
  *         $ref: '#/components/responses/Conflict'
  */
-router.post('/gift-vouchers', giftVoucherController.createVoucher);
+router.post('/gift-vouchers', admin, giftVoucherController.createVoucher);
 
 /**
  * @openapi
@@ -1612,7 +1623,7 @@ router.post('/gift-vouchers', giftVoucherController.createVoucher);
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.put('/gift-vouchers/:id', giftVoucherController.updateVoucher);
+router.put('/gift-vouchers/:id', admin, giftVoucherController.updateVoucher);
 
 /**
  * @openapi
@@ -1639,6 +1650,6 @@ router.put('/gift-vouchers/:id', giftVoucherController.updateVoucher);
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.delete('/gift-vouchers/:id', giftVoucherController.deleteVoucher);
+router.delete('/gift-vouchers/:id', admin, giftVoucherController.deleteVoucher);
 
 export default router;

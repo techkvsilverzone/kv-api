@@ -1201,6 +1201,25 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-07-05T00:00:00.000Z"
+    },
+    {
+      "id": "bug-090",
+      "timestamp": "2026-07-05T00:00:00.000Z",
+      "error_message": "Staff login could open the admin panel UI but got 403 Forbidden on almost every request: /admin/stats, /admin/orders, /admin/users, /admin/savings, /admin/coupons, /admin/returns, /admin/inventory/*, /admin/delivery-config",
+      "file": "src/routes/admin.routes.ts",
+      "root_cause": "router.use(protect, admin) blanket-applied isAdmin-only auth to the entire admin.routes.ts router, but the frontend Admin.tsx clearly built most tabs for staff too (queries enabled for role==='admin'||'staff', no per-action role gating on buttons, one tab's own comment said 'staff can manage delivery fees'). Browser-verified via Playwright: logging in as the seeded staff account and opening /admin produced 30 console errors, nearly all 403s.",
+      "fix": "User decision: staff should mirror admin everywhere except inventory. Changed the blanket to router.use(protect, adminOrStaff). Re-restricted store-config, pricing-config, gift-vouchers (no staff-facing UI / financially sensitive) and all inventory/* routes (explicit product decision) back to admin-only via an explicit `admin` middleware added on each of those routes (stacks on top of the looser blanket, since Express runs per-route middleware after router.use() middleware regardless of the blanket's own permissiveness). Frontend: inventory queries changed to enabled: role==='admin' only, and the Inventory tab hidden from staff in Admin.tsx. Regression tests added/updated in rate-staff-access.api.test.ts.",
+      "tags": [
+        "auth",
+        "rbac",
+        "staff",
+        "admin-panel",
+        "403",
+        "inventory"
+      ],
+      "related_bugs": ["bug-089"],
+      "occurrences": 1,
+      "last_seen": "2026-07-05T00:00:00.000Z"
     }
   ]
 }
