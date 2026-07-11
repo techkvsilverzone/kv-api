@@ -1220,6 +1220,26 @@
       "related_bugs": ["bug-089"],
       "occurrences": 1,
       "last_seen": "2026-07-05T00:00:00.000Z"
+    },
+    {
+      "id": "bug-091",
+      "timestamp": "2026-07-11T00:00:00.000Z",
+      "error_message": "POST /api/v1/admin/products returns 400 for a dynamic-price (isFixedPrice:false) product with price:0 and a multi-image `images[]` array — user reported it as an images-count issue ('works with single image, fails with multiple') but images were a red herring",
+      "file": "src/services/product.service.ts",
+      "root_cause": "`validateCreatePayload`/`validateUpdatePayload` required `price` to be a positive number unconditionally, but the admin Create form (Admin.tsx line ~1458) only disables submit for missing price when `isFixedPrice` is true — for dynamic-price products (isFixedPrice:false) the form deliberately allows price 0/blank because the real price is computed live from weight/purity/makingCharge/wastage (see cerebrum 'Money-path dynamic pricing wired'). Any dynamic-price create/update with an empty/zero price 400'd; images array size was unrelated (normalizeImages has no count-based check) — the user's 'single image works' payload almost certainly also had a nonzero price, not just fewer images.",
+      "fix": "In product.service.ts, resolved `isFixedPrice` before the price check in both validateCreatePayload and validateUpdatePayload: price must be >0 only when isFixedPrice is true; when false, price is optional and only validated to be a non-negative number if provided (defaults to 0). Reused the single isFixedPrice binding for the rest of validateCreatePayload instead of redeclaring it later.",
+      "tags": [
+        "api",
+        "admin",
+        "product",
+        "validation",
+        "pricing",
+        "isFixedPrice",
+        "400"
+      ],
+      "related_bugs": ["bug-021"],
+      "occurrences": 1,
+      "last_seen": "2026-07-11T00:00:00.000Z"
     }
   ]
 }

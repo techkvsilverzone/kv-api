@@ -149,10 +149,21 @@ export class ProductService {
       throw new AppError('weight must be a positive number', 400);
     }
 
+    // A fixed-price product needs a real listed price. A dynamic (non-fixed) product
+    // computes its price live from weight/purity/making charge/wastage — `price` there
+    // is only a display fallback, so the admin form allows leaving it 0/blank.
+    const isFixedPrice = payload.isFixedPrice !== undefined ? Boolean(payload.isFixedPrice) : false;
     const price = Number(payload.price);
-    if (!Number.isFinite(price) || price <= 0) {
-      throw new AppError('price must be a positive number', 400);
+    if (isFixedPrice) {
+      if (!Number.isFinite(price) || price <= 0) {
+        throw new AppError('price must be a positive number', 400);
+      }
+    } else if (payload.price !== undefined && payload.price !== '' && payload.price !== null) {
+      if (!Number.isFinite(price) || price < 0) {
+        throw new AppError('price must be a non-negative number', 400);
+      }
     }
+    const normalizedPrice = Number.isFinite(price) ? price : 0;
 
     const quantity = payload.quantity === undefined ? 1 : Number(payload.quantity);
     if (!Number.isInteger(quantity) || quantity < 0) {
@@ -174,7 +185,7 @@ export class ProductService {
       name,
       material,
       weight,
-      price,
+      price: normalizedPrice,
       quantity,
       isActive,
     };
@@ -193,7 +204,6 @@ export class ProductService {
     }
 
     // Pricing config: a fixed-price product has no making charge / wastage.
-    const isFixedPrice = payload.isFixedPrice !== undefined ? Boolean(payload.isFixedPrice) : false;
     result.isFixedPrice = isFixedPrice;
     if (isFixedPrice) {
       result.makingCharge = null;
@@ -250,11 +260,21 @@ export class ProductService {
     }
 
     if (payload.price !== undefined) {
+      // Same dynamic-price carve-out as create: only require price > 0 when this
+      // update is (also) setting isFixedPrice:true. Otherwise price is a display
+      // fallback for the live metal-rate calc and may be 0/blank.
+      const isFixedPrice = payload.isFixedPrice !== undefined ? Boolean(payload.isFixedPrice) : true;
       const price = Number(payload.price);
-      if (!Number.isFinite(price) || price <= 0) {
-        throw new AppError('price must be a positive number', 400);
+      if (isFixedPrice) {
+        if (!Number.isFinite(price) || price <= 0) {
+          throw new AppError('price must be a positive number', 400);
+        }
+      } else if (payload.price !== '' && payload.price !== null) {
+        if (!Number.isFinite(price) || price < 0) {
+          throw new AppError('price must be a non-negative number', 400);
+        }
       }
-      update.price = price;
+      update.price = Number.isFinite(price) ? price : 0;
     }
 
     if (payload.quantity !== undefined) {

@@ -457,3 +457,14 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 11:52 | Fixed POST/PUT /admin/products 400 for dynamic-price products (price:0 unconditionally rejected) | src/services/product.service.ts, .wolf/buglog.json, .wolf/cerebrum.md | fixed, tests pass (23/23) | ~9k |
+
+## Session: 2026-07-11 12:23
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-07-11 12:23
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

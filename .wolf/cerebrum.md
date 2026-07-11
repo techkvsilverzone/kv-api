@@ -51,6 +51,7 @@
 <!-- Format: [YYYY-MM-DD] Description of what went wrong and what to do instead. -->
 - [2026-04-05] Do not pass `req.params.<id>` directly where a strict `string` is required. Normalize `string | string[]` route params in controllers before service calls.
 - [2026-07-05] The blanket `router.use(protect, admin)` in `admin.routes.ts` requires `isAdmin` for EVERY route in that file, including ones the frontend explicitly shows to staff too (e.g. `RateUpdateGate`). If a UI says "staff can do X" but the route lives under the blanket-admin router, staff will 403 silently and it'll look like "the action doesn't work" rather than an auth error. Check the actual middleware, not just the frontend gating, before assuming a role-restricted feature is fully wired.
+- [2026-07-11] (bug-091) `product.service.ts` create/update validation required `price > 0` unconditionally, but the admin form only requires a positive price when `isFixedPrice:true` — dynamic-price products legitimately submit `price:0`. When a user reports "field X breaks this request" (they blamed the `images` array size), verify by tracing the actual validation code path against the exact payload rather than trusting which field they suspect — the failing field is often a different one they didn't think to vary between their "working" and "broken" test cases.
 
 ## Decision Log
 
