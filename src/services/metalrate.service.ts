@@ -1,7 +1,7 @@
 import { AppError } from '../utils/appError';
 import { IMetalRate, MetalType } from '../models/metalrate.model';
 import { MetalRateRepository } from '../repositories/metalrate.repository';
-import { istMidnightUtc } from '../utils/time';
+import { istDayKey, istMidnightUtc } from '../utils/time';
 
 export interface MetalRateResponse {
   id: string;
@@ -102,7 +102,13 @@ export class MetalRateService {
   private toResponse(rate: IMetalRate): MetalRateResponse {
     return {
       id: rate._id.toString(),
-      date: rate.date.toISOString().slice(0, 10),
+      // rate.date is stored as IST-midnight-in-UTC (istMidnightUtc), which for any
+      // IST calendar day falls on the PREVIOUS UTC calendar day (IST is UTC+5:30) —
+      // a naive .toISOString().slice(0,10) would therefore always report the date
+      // as one day earlier than the IST day the record actually represents. Derive
+      // the IST day directly instead, so the freshness checks that read this field
+      // (isSameLocalDay client-side, isSameIstDay server-side) agree with storage.
+      date: istDayKey(rate.date),
       metal: rate.metal,
       karat: rate.karat,
       ratePerGram: rate.ratePerGram,
