@@ -2,7 +2,7 @@ import { MetalRateRepository } from '../repositories/metalrate.repository';
 import { RateStatusRepository, RateStatusView } from '../repositories/rateStatus.repository';
 import { StaleMetal } from '../models/rateStatus.model';
 import { MetalType } from '../models/metalrate.model';
-import { sendRateUpdateReminder } from '../utils/whatsapp';
+import { sendRateUpdateReminder, sendRateUpdateSuccessNotice } from '../utils/whatsapp';
 import { isSameIstDay } from '../utils/time';
 import Logger from '../utils/logger';
 
@@ -31,14 +31,26 @@ export class RateGuardService {
     return this.rateStatusRepository.getStatus();
   }
 
-  /** Recompute freshness, persist the flag, and notify on stale metals. */
-  public async checkAndNotify(now: Date = new Date()): Promise<RateStatusView> {
+  /**
+   * Recompute freshness, persist the flag, and notify on stale metals.
+   *
+   * `notifyOnSuccess` gates the "rates are live" WhatsApp confirmation — only the
+   * scheduled 10 AM cron should send it; ad-hoc calls (server startup, tests,
+   * post-save reconciliation) must stay silent on the success path so a restart
+   * or admin edit doesn't spam the ops number.
+   */
+  public async checkAndNotify(now: Date = new Date(), notifyOnSuccess = false): Promise<RateStatusView> {
     const staleMetals: StaleMetal[] = [];
+    const freshRates: { metal: string; ratePerGram: number }[] = [];
 
     for (const { key, metal } of METALS) {
       const latest = await this.metalRateRepository.findLatest(metal);
       const fresh = latest != null && isSameIstDay(latest.date, now);
-      if (!fresh) staleMetals.push(key);
+      if (!fresh) {
+        staleMetals.push(key);
+      } else if (latest) {
+        freshRates.push({ metal: key, ratePerGram: latest.ratePerGram });
+      }
     }
 
     const blocked = staleMetals.length > 0;
@@ -49,6 +61,9 @@ export class RateGuardService {
       await sendRateUpdateReminder(staleMetals);
     } else {
       Logger.info('[rate-guard] all metal rates up to date for today (IST)');
+      if (notifyOnSuccess) {
+        await sendRateUpdateSuccessNotice(freshRates);
+      }
     }
 
     return status;

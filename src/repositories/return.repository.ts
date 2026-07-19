@@ -1,7 +1,10 @@
 import mongoose from 'mongoose';
-import { Return, IReturn } from '../models/return.model';
+import { Return, IReturn, ReturnFaultType } from '../models/return.model';
 
 export { IReturn };
+
+const generateVideoReferenceCode = (id: mongoose.Types.ObjectId): string =>
+  `RET-${id.toString().slice(-6).toUpperCase()}`;
 
 export class ReturnRepository {
   public async create(data: any): Promise<IReturn> {
@@ -17,12 +20,20 @@ export class ReturnRepository {
       };
     });
 
+    const faultType: ReturnFaultType = data.faultType === 'customer_preference' ? 'customer_preference' : 'kv_fault';
+    const _id = new mongoose.Types.ObjectId();
+
     const ret = new Return({
+      _id,
       orderId: new mongoose.Types.ObjectId(String(data.orderId)),
       userId: new mongoose.Types.ObjectId(String(data.userId)),
       reason: String(data.reason || ''),
+      description: data.description || undefined,
       refundAmount: Number(data.refundAmount || 0),
       items,
+      faultType,
+      videoStatus: faultType === 'kv_fault' ? 'awaiting' : 'not_required',
+      videoReferenceCode: faultType === 'kv_fault' ? generateVideoReferenceCode(_id) : undefined,
     });
 
     return ret.save();
@@ -48,6 +59,41 @@ export class ReturnRepository {
       .populate('userId', 'name email')
       .populate('orderId')
       .exec();
+  }
+
+  public async findByVideoReferenceCode(code: string): Promise<IReturn | null> {
+    return Return.findOne({ videoReferenceCode: code.trim().toUpperCase() }).exec();
+  }
+
+  /** Returns still awaiting a video whose ORDER's shipping-address phone matches
+   * the given WhatsApp sender number — the fallback match when no/garbled
+   * reference code is in the caption. Matches on the last 10 digits only, so
+   * formatting (+91, spaces, leading 0) doesn't cause a false miss. */
+  public async findAwaitingVideoByPhone(phone: string): Promise<IReturn[]> {
+    const normalized = phone.replace(/\D/g, '').slice(-10);
+    if (!normalized) return [];
+    const candidates = await Return.find({ videoStatus: 'awaiting' }).populate('orderId').exec();
+    return candidates.filter((r) => {
+      const orderPhone = (r.orderId as any)?.shippingAddress?.phone;
+      return !!orderPhone && String(orderPhone).replace(/\D/g, '').slice(-10) === normalized;
+    });
+  }
+
+  public async attachVideo(
+    id: string,
+    data: { filePath: string; mimeType: string; senderPhone: string },
+  ): Promise<IReturn | null> {
+    return Return.findByIdAndUpdate(
+      id,
+      {
+        videoStatus: 'received',
+        videoFilePath: data.filePath,
+        videoMimeType: data.mimeType,
+        videoSenderPhone: data.senderPhone,
+        videoReceivedAt: new Date(),
+      },
+      { new: true },
+    ).exec();
   }
 
   public async updateStatus(id: string, status: string, refundAmount: number): Promise<IReturn | null> {

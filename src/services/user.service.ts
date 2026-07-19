@@ -1,6 +1,7 @@
 import { UserRepository, AddressData } from '../repositories/user.repository';
 import { IAddress } from '../models/user.model';
 import { CouponRepository } from '../repositories/coupon.repository';
+import { StallConfigRepository } from '../repositories/stallConfig.repository';
 import { AppError } from '../utils/appError';
 import { generateToken } from '../utils/jwt';
 import bcrypt from 'bcryptjs';
@@ -14,10 +15,12 @@ function computeRole(user: { isAdmin: boolean; role?: string }): 'admin' | 'staf
 export class UserService {
   private userRepository: UserRepository;
   private couponRepository: CouponRepository;
+  private stallConfigRepository: StallConfigRepository;
 
   constructor() {
     this.userRepository = new UserRepository();
     this.couponRepository = new CouponRepository();
+    this.stallConfigRepository = new StallConfigRepository();
   }
 
   public async signup(data: any) {
@@ -30,15 +33,20 @@ export class UserService {
       throw new AppError('Email already in use', 400);
     }
 
+    // Offline-stall registration is server-gated: even if a client claims
+    // stallEvent=true, it's only honoured while the admin toggle is active.
+    const stallConfig = await this.stallConfigRepository.getConfig();
+    const stallEventHonoured = stallConfig.active && data.stallEvent === true;
+
     const user = await this.userRepository.create({
       ...data,
-      isStallRegistration: data.stallEvent === true,
+      isStallRegistration: stallEventHonoured,
     });
     const token = generateToken(user._id.toString());
     const { passwordHash, ...safeUser } = user.toObject ? user.toObject() : (user as any);
 
     let promoCoupon: string | undefined;
-    if (data.stallEvent === true) {
+    if (stallEventHonoured) {
       const expiryDate = new Date();
       expiryDate.setMonth(expiryDate.getMonth() + 3);
       const code = `STALL${user._id.toString().slice(-6).toUpperCase()}`;

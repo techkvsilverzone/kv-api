@@ -23,6 +23,10 @@ export interface IUser extends Document {
   isActive: boolean;
   role?: 'admin' | 'staff' | 'customer';
   isStallRegistration?: boolean;
+  /** Used for the daily WhatsApp birthday-wish cron (year is ignored — only month/day matter). */
+  dateOfBirth?: Date;
+  /** Used for the daily WhatsApp wedding-anniversary-wish cron. */
+  anniversaryDate?: Date;
   addresses: mongoose.Types.DocumentArray<IAddress>;
   createdAt: Date;
   updatedAt: Date;
@@ -53,6 +57,8 @@ const UserSchema = new Schema<IUser>(
     isActive: { type: Boolean, default: true },
     role: { type: String, enum: ['admin', 'staff', 'customer'] },
     isStallRegistration: { type: Boolean, default: false },
+    dateOfBirth: { type: Date },
+    anniversaryDate: { type: Date },
     addresses: { type: [AddressSchema], default: [] },
   },
   { timestamps: true },

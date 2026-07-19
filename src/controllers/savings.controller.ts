@@ -42,6 +42,20 @@ export class SavingsController {
     }
   };
 
+  public getByPassbookNumber = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const isStaffOrAdmin = !!req.user!.isAdmin || req.user!.role === 'staff';
+      const scheme = await this.savingsService.getByPassbookNumber(
+        req.user!._id.toString(),
+        isStaffOrAdmin,
+        req.params.passbookNumber as string,
+      );
+      res.status(200).json(scheme);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public getAllSchemes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const schemes = await this.savingsService.getAllSchemes();

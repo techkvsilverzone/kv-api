@@ -149,6 +149,34 @@ router.get('/my-schemes', protect, savingsController.getMySchemes);
 
 /**
  * @openapi
+ * /savings/passbook/{passbookNumber}:
+ *   get:
+ *     summary: Track a savings scheme by its passbook number
+ *     description: Customers may only look up their own passbook; admin/staff can look up any.
+ *     tags: [Savings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: passbookNumber
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: PB-00000042
+ *     responses:
+ *       200:
+ *         description: The matching savings scheme
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.get('/passbook/:passbookNumber', protect, savingsController.getByPassbookNumber);
+
+/**
+ * @openapi
  * /savings/{schemeId}/pay:
  *   post:
  *     summary: Record a monthly payment for a savings scheme

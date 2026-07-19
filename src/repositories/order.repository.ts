@@ -2,8 +2,19 @@ import mongoose from 'mongoose';
 import { Order, IOrder } from '../models/order.model';
 
 export class OrderRepository {
+  /** Sequential per-calendar-year tax invoice number, e.g. "INV-2026-000123". */
+  private async generateInvoiceNumber(): Promise<string> {
+    const year = new Date().getFullYear();
+    const start = new Date(year, 0, 1);
+    const end = new Date(year + 1, 0, 1);
+    const count = await Order.countDocuments({ createdAt: { $gte: start, $lt: end } });
+    const seq = (count + 1).toString().padStart(6, '0');
+    return `INV-${year}-${seq}`;
+  }
+
   public async create(data: any): Promise<IOrder> {
     const shippingAddress = data.shippingAddress || {};
+    const invoiceNumber = await this.generateInvoiceNumber();
     const items = (data.items || []).map((item: any) => {
       const rawId = item?.product?._id ?? item?.product?.id ?? item?.productId ?? item?.product;
       return {
@@ -22,6 +33,7 @@ export class OrderRepository {
 
     const order = new Order({
       userId: new mongoose.Types.ObjectId(String(data.user)),
+      invoiceNumber,
       status: data.status || 'Pending',
       paymentMethod: data.paymentMethod || 'cod',
       paymentStatus: data.razorpayPaymentId ? 'Paid' : 'Pending',
@@ -76,7 +88,18 @@ export class OrderRepository {
 
   public async updateStatus(id: string, status: string): Promise<IOrder | null> {
     if (!mongoose.Types.ObjectId.isValid(id)) return null;
-    return Order.findByIdAndUpdate(id, { status }, { new: true })
+
+    const update: Record<string, unknown> = { status };
+    // Stamp deliveredAt the FIRST time an order reaches 'Delivered' — this anchors
+    // the return claim window, so it must never be overwritten by a later re-save.
+    if (status === 'Delivered') {
+      const existing = await Order.findById(id).select('deliveredAt').exec();
+      if (existing && !existing.deliveredAt) {
+        update.deliveredAt = new Date();
+      }
+    }
+
+    return Order.findByIdAndUpdate(id, update, { new: true })
       .populate('userId', 'name email')
       .exec();
   }

@@ -1,11 +1,16 @@
 import { SavingsRepository } from '../repositories/savings.repository';
+import { UserRepository } from '../repositories/user.repository';
+import { sendSavingsPaymentSuccess } from '../utils/whatsapp';
 import { AppError } from '../utils/appError';
+import Logger from '../utils/logger';
 
 export class SavingsService {
   private savingsRepository: SavingsRepository;
+  private userRepository: UserRepository;
 
   constructor() {
     this.savingsRepository = new SavingsRepository();
+    this.userRepository = new UserRepository();
   }
 
   public async enroll(userId: string, data: any) {
@@ -40,12 +45,47 @@ export class SavingsService {
     if (!scheme) throw new AppError('Savings scheme not found', 404);
     if (scheme.userId.toString() !== userId) throw new AppError('Not authorized', 403);
 
+    // Payment lowest cutoff: an installment can't undercut the scheme's own
+    // monthly amount — mirrors the >=1000 floor enforced at enrollment.
+    if (!Number.isFinite(amount) || amount < scheme.monthlyAmount) {
+      throw new AppError(
+        `Payment must be at least the scheme's monthly amount (₹${scheme.monthlyAmount})`,
+        400,
+      );
+    }
+
     const updated = await this.savingsRepository.recordPayment(schemeId, amount, month);
     const payments = await this.savingsRepository.getPayments(schemeId);
+
+    // WhatsApp payment-success confirmation (best-effort — never blocks the response).
+    try {
+      const user = await this.userRepository.findById(userId);
+      if (user?.phone && updated) {
+        await sendSavingsPaymentSuccess(user.phone, {
+          passbookNumber: updated.passbookNumber,
+          amount,
+          totalPaid: updated.totalPaid,
+        });
+      }
+    } catch (error) {
+      Logger.error(`Savings payment WhatsApp dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+
     return { ...updated, payments };
   }
 
   public async getAllSchemes() {
     return await this.savingsRepository.findAll();
+  }
+
+  /** Track a scheme by its passbook number — the customer-facing lookup key.
+   * A customer may only look up their own passbook; admin/staff can look up any. */
+  public async getByPassbookNumber(requesterUserId: string, isStaffOrAdmin: boolean, passbookNumber: string) {
+    const scheme = await this.savingsRepository.findByPassbookNumber(passbookNumber);
+    if (!scheme) throw new AppError('No savings scheme found for that passbook number', 404);
+    if (!isStaffOrAdmin && scheme.userId.toString() !== requesterUserId) {
+      throw new AppError('Not authorized', 403);
+    }
+    return scheme;
   }
 }

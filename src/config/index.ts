@@ -39,4 +39,27 @@ export const config = {
   whatsappPhoneId: process.env.WHATSAPP_PHONE_ID || '',
   whatsappApiVersion: process.env.WHATSAPP_API_VERSION || 'v21.0',
   rateAlertRecipient: process.env.RATE_ALERT_RECIPIENT || '+918825649680',
+  // OTP login: email delivery (via Brevo, above) always works. WhatsApp delivery
+  // additionally requires an approved Meta "Authentication" template outside the
+  // 24h customer-care window — flip this on once that approval lands; until then
+  // it stays off and OTP login works via email only.
+  whatsappOtpEnabled: process.env.WHATSAPP_OTP_ENABLED === 'true',
+  otpExpiryMinutes: Number(process.env.OTP_EXPIRY_MINUTES || 5),
+  // Returns policy: KV-fault claims require an unboxing video sent to this
+  // WhatsApp number (shown to the customer after they file a fault-based return),
+  // received via the inbound webhook below and matched to the return by
+  // reference code / sender phone. Claim window is measured from Order.deliveredAt.
+  // Falls back to the existing rate-alert number if unset — set
+  // RETURN_VIDEO_WHATSAPP_NUMBER explicitly once there's a dedicated
+  // customer-facing WhatsApp Business number.
+  returnVideoWhatsappNumber:
+    process.env.RETURN_VIDEO_WHATSAPP_NUMBER || process.env.RATE_ALERT_RECIPIENT || '+918825649680',
+  returnClaimWindowHours: Number(process.env.RETURN_CLAIM_WINDOW_HOURS || 48),
+  returnVideoStorageDir: process.env.RETURN_VIDEO_STORAGE_DIR || '',
+  // Meta WhatsApp Cloud API inbound webhook (receives the unboxing videos above).
+  whatsappWebhookVerifyToken: process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || '',
+  // App secret used to verify the X-Hub-Signature-256 header on inbound webhook
+  // calls — without this, anyone who finds the webhook URL could POST a fake
+  // "video received" event. Strongly recommended in production.
+  whatsappAppSecret: process.env.WHATSAPP_APP_SECRET || '',
 };

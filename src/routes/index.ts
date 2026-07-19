@@ -21,6 +21,9 @@ import storeConfigRoutes from './storeConfig.routes';
 import giftVoucherRoutes from './giftVoucher.routes';
 import pricingConfigRoutes from './pricingConfig.routes';
 import deliveryConfigRoutes from './deliveryConfig.routes';
+import stallConfigRoutes from './stallConfig.routes';
+import invoiceConfigRoutes from './invoiceConfig.routes';
+import whatsappWebhookRoutes from './whatsappWebhook.routes';
 
 const router = Router();
 
@@ -44,6 +47,9 @@ router.use('/store-config', storeConfigRoutes);
 router.use('/gift-vouchers', giftVoucherRoutes);
 router.use('/pricing-config', pricingConfigRoutes);
 router.use('/delivery-config', deliveryConfigRoutes);
+router.use('/stall-config', stallConfigRoutes);
+router.use('/invoice-config', invoiceConfigRoutes);
+router.use('/webhooks/whatsapp', whatsappWebhookRoutes);
 router.use('/admin', adminRoutes);
 router.use('/', miscRoutes);
 

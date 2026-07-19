@@ -31,7 +31,16 @@ const corsOptions: cors.CorsOptions = {
 app.use(cors(corsOptions));
 // Products store images as base64 strings, which easily exceed the default 100kb
 // body limit. Raise it so admin product create/update with embedded images succeeds.
-app.use(express.json({ limit: '15mb' }));
+// `verify` stashes the raw bytes on the request — the WhatsApp inbound webhook needs
+// them (not the parsed object) to check Meta's X-Hub-Signature-256 HMAC.
+app.use(
+  express.json({
+    limit: '15mb',
+    verify: (req: Request & { rawBody?: Buffer }, _res, buf) => {
+      req.rawBody = buf;
+    },
+  }),
+);
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use(
   morgan(':method :url :status :res[content-length] - :response-time ms', {

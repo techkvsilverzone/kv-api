@@ -26,6 +26,8 @@ export interface IShippingAddress {
 export interface IOrder extends Document {
   _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
+  /** Sequential per-financial-year tax invoice number, e.g. "INV-2026-000123". */
+  invoiceNumber: string;
   status: string;
   paymentMethod: string;
   paymentStatus: string;
@@ -45,6 +47,8 @@ export interface IOrder extends Document {
   tax: number;
   shippingAddress: IShippingAddress;
   items: IOrderItem[];
+  /** Set once, the first time status transitions to 'Delivered' — anchors the return claim window. */
+  deliveredAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -80,6 +84,7 @@ const ShippingAddressSchema = new Schema<IShippingAddress>(
 const OrderSchema = new Schema<IOrder>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    invoiceNumber: { type: String, unique: true, sparse: true },
     status: {
       type: String,
       required: true,
@@ -114,6 +119,7 @@ const OrderSchema = new Schema<IOrder>(
     tax: { type: Number, default: 0 },
     shippingAddress: { type: ShippingAddressSchema, required: true },
     items: { type: [OrderItemSchema], default: [] },
+    deliveredAt: { type: Date },
   },
   { timestamps: true },
 );

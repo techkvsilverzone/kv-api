@@ -5,6 +5,8 @@ import { connectMongo } from './utils/db';
 import { seedAdmin } from './utils/seeder';
 import { scheduleDailyIST } from './utils/scheduler';
 import { RateGuardService } from './services/rateGuard.service';
+import { SavingsReminderService } from './services/savingsReminder.service';
+import { BirthdayWishService } from './services/birthdayWish.service';
 
 const PORT = config.port;
 
@@ -21,8 +23,26 @@ connectMongo()
     scheduleDailyIST(
       config.rateUpdateCutoffHour,
       0,
-      () => rateGuardService.checkAndNotify().then(() => undefined),
+      () => rateGuardService.checkAndNotify(new Date(), true).then(() => undefined),
       'rate-update-guard',
+    );
+
+    // Savings installment reminders (day 1/5/10 overdue + missed) — once a day, morning IST.
+    const savingsReminderService = new SavingsReminderService();
+    scheduleDailyIST(
+      9,
+      0,
+      () => savingsReminderService.runDailyReminders(new Date()).then(() => undefined),
+      'savings-reminders',
+    );
+
+    // Birthday / wedding-anniversary WhatsApp wishes — once a day, morning IST.
+    const birthdayWishService = new BirthdayWishService();
+    scheduleDailyIST(
+      9,
+      30,
+      () => birthdayWishService.runDailyWishes(new Date()).then(() => undefined),
+      'birthday-anniversary-wishes',
     );
 
     app.listen(PORT, () => {

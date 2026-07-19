@@ -1,3 +1,6 @@
+# Locally stored return-request unboxing videos (received via the WhatsApp webhook)
+uploads/
+
 # Logs
 logs
 *.log

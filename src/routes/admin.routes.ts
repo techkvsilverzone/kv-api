@@ -13,6 +13,10 @@ import { FilterConfigRepository } from '../repositories/filterConfig.repository'
 import { StoreConfigRepository } from '../repositories/storeConfig.repository';
 import { PricingConfigRepository } from '../repositories/pricingConfig.repository';
 import { DeliveryConfigRepository } from '../repositories/deliveryConfig.repository';
+import { StallConfigRepository } from '../repositories/stallConfig.repository';
+import { InvoiceConfigRepository } from '../repositories/invoiceConfig.repository';
+import { UserRepository } from '../repositories/user.repository';
+import { sendBroadcast } from '../utils/whatsapp';
 import { InventoryController } from '../controllers/inventory.controller';
 import { GiftVoucherController } from '../controllers/giftVoucher.controller';
 import { protect, admin, adminOrStaff } from '../middlewares/auth.middleware';
@@ -21,6 +25,9 @@ const filterConfigRepository = new FilterConfigRepository();
 const storeConfigRepository = new StoreConfigRepository();
 const pricingConfigRepository = new PricingConfigRepository();
 const deliveryConfigRepository = new DeliveryConfigRepository();
+const stallConfigRepository = new StallConfigRepository();
+const invoiceConfigRepository = new InvoiceConfigRepository();
+const userRepositoryForBroadcast = new UserRepository();
 const inventoryController = new InventoryController();
 const giftVoucherController = new GiftVoucherController();
 
@@ -758,6 +765,92 @@ router.get('/returns', returnController.getAllReturns);
  *         $ref: '#/components/responses/NotFound'
  */
 router.put('/returns/:id', returnController.updateReturnStatus);
+
+/**
+ * @openapi
+ * /admin/returns/{id}/video:
+ *   get:
+ *     summary: Stream the unboxing video attached to a return (video/mp4 or similar)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Video file stream
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.get('/returns/:id/video', returnController.streamReturnVideo);
+
+/**
+ * @openapi
+ * /admin/return-videos/unmatched:
+ *   get:
+ *     summary: List unboxing videos received via WhatsApp that could not be auto-matched to a return
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Unmatched videos
+ */
+router.get('/return-videos/unmatched', returnController.listUnmatchedVideos);
+
+/**
+ * @openapi
+ * /admin/return-videos/unmatched/{id}/file:
+ *   get:
+ *     summary: Stream an unmatched video
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Video file stream
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.get('/return-videos/unmatched/:id/file', returnController.streamUnmatchedVideo);
+
+/**
+ * @openapi
+ * /admin/return-videos/unmatched/{id}/link:
+ *   post:
+ *     summary: Manually link an unmatched WhatsApp video to a return request
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [returnId]
+ *             properties:
+ *               returnId: { type: string }
+ *     responses:
+ *       200:
+ *         description: Return updated with the linked video
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.post('/return-videos/unmatched/:id/link', returnController.linkUnmatchedVideo);
 
 /**
  * @openapi
@@ -1507,6 +1600,260 @@ router.put('/delivery-config', async (req: Request, res: Response, next: NextFun
         otherDistrict: config.otherDistrict,
         otherState: config.otherState,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @openapi
+ * /admin/stall-config:
+ *   get:
+ *     summary: Get offline-stall registration mode status
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Stall config
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     active:
+ *                       type: boolean
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.get('/stall-config', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await stallConfigRepository.getConfig();
+    res.status(200).json({ status: 'success', data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @openapi
+ * /admin/stall-config:
+ *   put:
+ *     summary: Enable/disable offline-stall registration mode
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [active]
+ *             properties:
+ *               active:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Stall config updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     active:
+ *                       type: boolean
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.put('/stall-config', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const body = req.body ?? {};
+    if (typeof body.active !== 'boolean') {
+      res.status(400).json({ message: 'active must be a boolean' });
+      return;
+    }
+    const config = await stallConfigRepository.upsert({ active: body.active });
+    res.status(200).json({ status: 'success', data: { active: config.active } });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @openapi
+ * /admin/invoice-config:
+ *   get:
+ *     summary: Get invoice/company details (GSTIN, address)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Invoice config
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.get('/invoice-config', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await invoiceConfigRepository.getConfig();
+    res.status(200).json({ status: 'success', data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @openapi
+ * /admin/invoice-config:
+ *   put:
+ *     summary: Update invoice/company details (GSTIN, address) shown on customer invoices
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               companyName:
+ *                 type: string
+ *               gstin:
+ *                 type: string
+ *               companyAddress:
+ *                 type: string
+ *               companyPhone:
+ *                 type: string
+ *               companyEmail:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Invoice config updated
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.put('/invoice-config', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const body = req.body ?? {};
+    const fields: Array<'companyName' | 'gstin' | 'companyAddress' | 'companyPhone' | 'companyEmail'> = [
+      'companyName',
+      'gstin',
+      'companyAddress',
+      'companyPhone',
+      'companyEmail',
+    ];
+    const values: Record<string, string> = {};
+    for (const field of fields) {
+      if (body[field] !== undefined) {
+        if (typeof body[field] !== 'string') {
+          res.status(400).json({ message: `${field} must be a string` });
+          return;
+        }
+        values[field] = body[field].trim();
+      }
+    }
+    const config = await invoiceConfigRepository.upsert(values);
+    res.status(200).json({
+      status: 'success',
+      data: {
+        companyName: config.companyName,
+        gstin: config.gstin,
+        companyAddress: config.companyAddress,
+        companyPhone: config.companyPhone,
+        companyEmail: config.companyEmail,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @openapi
+ * /admin/whatsapp/broadcast:
+ *   post:
+ *     summary: Send a WhatsApp broadcast (festival promotions etc.) to customers
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [message]
+ *             properties:
+ *               message:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Broadcast dispatched
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     recipients:
+ *                       type: integer
+ *                     sent:
+ *                       type: integer
+ *                     failed:
+ *                       type: integer
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.post('/whatsapp/broadcast', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
+    if (!message) {
+      res.status(400).json({ message: 'message is required' });
+      return;
+    }
+
+    const customers = await userRepositoryForBroadcast.findRegularCustomers();
+    const phones = customers.map((c) => c.phone).filter((p): p is string => !!p);
+
+    const results = await sendBroadcast(phones, message);
+    const sent = results.filter((r) => r.result.sent).length;
+
+    res.status(200).json({
+      status: 'success',
+      data: { recipients: phones.length, sent, failed: phones.length - sent },
     });
   } catch (error) {
     next(error);

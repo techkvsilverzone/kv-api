@@ -8,6 +8,7 @@ import { PricingService, CheckoutBreakdown, CheckoutItemInput, CheckoutAddress }
 import { StockService } from './stock.service';
 import { AppError } from '../utils/appError';
 import { sendOrderConfirmationEmail, buildOrderConfirmationInput } from '../utils/emailNotifications';
+import { sendPaymentSuccessMessage } from '../utils/whatsapp';
 import Logger from '../utils/logger';
 
 export interface CreateOrderInput {
@@ -82,11 +83,12 @@ export class PaymentService {
       throw new AppError('orderData.items is required', 400);
     }
 
-    const isCod =
-      !razorpayOrderId &&
-      !razorpayPaymentId &&
-      !razorpaySignature &&
-      orderData?.paymentMethod === 'cod';
+    // Cash on Delivery has been discontinued — every order must be paid online.
+    if (String(orderData?.paymentMethod || '').toLowerCase() === 'cod') {
+      throw new AppError('Cash on Delivery is no longer available. Please pay online.', 400);
+    }
+
+    const isCod = false;
 
     if (!isCod) {
       const expectedSignature = crypto
@@ -168,6 +170,20 @@ export class PaymentService {
       );
     } catch (error) {
       Logger.error(`Order confirmation email dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+
+    // WhatsApp payment-success confirmation (best-effort, mirrors the email above).
+    try {
+      const phone = order.shippingAddress?.phone;
+      if (phone) {
+        await sendPaymentSuccessMessage(phone, {
+          invoiceNumber: order.invoiceNumber,
+          amount: order.grandTotal || order.totalAmount,
+          paymentMethod: order.paymentMethod,
+        });
+      }
+    } catch (error) {
+      Logger.error(`Order confirmation WhatsApp dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     return order;

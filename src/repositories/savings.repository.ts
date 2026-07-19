@@ -37,9 +37,20 @@ export class SavingsRepository {
       .exec();
   }
 
+  /** Active schemes with the owner's phone populated — used by the daily reminder cron. */
+  public async findActiveWithUserPhone(): Promise<ISavings[]> {
+    return Savings.find({ status: 'Active' })
+      .populate('userId', 'name phone')
+      .exec();
+  }
+
   public async findById(id: string): Promise<ISavings | null> {
     if (!mongoose.Types.ObjectId.isValid(id)) return null;
     return Savings.findById(id).exec();
+  }
+
+  public async findByPassbookNumber(passbookNumber: string): Promise<ISavings | null> {
+    return Savings.findOne({ passbookNumber: passbookNumber.trim().toUpperCase() }).exec();
   }
 
   public async recordPayment(schemeId: string, amount: number, month: number): Promise<ISavings | null> {

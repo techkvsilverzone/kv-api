@@ -1,13 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserService } from '../services/user.service';
+import { OtpService } from '../services/otp.service';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { setAuthCookie, clearAuthCookie } from '../utils/authCookie';
 
 export class UserController {
   private userService: UserService;
+  private otpService: OtpService;
 
   constructor() {
     this.userService = new UserService();
+    this.otpService = new OtpService();
   }
 
   public signup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -23,6 +26,25 @@ export class UserController {
   public login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const result = await this.userService.login(req.body);
+      setAuthCookie(res, result.token);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public requestLoginOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this.otpService.requestLoginOtp(req.body?.email);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public verifyLoginOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this.otpService.verifyLoginOtp(req.body?.email, req.body?.code);
       setAuthCookie(res, result.token);
       res.status(200).json(result);
     } catch (error) {

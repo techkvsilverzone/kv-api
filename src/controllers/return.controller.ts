@@ -18,6 +18,10 @@ export class ReturnController {
     }
   };
 
+  public getReturnPolicy = (_req: Request, res: Response): void => {
+    res.status(200).json(this.returnService.getReturnPolicy());
+  };
+
   public getMyReturns = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const returns = await this.returnService.getMyReturns(req.user!._id.toString());
@@ -43,6 +47,49 @@ export class ReturnController {
         req.params.id as string,
         status,
         Number(refundAmount || 0),
+      );
+      res.status(200).json(updated);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // ── Admin: video review ─────────────────────────────────────────────
+
+  public streamReturnVideo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { filePath, mimeType } = await this.returnService.getReturnVideoFile(req.params.id as string);
+      res.setHeader('Content-Type', mimeType);
+      res.sendFile(filePath);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public listUnmatchedVideos = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const videos = await this.returnService.getUnmatchedVideos();
+      res.status(200).json(videos);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public streamUnmatchedVideo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { filePath, mimeType } = await this.returnService.getUnmatchedVideoFile(req.params.id as string);
+      res.setHeader('Content-Type', mimeType);
+      res.sendFile(filePath);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public linkUnmatchedVideo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const updated = await this.returnService.linkUnmatchedVideo(
+        req.params.id as string,
+        req.body?.returnId,
       );
       res.status(200).json(updated);
     } catch (error) {
