@@ -98,6 +98,16 @@ export class UserService {
     return await this.userRepository.findAll();
   }
 
+  /** Admin-only. Deactivates rather than hard-deletes — preserves referential
+   * integrity for the user's existing orders/returns/savings history, and
+   * findByEmail/findAll already filter on isActive so the account effectively
+   * disappears (can no longer log in or appear in customer lists). */
+  public async deleteUser(userId: string) {
+    const user = await this.userRepository.update(userId, { isActive: false });
+    if (!user) throw new AppError('User not found', 404);
+    return user;
+  }
+
   // ── Address book ─────────────────────────────────────────────────────
 
   private toAddressResponse(a: IAddress) {

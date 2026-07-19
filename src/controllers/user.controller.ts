@@ -139,6 +139,24 @@ export class UserController {
     }
   };
 
+  public adminUpdateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = await this.userService.updateProfile(req.params.id as string, req.body);
+      res.status(200).json(user);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await this.userService.deleteUser(req.params.id as string);
+      res.status(200).json({ status: 'success' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public changePassword = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const requesterUserId = req.user!._id.toString();

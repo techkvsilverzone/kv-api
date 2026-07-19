@@ -358,6 +358,71 @@ router.get('/users', userController.getAllUsers);
 
 /**
  * @openapi
+ * /admin/users/{id}:
+ *   put:
+ *     summary: Update a user (admin only, not staff — user management is sensitive)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               isAdmin:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Updated user
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.put('/users/:id', admin, userController.adminUpdateUser);
+
+/**
+ * @openapi
+ * /admin/users/{id}:
+ *   delete:
+ *     summary: Deactivate a user (admin only). Soft delete — preserves order/return/savings history.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User deactivated
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.delete('/users/:id', admin, userController.deleteUser);
+
+/**
+ * @openapi
  * /products:
  *   post:
  *     summary: Add new product
