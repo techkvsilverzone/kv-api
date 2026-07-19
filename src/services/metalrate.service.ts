@@ -1,6 +1,7 @@
 import { AppError } from '../utils/appError';
 import { IMetalRate, MetalType } from '../models/metalrate.model';
 import { MetalRateRepository } from '../repositories/metalrate.repository';
+import { istMidnightUtc } from '../utils/time';
 
 export interface MetalRateResponse {
   id: string;
@@ -63,11 +64,15 @@ export class MetalRateService {
     karat: number | null;
     ratePerGram: number;
   } {
-    const parsedDate = new Date(payload.date);
+    // Pin to IST midnight for the given calendar day, NOT UTC or server-local
+    // midnight — the rate-freshness guard compares by IST day, so the anchor
+    // used to store a rate must agree with it or "today's" rate silently
+    // lands under yesterday's key during the UTC/IST offset window.
+    const dayKey = String(payload.date || '').slice(0, 10);
+    const parsedDate = dayKey ? istMidnightUtc(dayKey) : new Date(NaN);
     if (!payload.date || Number.isNaN(parsedDate.getTime())) {
       throw new AppError('date must be a valid ISO date (YYYY-MM-DD)', 400);
     }
-    parsedDate.setHours(0, 0, 0, 0);
 
     if (payload.metal !== 'SILVER' && payload.metal !== 'GOLD') {
       throw new AppError('metal must be SILVER or GOLD', 400);

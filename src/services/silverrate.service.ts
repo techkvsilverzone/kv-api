@@ -1,4 +1,5 @@
 import { MetalRateService } from './metalrate.service';
+import { istDayKey } from '../utils/time';
 
 export interface LegacySilverRateResponse {
   id: string;
@@ -33,7 +34,10 @@ export class SilverRateService {
   }
 
   public async upsertRate(ratePerGram: number, _purity: string, updatedBy?: string) {
-    const today = new Date().toISOString().slice(0, 10);
+    // IST calendar day, not UTC — must agree with the rate-freshness guard's
+    // day comparison, or a rate saved between 00:00-05:30 IST silently lands
+    // under yesterday's date and the admin panel stays locked.
+    const today = istDayKey();
     const rate = await this.metalRateService.upsertRate(
       {
         date: today,

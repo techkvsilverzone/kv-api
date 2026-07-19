@@ -26,6 +26,17 @@ export function isSameIstDay(date: Date, reference: Date = new Date()): boolean 
 }
 
 /**
+ * The UTC instant corresponding to IST midnight of the given 'YYYY-MM-DD' day key.
+ * Use this (not `new Date(key); d.setHours(0,0,0,0)`) whenever a calendar day needs
+ * to be pinned to a stable instant — `setHours` mutates in the SERVER's local
+ * timezone, which silently drifts the stored date whenever the server isn't
+ * running in IST (or UTC, by luck). This is deterministic regardless of server TZ.
+ */
+export function istMidnightUtc(dayKey: string): Date {
+  return new Date(`${dayKey}T00:00:00+05:30`);
+}
+
+/**
  * Milliseconds from `from` until the next occurrence of `hour:minute` IST.
  * If that time has already passed today (IST), targets the same time tomorrow.
  */

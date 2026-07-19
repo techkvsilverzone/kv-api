@@ -1,4 +1,5 @@
 import { MetalRateService } from './metalrate.service';
+import { istDayKey } from '../utils/time';
 
 // 22K gold hallmark. Mirrors how the silver service pins purity to '999';
 // the MetalRate collection stores karat (22), not the purity string.
@@ -41,7 +42,8 @@ export class GoldRateService {
   }
 
   public async upsertRate(ratePerGram: number, _purity: string, updatedBy?: string) {
-    const today = new Date().toISOString().slice(0, 10);
+    // IST calendar day, not UTC — see silverrate.service.ts for why this matters.
+    const today = istDayKey();
     const rate = await this.metalRateService.upsertRate(
       {
         date: today,
