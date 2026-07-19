@@ -26,6 +26,24 @@ export class ProductController {
     }
   };
 
+  public createCategory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await this.productService.createCategory(req.body?.name);
+      res.status(201).json({ status: 'success' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public deleteCategory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await this.productService.deleteCategory(req.params.name as string);
+      res.status(200).json({ status: 'success' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public getProductById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const product = await this.productService.getProductById(req.params.id as string);

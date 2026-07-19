@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ProductController } from '../controllers/product.controller';
 import { ReviewController } from '../controllers/review.controller';
-import { protect, admin } from '../middlewares/auth.middleware';
+import { protect, admin, adminOrStaff } from '../middlewares/auth.middleware';
 
 const router = Router();
 const productController = new ProductController();
@@ -123,6 +123,64 @@ router.get('/featured', productController.getFeatured);
  *                     type: string
  */
 router.get('/categories', productController.getCategories);
+
+/**
+ * @openapi
+ * /products/categories:
+ *   post:
+ *     summary: Register a new category (admin/staff)
+ *     description: Categories are otherwise derived from products in use — this lets an
+ *       admin create one ahead of the first product that uses it.
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name]
+ *             properties:
+ *               name:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Category registered (idempotent if it already exists)
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.post('/categories', protect, adminOrStaff, productController.createCategory);
+
+/**
+ * @openapi
+ * /products/categories/{name}:
+ *   delete:
+ *     summary: Remove a registered category (admin/staff)
+ *     description: Only removes the standalone registration — products already using this
+ *       category as their material are unaffected and it will keep appearing in the list.
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: name
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Category removed
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.delete('/categories/:name', protect, adminOrStaff, productController.deleteCategory);
 
 /**
  * @openapi

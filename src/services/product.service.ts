@@ -2,6 +2,7 @@ import { ProductRepository } from '../repositories/product.repository';
 import { IProductCharge } from '../models/product.model';
 import { UserRepository } from '../repositories/user.repository';
 import { InventoryRepository } from '../repositories/inventory.repository';
+import { CategoryRepository } from '../repositories/category.repository';
 import { PricingService } from './pricing.service';
 import { AppError } from '../utils/appError';
 import { sendNewProductPromotion } from '../utils/emailNotifications';
@@ -12,12 +13,14 @@ export class ProductService {
   private productRepository: ProductRepository;
   private userRepository: UserRepository;
   private inventoryRepository: InventoryRepository;
+  private categoryRepository: CategoryRepository;
   private pricingService: PricingService;
 
   constructor() {
     this.productRepository = new ProductRepository();
     this.userRepository = new UserRepository();
     this.inventoryRepository = new InventoryRepository();
+    this.categoryRepository = new CategoryRepository();
     this.pricingService = new PricingService();
   }
 
@@ -72,8 +75,26 @@ export class ProductService {
     return await this.attachStock(enriched);
   }
 
+  /** Merges categories actually in use (distinct product material) with ones an
+   * admin has registered ahead of creating a product in them. */
   public async getCategories() {
-    return await this.productRepository.getCategories();
+    const [fromProducts, stored] = await Promise.all([
+      this.productRepository.getCategories(),
+      this.categoryRepository.findAllNames(),
+    ]);
+    return Array.from(new Set([...fromProducts, ...stored])).sort();
+  }
+
+  public async createCategory(name: string) {
+    const trimmed = String(name || '').trim();
+    if (!trimmed) throw new AppError('Category name is required', 400);
+    await this.categoryRepository.create(trimmed);
+  }
+
+  public async deleteCategory(name: string) {
+    const trimmed = String(name || '').trim();
+    if (!trimmed) throw new AppError('Category name is required', 400);
+    await this.categoryRepository.delete(trimmed);
   }
 
   public async getProductById(id: string) {
