@@ -5,6 +5,7 @@ export interface IStoreConfig extends Document {
   key: string;
   theme: string;
   isDark: boolean;
+  marqueeMessages: string[];
   updatedAt: Date;
 }
 
@@ -13,6 +14,7 @@ const StoreConfigSchema = new Schema<IStoreConfig>(
     key: { type: String, required: true, unique: true, default: 'global' },
     theme: { type: String, required: true, default: 'icy-silver', trim: true },
     isDark: { type: Boolean, default: false },
+    marqueeMessages: { type: [String], default: [] },
   },
   { timestamps: true },
 );

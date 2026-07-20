@@ -7,13 +7,14 @@ export class StoreConfigRepository {
     return StoreConfig.findOne({ key: GLOBAL_KEY }).exec();
   }
 
-  public async upsert(data: { theme?: string; isDark?: boolean }): Promise<IStoreConfig> {
+  public async upsert(data: { theme?: string; isDark?: boolean; marqueeMessages?: string[] }): Promise<IStoreConfig> {
     return StoreConfig.findOneAndUpdate(
       { key: GLOBAL_KEY },
       {
         $set: {
           theme: data.theme ?? 'icy-silver',
           isDark: data.isDark ?? false,
+          marqueeMessages: data.marqueeMessages ?? [],
         },
       },
       { new: true, upsert: true },

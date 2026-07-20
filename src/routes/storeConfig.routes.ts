@@ -16,21 +16,15 @@ const storeConfigRepository = new StoreConfigRepository();
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 data:
- *                   $ref: '#/components/schemas/StoreConfig'
+ *               $ref: '#/components/schemas/StoreConfig'
  */
+// Response is the config object itself (not the {status, data} envelope some other
+// routes use) — the frontend's storeConfigService types this as a plain StoreConfig
+// and reads `.theme`/`.marqueeMessages` directly off the response body.
 router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const config = await storeConfigRepository.get();
-    res.status(200).json({
-      status: 'success',
-      data: config ?? { theme: 'icy-silver', isDark: false },
-    });
+    res.status(200).json(config ?? { theme: 'icy-silver', isDark: false, marqueeMessages: [] });
   } catch (error) {
     next(error);
   }

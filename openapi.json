@@ -1079,6 +1079,12 @@
           },
           "isDark": {
             "type": "boolean"
+          },
+          "marqueeMessages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -2341,15 +2347,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/StoreConfig"
-                    }
-                  }
+                  "$ref": "#/components/schemas/StoreConfig"
                 }
               }
             }
@@ -2388,6 +2386,12 @@
                   },
                   "isDark": {
                     "type": "boolean"
+                  },
+                  "marqueeMessages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -2400,15 +2404,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/StoreConfig"
-                    }
-                  }
+                  "$ref": "#/components/schemas/StoreConfig"
                 }
               }
             }
@@ -5061,16 +5057,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "example": "success"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/StoreConfig"
-                    }
-                  }
+                  "$ref": "#/components/schemas/StoreConfig"
                 }
               }
             }

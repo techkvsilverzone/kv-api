@@ -498,6 +498,7 @@ const options: swaggerJsdoc.Options = {
           properties: {
             theme: { type: 'string', example: 'icy-silver' },
             isDark: { type: 'boolean' },
+            marqueeMessages: { type: 'array', items: { type: 'string' } },
           },
         },
         Review: {

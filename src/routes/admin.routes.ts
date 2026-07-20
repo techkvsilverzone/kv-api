@@ -1050,12 +1050,7 @@ router.put('/filter-config', async (req: Request, res: Response, next: NextFunct
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/StoreConfig'
+ *               $ref: '#/components/schemas/StoreConfig'
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       403:
@@ -1063,13 +1058,12 @@ router.put('/filter-config', async (req: Request, res: Response, next: NextFunct
  */
 // Theme/branding is admin-only in the UI (Theme tab is hidden from staff) — kept stricter
 // than the blanket adminOrStaff default below.
+// Response is the config object itself, matching adminService.getStoreConfig's
+// StoreConfig return type (no {status, data} envelope).
 router.get('/store-config', admin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const config = await storeConfigRepository.get();
-    res.status(200).json({
-      status: 'success',
-      data: config ?? { theme: 'icy-silver', isDark: false },
-    });
+    res.status(200).json(config ?? { theme: 'icy-silver', isDark: false, marqueeMessages: [] });
   } catch (error) {
     next(error);
   }
@@ -1097,18 +1091,17 @@ router.get('/store-config', admin, async (req: Request, res: Response, next: Nex
  *                 type: string
  *               isDark:
  *                 type: boolean
+ *               marqueeMessages:
+ *                 type: array
+ *                 items:
+ *                   type: string
  *     responses:
  *       200:
  *         description: Store theme configuration updated
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/StoreConfig'
+ *               $ref: '#/components/schemas/StoreConfig'
  *       400:
  *         $ref: '#/components/responses/BadRequest'
  *       401:
@@ -1118,7 +1111,7 @@ router.get('/store-config', admin, async (req: Request, res: Response, next: Nex
  */
 router.put('/store-config', admin, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { theme, isDark } = req.body;
+    const { theme, isDark, marqueeMessages } = req.body;
 
     if (typeof theme !== 'string' || !theme.trim()) {
       res.status(400).json({ message: 'theme is required' });
@@ -1130,8 +1123,17 @@ router.put('/store-config', admin, async (req: Request, res: Response, next: Nex
       return;
     }
 
-    const config = await storeConfigRepository.upsert({ theme: theme.trim(), isDark });
-    res.status(200).json({ status: 'success', data: config });
+    if (marqueeMessages !== undefined && (!Array.isArray(marqueeMessages) || marqueeMessages.some((m) => typeof m !== 'string'))) {
+      res.status(400).json({ message: 'marqueeMessages must be an array of strings' });
+      return;
+    }
+
+    const config = await storeConfigRepository.upsert({
+      theme: theme.trim(),
+      isDark,
+      marqueeMessages: marqueeMessages?.map((m: string) => m.trim()).filter(Boolean),
+    });
+    res.status(200).json(config);
   } catch (error) {
     next(error);
   }
@@ -1139,7 +1141,7 @@ router.put('/store-config', admin, async (req: Request, res: Response, next: Nex
 
 router.post('/store-config', admin, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { theme, isDark } = req.body;
+    const { theme, isDark, marqueeMessages } = req.body;
 
     if (typeof theme !== 'string' || !theme.trim()) {
       res.status(400).json({ message: 'theme is required' });
@@ -1151,8 +1153,17 @@ router.post('/store-config', admin, async (req: Request, res: Response, next: Ne
       return;
     }
 
-    const config = await storeConfigRepository.upsert({ theme: theme.trim(), isDark });
-    res.status(200).json({ status: 'success', data: config });
+    if (marqueeMessages !== undefined && (!Array.isArray(marqueeMessages) || marqueeMessages.some((m) => typeof m !== 'string'))) {
+      res.status(400).json({ message: 'marqueeMessages must be an array of strings' });
+      return;
+    }
+
+    const config = await storeConfigRepository.upsert({
+      theme: theme.trim(),
+      isDark,
+      marqueeMessages: marqueeMessages?.map((m: string) => m.trim()).filter(Boolean),
+    });
+    res.status(200).json(config);
   } catch (error) {
     next(error);
   }
