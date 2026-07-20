@@ -4,13 +4,8 @@ import { CouponRepository } from '../repositories/coupon.repository';
 import { StallConfigRepository } from '../repositories/stallConfig.repository';
 import { AppError } from '../utils/appError';
 import { generateToken } from '../utils/jwt';
+import { toUserResponse, toAddressResponse } from '../utils/userResponse';
 import bcrypt from 'bcryptjs';
-
-function computeRole(user: { isAdmin: boolean; role?: string }): 'admin' | 'staff' | 'customer' {
-  if (user.role === 'staff') return 'staff';
-  if (user.role === 'admin' || user.isAdmin) return 'admin';
-  return 'customer';
-}
 
 export class UserService {
   private userRepository: UserRepository;
@@ -43,7 +38,6 @@ export class UserService {
       isStallRegistration: stallEventHonoured,
     });
     const token = generateToken(user._id.toString());
-    const { passwordHash, ...safeUser } = user.toObject ? user.toObject() : (user as any);
 
     let promoCoupon: string | undefined;
     if (stallEventHonoured) {
@@ -62,7 +56,7 @@ export class UserService {
       promoCoupon = coupon.code;
     }
 
-    return { user: { ...safeUser, role: computeRole(safeUser) }, token, ...(promoCoupon ? { promoCoupon } : {}) };
+    return { user: toUserResponse(user), token, ...(promoCoupon ? { promoCoupon } : {}) };
   }
 
   public async login(data: any) {
@@ -77,25 +71,24 @@ export class UserService {
     }
 
     const token = generateToken(user._id.toString());
-    const { passwordHash, ...safeUser } = user.toObject ? user.toObject() : (user as any);
-    return { user: { ...safeUser, role: computeRole(safeUser) }, token };
+    return { user: toUserResponse(user), token };
   }
 
   public async getProfile(userId: string) {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new AppError('User not found', 404);
-    const { passwordHash, ...safeUser } = user.toObject ? user.toObject() : (user as any);
-    return { ...safeUser, role: computeRole(safeUser) };
+    return toUserResponse(user);
   }
 
   public async updateProfile(userId: string, data: any) {
     const user = await this.userRepository.update(userId, data);
     if (!user) throw new AppError('User not found', 404);
-    return user;
+    return toUserResponse(user);
   }
 
   public async getAllUsers() {
-    return await this.userRepository.findAll();
+    const users = await this.userRepository.findAll();
+    return users.map(toUserResponse);
   }
 
   /** Admin-only. Deactivates rather than hard-deletes — preserves referential
@@ -105,24 +98,13 @@ export class UserService {
   public async deleteUser(userId: string) {
     const user = await this.userRepository.update(userId, { isActive: false });
     if (!user) throw new AppError('User not found', 404);
-    return user;
+    return toUserResponse(user);
   }
 
   // ── Address book ─────────────────────────────────────────────────────
 
   private toAddressResponse(a: IAddress) {
-    return {
-      id: a._id.toString(),
-      label: a.label,
-      firstName: a.firstName,
-      lastName: a.lastName,
-      address: a.address,
-      city: a.city,
-      state: a.state,
-      pincode: a.pincode,
-      phone: a.phone,
-      isDefault: a.isDefault,
-    };
+    return toAddressResponse(a);
   }
 
   private buildAddressData(data: any, partial: boolean): AddressData {

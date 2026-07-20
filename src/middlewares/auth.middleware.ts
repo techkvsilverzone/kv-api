@@ -24,9 +24,14 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
     return next(new AppError('You are not logged in! Please log in to get access.', 401));
   }
 
+  let decoded: JwtPayload;
   try {
-    const decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
+    decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
+  } catch (error) {
+    return next(new AppError('Invalid token. Please log in again!', 401));
+  }
 
+  try {
     const currentUser = await userRepository.findById(decoded.id);
     if (!currentUser) {
       return next(new AppError('The user belonging to this token no longer exists.', 401));
@@ -35,7 +40,15 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
     req.user = currentUser;
     next();
   } catch (error) {
-    return next(new AppError('Invalid token. Please log in again!', 401));
+    // A lookup failure (Mongo unreachable, timeout) is NOT an auth failure. This used
+    // to share the catch above and surface as 401, which told every client to discard
+    // a perfectly valid session over a transient blip. Let it fall through as a 5xx so
+    // clients can retry instead of logging the user out.
+    if ((error as { name?: string })?.name === 'CastError') {
+      // Signed token carrying a non-ObjectId subject — that IS a bad token.
+      return next(new AppError('Invalid token. Please log in again!', 401));
+    }
+    return next(error);
   }
 };
 

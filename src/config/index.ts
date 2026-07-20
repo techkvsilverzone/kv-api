@@ -5,6 +5,11 @@ dotenv.config();
 export const config = {
   port: process.env.PORT || 5000,
   nodeEnv: process.env.NODE_ENV || 'development',
+  // Whether client-facing error responses carry a stack trace. Requires NODE_ENV
+  // to be EXPLICITLY 'development' — note this deliberately does not reuse the
+  // `nodeEnv` default above, so a prod box that forgot to set the var fails
+  // closed (no stack) rather than leaking internals.
+  exposeErrorStack: process.env.NODE_ENV === 'development',
   // Public storefront URL, used to build order links in transactional emails.
   frontendUrl: process.env.FRONTEND_URL || '',
   corsOrigins: process.env.CORS_ORIGINS || '*',

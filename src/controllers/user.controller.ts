@@ -81,8 +81,21 @@ export class UserController {
 
   public forgotPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      // Logic for forgot password (omitted for brevity, would usually involves email service)
-      res.status(200).json({ message: 'Password reset link sent to your email' });
+      const result = await this.otpService.requestPasswordReset(req.body?.email);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this.otpService.resetPassword(
+        req.body?.email,
+        req.body?.code,
+        req.body?.newPassword,
+      );
+      res.status(200).json(result);
     } catch (error) {
       next(error);
     }

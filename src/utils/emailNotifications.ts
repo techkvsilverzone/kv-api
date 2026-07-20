@@ -323,6 +323,31 @@ export async function sendOtpEmail(input: { email: string; name?: string; code: 
   });
 }
 
+export async function sendPasswordResetEmail(input: {
+  email: string;
+  name?: string;
+  code: string;
+  expiryMinutes: number;
+}): Promise<void> {
+  const html = buildLightThemeEmail({
+    title: 'Reset Your Password',
+    intro: `Hi ${input.name || 'there'}, use the code below to set a new KV Silver Zone password. It expires in ${input.expiryMinutes} minutes.`,
+    detailsTable: `
+      <div style="text-align:center;padding:16px 0;">
+        <span style="display:inline-block;font-size:32px;font-weight:700;letter-spacing:0.3em;color:#0f766e;">${input.code}</span>
+      </div>
+    `,
+    closing:
+      "If you didn't request a password reset, you can safely ignore this email — your password stays unchanged.",
+  });
+
+  await sendEmail({
+    to: [{ email: input.email, name: input.name }],
+    subject: `${input.code} is your KV Silver Zone password reset code`,
+    htmlContent: html,
+  });
+}
+
 export async function sendContactUsEmail(input: {
   name: string;
   email: string;

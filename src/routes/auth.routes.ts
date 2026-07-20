@@ -76,7 +76,11 @@ router.post('/logout', userController.logout);
  * @openapi
  * /auth/forgot-password:
  *   post:
- *     summary: Initiate password reset
+ *     summary: Email a password reset code
+ *     description: >
+ *       Sends a 6-digit reset code to the address if it belongs to an account.
+ *       Redeem it via POST /auth/reset-password. The response is deliberately
+ *       generic so this cannot be used to enumerate registered accounts.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -91,7 +95,7 @@ router.post('/logout', userController.logout);
  *                 format: email
  *     responses:
  *       200:
- *         description: Password reset link sent if the email exists
+ *         description: Generic confirmation — does not reveal whether the email is registered
  *         content:
  *           application/json:
  *             schema:
@@ -100,6 +104,43 @@ router.post('/logout', userController.logout);
  *         $ref: '#/components/responses/BadRequest'
  */
 router.post('/forgot-password', userController.forgotPassword);
+
+/**
+ * @openapi
+ * /auth/reset-password:
+ *   post:
+ *     summary: Redeem a password reset code and set a new password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, code, newPassword]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               code:
+ *                 type: string
+ *                 example: '123456'
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 6
+ *     responses:
+ *       200:
+ *         description: Password updated; sign in with the new password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MessageResponse'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.post('/reset-password', userController.resetPassword);
 
 /**
  * @openapi

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../utils/appError';
 import Logger from '../utils/logger';
+import { config } from '../config';
 
 export const errorMiddleware = (
   err: Error | AppError,
@@ -44,6 +45,6 @@ export const errorMiddleware = (
     status: 'error',
     statusCode,
     message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    ...(config.exposeErrorStack && { stack: err.stack }),
   });
 };
