@@ -145,14 +145,19 @@ const SAVINGS_REMINDER_COPY: Record<SavingsReminderKind, string> = {
   missed: 'You have missed this month\'s savings scheme installment. Please contact us or pay online to stay on track.',
 };
 
-/** Installment-due / overdue reminder for a savings scheme. */
+/**
+ * Installment-due / overdue reminder for a savings scheme. `passbookNumber` is absent for
+ * the very first installment (a passbook isn't issued until that payment lands), so the
+ * message refers to "your savings enrollment" instead of a passbook number in that case.
+ */
 export async function sendSavingsReminder(
   phone: string,
   kind: SavingsReminderKind,
-  input: { passbookNumber: string; monthlyAmount: number },
+  input: { passbookNumber?: string; monthlyAmount: number },
 ): Promise<WhatsAppSendResult> {
+  const label = input.passbookNumber ? `Passbook #${input.passbookNumber}` : 'your savings enrollment';
   const body =
-    `🔔 KV Silver Zone — Passbook #${input.passbookNumber}: ${SAVINGS_REMINDER_COPY[kind]} ` +
+    `🔔 KV Silver Zone — ${label}: ${SAVINGS_REMINDER_COPY[kind]} ` +
     `Amount due: ₹${input.monthlyAmount.toLocaleString('en-IN')}.`;
   return sendWhatsAppText(phone, body);
 }

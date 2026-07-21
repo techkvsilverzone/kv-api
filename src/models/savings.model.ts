@@ -9,7 +9,8 @@ export interface ISavingsPayment {
 export interface ISavings extends Document {
   _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
-  passbookNumber: string;
+  /** Unset until the scheme's first payment lands — see SavingsRepository.recordPayment. */
+  passbookNumber?: string;
   planName: string;
   monthlyAmount: number;
   duration: number;

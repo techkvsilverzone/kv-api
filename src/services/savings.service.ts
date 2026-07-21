@@ -13,6 +13,7 @@ export class SavingsService {
     this.userRepository = new UserRepository();
   }
 
+  /** Enrollment alone creates a scheme record but no passbook — that's issued on first payment. */
   public async enroll(userId: string, data: any) {
     const monthlyAmount = Number(data.monthlyAmount);
     if (!Number.isInteger(monthlyAmount) || monthlyAmount < 1000) {
@@ -54,13 +55,17 @@ export class SavingsService {
       );
     }
 
-    const updated = await this.savingsRepository.recordPayment(schemeId, amount, month);
+    // A real passbook is only minted once — on this scheme's first actual payment.
+    const isFirstPayment = scheme.payments.length === 0 && !scheme.passbookNumber;
+    const updated = await this.savingsRepository.recordPayment(schemeId, amount, month, isFirstPayment);
     const payments = await this.savingsRepository.getPayments(schemeId);
 
     // WhatsApp payment-success confirmation (best-effort — never blocks the response).
+    // updated.passbookNumber is always set by this point (either pre-existing, or just
+    // minted above via isFirstPayment) — the `if` is a type-narrowing guard, not a real branch.
     try {
       const user = await this.userRepository.findById(userId);
-      if (user?.phone && updated) {
+      if (user?.phone && updated?.passbookNumber) {
         await sendSavingsPaymentSuccess(user.phone, {
           passbookNumber: updated.passbookNumber,
           amount,

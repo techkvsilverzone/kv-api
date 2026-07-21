@@ -48,7 +48,9 @@ const savingsController = new SavingsController();
  *                   type: string
  *                 passbookNumber:
  *                   type: string
- *                   example: PB-00000042
+ *                   nullable: true
+ *                   description: Absent until this scheme's first payment is recorded.
+ *                   example: null
  *                 planName:
  *                   type: string
  *                 monthlyAmount:
