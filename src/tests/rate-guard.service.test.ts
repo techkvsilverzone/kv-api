@@ -5,11 +5,15 @@ import * as whatsapp from '../utils/whatsapp';
 
 describe('RateGuardService.checkAndNotify (#25 B2)', () => {
   let reminderSpy: jest.SpyInstance;
+  let successSpy: jest.SpyInstance;
   let setStatusSpy: jest.SpyInstance;
 
   beforeEach(() => {
     reminderSpy = jest
       .spyOn(whatsapp, 'sendRateUpdateReminder')
+      .mockResolvedValue({ sent: true } as never);
+    successSpy = jest
+      .spyOn(whatsapp, 'sendRateUpdateSuccessNotice')
       .mockResolvedValue({ sent: true } as never);
     setStatusSpy = jest
       .spyOn(RateStatusRepository.prototype, 'setStatus')
@@ -60,5 +64,22 @@ describe('RateGuardService.checkAndNotify (#25 B2)', () => {
     expect(status.blocked).toBe(true);
     expect(status.staleMetals).toEqual(['gold']);
     expect(reminderSpy).toHaveBeenCalledWith(['gold']);
+  });
+
+  it('is exempt on Sunday (IST), even with both metals missing today rate', async () => {
+    // 2026-06-14T05:00:00Z = 10:30 IST on Sunday the 14th, past the 10:00 cutoff.
+    const sunday = new Date('2026-06-14T05:00:00.000Z');
+    const findLatestSpy = jest
+      .spyOn(MetalRateRepository.prototype, 'findLatest')
+      .mockResolvedValue(null);
+
+    const status = await new RateGuardService().checkAndNotify(sunday, true);
+
+    expect(status.blocked).toBe(false);
+    expect(status.staleMetals).toEqual([]);
+    expect(setStatusSpy).toHaveBeenCalledWith(false, [], sunday);
+    expect(reminderSpy).not.toHaveBeenCalled();
+    expect(successSpy).not.toHaveBeenCalled();
+    expect(findLatestSpy).not.toHaveBeenCalled();
   });
 });

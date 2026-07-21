@@ -1,4 +1,4 @@
-import { istDayKey, isSameIstDay, msUntilNextDailyIST } from '../utils/time';
+import { istDayKey, isSameIstDay, isIstSunday, msUntilNextDailyIST } from '../utils/time';
 
 describe('IST time helpers (#25)', () => {
   it('istDayKey rolls the day over at IST midnight, not UTC', () => {
@@ -27,5 +27,21 @@ describe('IST time helpers (#25)', () => {
     const from = new Date('2026-06-16T03:00:00.000Z'); // 08:30 IST → 10:00 still ahead
     const ms = msUntilNextDailyIST(10, 0, from);
     expect(Math.round(ms / 60_000)).toBe(90); // 1h30m to 10:00 IST
+  });
+
+  it('isIstSunday is true for a Sunday IST instant', () => {
+    // 2026-06-14T05:00:00Z = 2026-06-14T10:30 IST, a Sunday.
+    expect(isIstSunday(new Date('2026-06-14T05:00:00.000Z'))).toBe(true);
+  });
+
+  it('isIstSunday is false for other days', () => {
+    // 2026-06-15T05:00:00Z = 2026-06-15T10:30 IST, a Monday.
+    expect(isIstSunday(new Date('2026-06-15T05:00:00.000Z'))).toBe(false);
+  });
+
+  it('isIstSunday rolls over at IST midnight, not UTC', () => {
+    // 2026-06-13T20:00:00Z = 2026-06-14T01:30 IST → already Sunday in IST,
+    // even though the UTC calendar date is still Saturday the 13th.
+    expect(isIstSunday(new Date('2026-06-13T20:00:00.000Z'))).toBe(true);
   });
 });

@@ -3,7 +3,7 @@ import { RateStatusRepository, RateStatusView } from '../repositories/rateStatus
 import { StaleMetal } from '../models/rateStatus.model';
 import { MetalType } from '../models/metalrate.model';
 import { sendRateUpdateReminder, sendRateUpdateSuccessNotice } from '../utils/whatsapp';
-import { isSameIstDay } from '../utils/time';
+import { isSameIstDay, isIstSunday } from '../utils/time';
 import Logger from '../utils/logger';
 
 const METALS: { key: StaleMetal; metal: MetalType }[] = [
@@ -15,7 +15,9 @@ const METALS: { key: StaleMetal; metal: MetalType }[] = [
  * Daily price-update guard (#25 B2). Determines which metals are missing today's
  * (IST) rate, persists the authoritative block flag, and — when something is
  * stale — fires the WhatsApp reminder. Designed to be called by the 10:00 IST
- * cron, but also safe to call on demand.
+ * cron, but also safe to call on demand. Sunday (IST) is exempt entirely — no
+ * rate update is required that day, so the lock never engages and no reminder
+ * is sent, regardless of how stale the last recorded rate is.
  */
 export class RateGuardService {
   private readonly metalRateRepository: MetalRateRepository;
@@ -40,6 +42,11 @@ export class RateGuardService {
    * or admin edit doesn't spam the ops number.
    */
   public async checkAndNotify(now: Date = new Date(), notifyOnSuccess = false): Promise<RateStatusView> {
+    if (isIstSunday(now)) {
+      Logger.info('[rate-guard] Sunday (IST) — rate update is exempt, skipping the lock');
+      return this.rateStatusRepository.setStatus(false, [], now);
+    }
+
     const staleMetals: StaleMetal[] = [];
     const freshRates: { metal: string; ratePerGram: number }[] = [];
 

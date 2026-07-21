@@ -25,6 +25,14 @@ export function isSameIstDay(date: Date, reference: Date = new Date()): boolean 
   return istDayKey(date) === istDayKey(reference);
 }
 
+/** True when `date` falls on a Sunday in IST (regardless of the server's own timezone). */
+export function isIstSunday(date: Date = new Date()): boolean {
+  return (
+    new Intl.DateTimeFormat('en-US', { timeZone: IST_TIMEZONE, weekday: 'short' }).format(date) ===
+    'Sun'
+  );
+}
+
 /**
  * The UTC instant corresponding to IST midnight of the given 'YYYY-MM-DD' day key.
  * Use this (not `new Date(key); d.setHours(0,0,0,0)`) whenever a calendar day needs
