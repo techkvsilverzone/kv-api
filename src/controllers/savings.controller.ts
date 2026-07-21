@@ -64,4 +64,22 @@ export class SavingsController {
       next(error);
     }
   };
+
+  public adminUpdate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const scheme = await this.savingsService.adminUpdateScheme(req.params.id as string, req.body);
+      res.status(200).json(scheme);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public adminDelete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await this.savingsService.adminDeleteScheme(req.params.id as string);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  };
 }

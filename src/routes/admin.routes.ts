@@ -588,6 +588,91 @@ router.get('/savings', savingsController.getAllSchemes);
 
 /**
  * @openapi
+ * /admin/savings/{id}:
+ *   put:
+ *     summary: Correct a savings/passbook record (admin only)
+ *     description: >
+ *       Staff cannot call this — passbook records can only be modified by a full admin.
+ *       The passbook number itself is never editable (it's the tracking key already handed
+ *       out to the customer); only planName/monthlyAmount/duration/bonusAmount/totalPaid/
+ *       status/startDate can be corrected.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               planName:
+ *                 type: string
+ *               monthlyAmount:
+ *                 type: integer
+ *                 minimum: 1000
+ *               duration:
+ *                 type: integer
+ *                 enum: [6, 11, 12]
+ *               bonusAmount:
+ *                 type: number
+ *               totalPaid:
+ *                 type: number
+ *               status:
+ *                 type: string
+ *                 enum: [Active, Completed, Cancelled]
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       200:
+ *         description: Updated savings scheme
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.put('/savings/:id', admin, savingsController.adminUpdate);
+
+/**
+ * @openapi
+ * /admin/savings/{id}:
+ *   delete:
+ *     summary: Delete a savings/passbook record (admin only)
+ *     description: Staff cannot call this — passbook records can only be deleted by a full admin.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: Savings scheme deleted
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.delete('/savings/:id', admin, savingsController.adminDelete);
+
+/**
+ * @openapi
  * /admin/coupons:
  *   get:
  *     summary: List all coupons

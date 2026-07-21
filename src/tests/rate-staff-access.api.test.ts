@@ -5,6 +5,7 @@ import { RateGuardService } from '../services/rateGuard.service';
 import { OrderService } from '../services/order.service';
 import { UserService } from '../services/user.service';
 import { InventoryService } from '../services/inventory.service';
+import { SavingsService } from '../services/savings.service';
 
 // Use the REAL admin/adminOrStaff middleware here (only `protect` is mocked, per request, to
 // inject a req.user controlled via an `x-test-user` header) so this test exercises the actual
@@ -37,7 +38,7 @@ const customerHeader = JSON.stringify({ isAdmin: false, role: 'customer' });
 const getAsStaff = (url: string) => request(app).get(url).set('x-test-user', staffHeader);
 const getAsCustomer = (url: string) => request(app).get(url).set('x-test-user', customerHeader);
 
-describe('Admin panel access — staff mirrors admin except inventory', () => {
+describe('Admin panel access — staff mirrors admin except inventory and savings modify/delete', () => {
   afterEach(() => jest.restoreAllMocks());
 
   it('allows a staff user to POST /admin/silver-rates', async () => {
@@ -88,6 +89,58 @@ describe('Admin panel access — staff mirrors admin except inventory', () => {
 
     expect(res.status).toBe(403);
     expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('allows a staff user to GET /admin/savings (view-only stays allowed)', async () => {
+    jest.spyOn(SavingsService.prototype, 'getAllSchemes').mockResolvedValue([] as never);
+
+    const res = await getAsStaff('/api/v1/admin/savings');
+
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects a staff user from PUT /admin/savings/:id with 403 (passbook edits are admin-only)', async () => {
+    const spy = jest.spyOn(SavingsService.prototype, 'adminUpdateScheme');
+
+    const res = await request(app)
+      .put('/api/v1/admin/savings/64f0000000000000000000aa')
+      .set('x-test-user', staffHeader)
+      .send({ status: 'Cancelled' });
+
+    expect(res.status).toBe(403);
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('rejects a staff user from DELETE /admin/savings/:id with 403 (passbook deletion is admin-only)', async () => {
+    const spy = jest.spyOn(SavingsService.prototype, 'adminDeleteScheme');
+
+    const res = await request(app)
+      .delete('/api/v1/admin/savings/64f0000000000000000000aa')
+      .set('x-test-user', staffHeader);
+
+    expect(res.status).toBe(403);
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('allows an admin user to PUT /admin/savings/:id', async () => {
+    jest.spyOn(SavingsService.prototype, 'adminUpdateScheme').mockResolvedValue({} as never);
+
+    const res = await request(app)
+      .put('/api/v1/admin/savings/64f0000000000000000000aa')
+      .set('x-test-user', JSON.stringify({ isAdmin: true }))
+      .send({ status: 'Cancelled' });
+
+    expect(res.status).toBe(200);
+  });
+
+  it('allows an admin user to DELETE /admin/savings/:id', async () => {
+    jest.spyOn(SavingsService.prototype, 'adminDeleteScheme').mockResolvedValue({} as never);
+
+    const res = await request(app)
+      .delete('/api/v1/admin/savings/64f0000000000000000000aa')
+      .set('x-test-user', JSON.stringify({ isAdmin: true }));
+
+    expect(res.status).toBe(204);
   });
 
   it('rejects a plain customer from POST /admin/silver-rates with 403', async () => {

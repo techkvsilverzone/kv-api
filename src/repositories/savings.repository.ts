@@ -53,6 +53,16 @@ export class SavingsRepository {
     return Savings.findOne({ passbookNumber: passbookNumber.trim().toUpperCase() }).exec();
   }
 
+  public async updateById(id: string, data: Partial<ISavings>): Promise<ISavings | null> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return null;
+    return Savings.findByIdAndUpdate(id, data, { new: true, runValidators: true }).exec();
+  }
+
+  public async deleteById(id: string): Promise<ISavings | null> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return null;
+    return Savings.findByIdAndDelete(id).exec();
+  }
+
   public async recordPayment(schemeId: string, amount: number, month: number): Promise<ISavings | null> {
     return Savings.findByIdAndUpdate(
       schemeId,

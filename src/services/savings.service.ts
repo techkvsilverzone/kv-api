@@ -78,6 +78,82 @@ export class SavingsService {
     return await this.savingsRepository.findAll();
   }
 
+  /**
+   * Admin-only correction of a passbook record (planName/amount/duration/status/etc). The
+   * passbook number itself is never editable here — it's the tracking key customers quote
+   * over WhatsApp/support, so renaming it would break lookups already handed out.
+   */
+  public async adminUpdateScheme(id: string, data: any) {
+    const update: Record<string, unknown> = {};
+
+    if (data.planName !== undefined) {
+      const planName = String(data.planName).trim();
+      if (!planName) throw new AppError('planName cannot be empty', 400);
+      update.planName = planName;
+    }
+
+    if (data.monthlyAmount !== undefined) {
+      const monthlyAmount = Number(data.monthlyAmount);
+      if (!Number.isInteger(monthlyAmount) || monthlyAmount < 1000) {
+        throw new AppError('monthlyAmount must be a whole number and at least 1000', 400);
+      }
+      update.monthlyAmount = monthlyAmount;
+    }
+
+    if (data.duration !== undefined) {
+      const duration = Number(data.duration);
+      const allowedDurations = [6, 11, 12];
+      if (!allowedDurations.includes(duration)) {
+        throw new AppError('duration must be one of 6, 11, or 12', 400);
+      }
+      update.duration = duration;
+    }
+
+    if (data.bonusAmount !== undefined) {
+      const bonusAmount = Number(data.bonusAmount);
+      if (!Number.isFinite(bonusAmount) || bonusAmount < 0) {
+        throw new AppError('bonusAmount must be a non-negative number', 400);
+      }
+      update.bonusAmount = bonusAmount;
+    }
+
+    if (data.totalPaid !== undefined) {
+      const totalPaid = Number(data.totalPaid);
+      if (!Number.isFinite(totalPaid) || totalPaid < 0) {
+        throw new AppError('totalPaid must be a non-negative number', 400);
+      }
+      update.totalPaid = totalPaid;
+    }
+
+    if (data.status !== undefined) {
+      const allowedStatuses = ['Active', 'Completed', 'Cancelled'];
+      if (!allowedStatuses.includes(data.status)) {
+        throw new AppError('status must be one of Active, Completed, or Cancelled', 400);
+      }
+      update.status = data.status;
+    }
+
+    if (data.startDate !== undefined) {
+      const startDate = new Date(data.startDate);
+      if (Number.isNaN(startDate.getTime())) throw new AppError('startDate is invalid', 400);
+      update.startDate = startDate;
+    }
+
+    if (Object.keys(update).length === 0) {
+      throw new AppError('No valid fields provided to update', 400);
+    }
+
+    const updated = await this.savingsRepository.updateById(id, update);
+    if (!updated) throw new AppError('Savings scheme not found', 404);
+    return updated;
+  }
+
+  public async adminDeleteScheme(id: string) {
+    const deleted = await this.savingsRepository.deleteById(id);
+    if (!deleted) throw new AppError('Savings scheme not found', 404);
+    return deleted;
+  }
+
   /** Track a scheme by its passbook number — the customer-facing lookup key.
    * A customer may only look up their own passbook; admin/staff can look up any. */
   public async getByPassbookNumber(requesterUserId: string, isStaffOrAdmin: boolean, passbookNumber: string) {
