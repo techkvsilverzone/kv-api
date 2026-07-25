@@ -34,6 +34,20 @@ export function isIstSunday(date: Date = new Date()): boolean {
 }
 
 /**
+ * India's financial year (April–March) code for a date, in IST — e.g. Nov 2023 → '2324',
+ * Jan 2024 → '2324', Jul 2026 → '2627'. Used as the prefix for savings passbook ticket
+ * numbers (e.g. '2425-0000111'), matching the shop's existing paper ledger format.
+ */
+export function financialYearCode(date: Date = new Date()): string {
+  const [yearStr, monthStr] = istDayKey(date).split('-');
+  const year = Number(yearStr);
+  const month = Number(monthStr); // 1-12
+  const startYear = month >= 4 ? year : year - 1;
+  const endYear = startYear + 1;
+  return `${String(startYear).slice(-2)}${String(endYear).slice(-2)}`;
+}
+
+/**
  * The UTC instant corresponding to IST midnight of the given 'YYYY-MM-DD' day key.
  * Use this (not `new Date(key); d.setHours(0,0,0,0)`) whenever a calendar day needs
  * to be pinned to a stable instant — `setHours` mutates in the SERVER's local

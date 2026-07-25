@@ -179,9 +179,12 @@ router.get('/passbook/:passbookNumber', protect, savingsController.getByPassbook
 
 /**
  * @openapi
- * /savings/{schemeId}/pay:
+ * /savings/{schemeId}/pay/create-order:
  *   post:
- *     summary: Record a monthly payment for a savings scheme
+ *     summary: Create a Razorpay order for this scheme's next monthly installment
+ *     description: >
+ *       The amount is always the scheme's own `monthlyAmount` — server-computed, never
+ *       client input. Step 1 of the customer self-pay flow; step 2 is `/pay/verify`.
  *     tags: [Savings]
  *     security:
  *       - bearerAuth: []
@@ -191,49 +194,23 @@ router.get('/passbook/:passbookNumber', protect, savingsController.getByPassbook
  *         required: true
  *         schema:
  *           type: string
- *         description: Savings scheme id
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [amount, month]
- *             properties:
- *               amount:
- *                 type: number
- *                 example: 2000
- *               month:
- *                 type: integer
- *                 description: Installment month number
- *                 example: 1
  *     responses:
- *       200:
- *         description: Updated scheme with payment history
+ *       201:
+ *         description: Razorpay order
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 _id:
+ *                 id:
  *                   type: string
- *                 totalPaid:
- *                   type: number
- *                 status:
+ *                 amount:
+ *                   type: integer
+ *                   description: Paise
+ *                 currency:
  *                   type: string
- *                   enum: [Active, Completed, Cancelled]
- *                 payments:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       month:
- *                         type: integer
- *                       amount:
- *                         type: number
- *                       paidAt:
- *                         type: string
- *                         format: date-time
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       403:
@@ -241,6 +218,52 @@ router.get('/passbook/:passbookNumber', protect, savingsController.getByPassbook
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.post('/:schemeId/pay', protect, savingsController.recordPayment);
+router.post('/:schemeId/pay/create-order', protect, savingsController.createInstallmentOrder);
+
+/**
+ * @openapi
+ * /savings/{schemeId}/pay/verify:
+ *   post:
+ *     summary: Verify a Razorpay installment payment and record it on the ledger
+ *     description: >
+ *       Verifies the payment signature, re-confirms the amount Razorpay actually captured
+ *       matches the scheme's monthly amount, converts the collection to silver grams at
+ *       the live rate, and mints the passbook if this was the scheme's first payment.
+ *     tags: [Savings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: schemeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [razorpayOrderId, razorpayPaymentId, razorpaySignature]
+ *             properties:
+ *               razorpayOrderId:
+ *                 type: string
+ *               razorpayPaymentId:
+ *                 type: string
+ *               razorpaySignature:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Updated scheme with payment history
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.post('/:schemeId/pay/verify', protect, savingsController.verifyInstallmentPayment);
 
 export default router;

@@ -1,16 +1,28 @@
 import mongoose from 'mongoose';
-import { Savings, ISavings } from '../models/savings.model';
+import { Savings, ISavings, ISavingsPayment } from '../models/savings.model';
+import { financialYearCode } from '../utils/time';
+
+type PaymentRowPatch = Partial<
+  Pick<
+    ISavingsPayment,
+    'amount' | 'paidAt' | 'materialRate' | 'materialWeight' | 'devidentAmount' | 'devidentMaterialRate' | 'devidentMaterialWeight'
+  >
+>;
 
 export class SavingsRepository {
   /**
    * Only used once a scheme's first payment lands (see `recordPayment`) — enrollment
    * alone no longer mints a passbook number. `passbookNumber` is a sparse-unique field
    * (see savings.model.ts) precisely so a fresh enrollment can sit with it unset.
+   *
+   * Format matches the shop's existing paper ledger: `{financialYearCode}-{7-digit seq}`,
+   * e.g. '2425-0000111'. The sequence is a global running count of passbooks actually
+   * issued (not reset per financial year).
    */
   private async generatePassbookNumber(): Promise<string> {
     const count = await Savings.countDocuments({ passbookNumber: { $exists: true } });
-    const seq = (count + 1).toString().padStart(8, '0');
-    return `PB-${seq}`;
+    const seq = (count + 1).toString().padStart(7, '0');
+    return `${financialYearCode(new Date())}-${seq}`;
   }
 
   public async create(data: any): Promise<ISavings> {
@@ -71,17 +83,28 @@ export class SavingsRepository {
   /**
    * `assignPassbook` is set by the caller (SavingsService) when this is the scheme's
    * first-ever payment and it doesn't already have a passbook number — that's the one
-   * moment a real passbook is minted.
+   * moment a real passbook is minted. `materialRate`/`materialWeight` are already resolved
+   * by the caller (live silver rate, or an admin override) — this method just persists them.
    */
   public async recordPayment(
     schemeId: string,
-    amount: number,
-    month: number,
+    row: { month: number; amount: number; materialRate: number; materialWeight: number },
     assignPassbook = false,
   ): Promise<ISavings | null> {
     const update: Record<string, unknown> = {
-      $inc: { totalPaid: amount },
-      $push: { payments: { month, amount, paidAt: new Date() } },
+      $inc: { totalPaid: row.amount },
+      $push: {
+        payments: {
+          month: row.month,
+          amount: row.amount,
+          paidAt: new Date(),
+          materialRate: row.materialRate,
+          materialWeight: row.materialWeight,
+          devidentAmount: 0,
+          devidentMaterialRate: 0,
+          devidentMaterialWeight: 0,
+        },
+      },
     };
     if (assignPassbook) {
       update.$set = { passbookNumber: await this.generatePassbookNumber() };
@@ -89,13 +112,75 @@ export class SavingsRepository {
     return Savings.findByIdAndUpdate(schemeId, update, { new: true }).exec();
   }
 
-  public async getPayments(schemeId: string): Promise<any[]> {
+  /**
+   * Appends the automatic bonus-month ledger row (no real collection — `amount`/
+   * `materialRate`/`materialWeight` are all 0) and marks the scheme Completed. Called once,
+   * right after an 11-month scheme's 11th real payment — see SavingsService.applyPayment.
+   */
+  public async creditBonusMonth(
+    schemeId: string,
+    row: { month: number; devidentAmount: number; devidentMaterialRate: number; devidentMaterialWeight: number },
+  ): Promise<ISavings | null> {
+    return Savings.findByIdAndUpdate(
+      schemeId,
+      {
+        $push: {
+          payments: {
+            month: row.month,
+            amount: 0,
+            paidAt: new Date(),
+            materialRate: 0,
+            materialWeight: 0,
+            devidentAmount: row.devidentAmount,
+            devidentMaterialRate: row.devidentMaterialRate,
+            devidentMaterialWeight: row.devidentMaterialWeight,
+          },
+        },
+        $set: { status: 'Completed' },
+      },
+      { new: true },
+    ).exec();
+  }
+
+  /** Admin-only correction of a single ledger row (see `/admin/savings/:id/payments/:index`). */
+  public async updatePaymentRow(schemeId: string, index: number, patch: PaymentRowPatch): Promise<ISavings | null> {
+    if (!mongoose.Types.ObjectId.isValid(schemeId)) return null;
+    const scheme = await Savings.findById(schemeId).exec();
+    const row = scheme?.payments[index];
+    if (!scheme || !row) return null;
+
+    const oldAmount = row.amount;
+    Object.assign(row, patch);
+    if (patch.amount !== undefined) {
+      scheme.totalPaid = scheme.totalPaid - oldAmount + patch.amount;
+    }
+    return scheme.save();
+  }
+
+  /** Admin-only removal of an erroneous ledger row. */
+  public async deletePaymentRow(schemeId: string, index: number): Promise<ISavings | null> {
+    if (!mongoose.Types.ObjectId.isValid(schemeId)) return null;
+    const scheme = await Savings.findById(schemeId).exec();
+    const row = scheme?.payments[index];
+    if (!scheme || !row) return null;
+
+    scheme.totalPaid = Math.max(0, scheme.totalPaid - row.amount);
+    scheme.payments.splice(index, 1);
+    return scheme.save();
+  }
+
+  public async getPayments(schemeId: string): Promise<ISavingsPayment[]> {
     const savings = await Savings.findById(schemeId).exec();
     if (!savings) return [];
     return savings.payments.map((p) => ({
       month: p.month,
       amount: p.amount,
       paidAt: p.paidAt,
+      materialRate: p.materialRate,
+      materialWeight: p.materialWeight,
+      devidentAmount: p.devidentAmount,
+      devidentMaterialRate: p.devidentMaterialRate,
+      devidentMaterialWeight: p.devidentMaterialWeight,
     }));
   }
 }

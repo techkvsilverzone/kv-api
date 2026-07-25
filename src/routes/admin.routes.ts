@@ -630,6 +630,17 @@ router.get('/savings', savingsController.getAllSchemes);
  *               startDate:
  *                 type: string
  *                 format: date-time
+ *               maturityBenefits:
+ *                 type: object
+ *                 properties:
+ *                   goldCoinValue:
+ *                     type: number
+ *                   silverGrams:
+ *                     type: number
+ *                   gifts:
+ *                     type: array
+ *                     items:
+ *                       type: string
  *     responses:
  *       200:
  *         description: Updated savings scheme
@@ -670,6 +681,135 @@ router.put('/savings/:id', admin, savingsController.adminUpdate);
  *         $ref: '#/components/responses/NotFound'
  */
 router.delete('/savings/:id', admin, savingsController.adminDelete);
+
+/**
+ * @openapi
+ * /admin/savings/{id}/pay:
+ *   post:
+ *     summary: Manually record a collection on a passbook (admin only)
+ *     description: >
+ *       For cash/offline collections or corrections — not exposed to staff. `materialRate`
+ *       defaults to the live silver rate; pass it to override (e.g. a backdated entry).
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [amount]
+ *             properties:
+ *               amount:
+ *                 type: number
+ *               materialRate:
+ *                 type: number
+ *                 description: Optional override of the live silver rate
+ *     responses:
+ *       200:
+ *         description: Updated scheme with payment history
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.post('/savings/:id/pay', admin, savingsController.adminRecordPayment);
+
+/**
+ * @openapi
+ * /admin/savings/{id}/payments/{index}:
+ *   put:
+ *     summary: Correct a single ledger row (admin only)
+ *     description: Staff cannot call this. Re-derives materialWeight/devidentMaterialWeight from any edited amount/rate.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: index
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Zero-based index into the scheme's payments array
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               amount:
+ *                 type: number
+ *               materialRate:
+ *                 type: number
+ *               devidentAmount:
+ *                 type: number
+ *               devidentMaterialRate:
+ *                 type: number
+ *               paidAt:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       200:
+ *         description: Updated savings scheme
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.put('/savings/:id/payments/:index', admin, savingsController.adminUpdatePaymentRow);
+
+/**
+ * @openapi
+ * /admin/savings/{id}/payments/{index}:
+ *   delete:
+ *     summary: Remove an erroneous ledger row (admin only)
+ *     description: Staff cannot call this. Adjusts totalPaid accordingly.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: index
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Updated savings scheme
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.delete('/savings/:id/payments/:index', admin, savingsController.adminDeletePaymentRow);
 
 /**
  * @openapi

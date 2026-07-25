@@ -1,6 +1,3 @@
-import crypto from 'crypto';
-import https from 'https';
-import { config } from '../config';
 import { OrderRepository } from '../repositories/order.repository';
 import { CouponRepository } from '../repositories/coupon.repository';
 import { UserRepository } from '../repositories/user.repository';
@@ -9,6 +6,7 @@ import { StockService } from './stock.service';
 import { AppError } from '../utils/appError';
 import { sendOrderConfirmationEmail, buildOrderConfirmationInput } from '../utils/emailNotifications';
 import { sendPaymentSuccessMessage } from '../utils/whatsapp';
+import { createRazorpayOrder, fetchRazorpayOrder, verifyRazorpaySignature } from '../utils/razorpay';
 import Logger from '../utils/logger';
 
 export interface CreateOrderInput {
@@ -52,14 +50,10 @@ export class PaymentService {
       throw new AppError('Computed order amount is zero — nothing to charge', 400);
     }
 
-    const razorpayOrder = await this.callRazorpay(
-      'POST',
-      '/v1/orders',
-      {
-        amount: breakdown.amountInPaise,
-        currency: input.currency || 'INR',
-        receipt: `rcpt_${breakdown.amountInPaise}_${breakdown.items.length}`,
-      },
+    const razorpayOrder = await createRazorpayOrder(
+      breakdown.amountInPaise,
+      input.currency || 'INR',
+      `rcpt_${breakdown.amountInPaise}_${breakdown.items.length}`,
     );
 
     return {
@@ -90,15 +84,8 @@ export class PaymentService {
 
     const isCod = false;
 
-    if (!isCod) {
-      const expectedSignature = crypto
-        .createHmac('sha256', config.razorpayKeySecret)
-        .update(`${razorpayOrderId}|${razorpayPaymentId}`)
-        .digest('hex');
-
-      if (expectedSignature !== razorpaySignature) {
-        throw new AppError('Payment verification failed — signature mismatch', 400);
-      }
+    if (!isCod && !verifyRazorpaySignature(razorpayOrderId, razorpayPaymentId, razorpaySignature)) {
+      throw new AppError('Payment verification failed — signature mismatch', 400);
     }
 
     // Recompute the authoritative total from items + coupon + shipping address.
@@ -112,7 +99,7 @@ export class PaymentService {
     // For online payments, confirm the amount Razorpay actually captured equals
     // the freshly recomputed amount. Closes the price-tampering loop.
     if (!isCod) {
-      const razorpayOrder = await this.callRazorpay('GET', `/v1/orders/${razorpayOrderId}`);
+      const razorpayOrder = await fetchRazorpayOrder(razorpayOrderId);
       const chargedPaise = Number(razorpayOrder?.amount);
       if (chargedPaise !== breakdown.amountInPaise) {
         throw new AppError(
@@ -213,49 +200,5 @@ export class PaymentService {
       deliveryFee: breakdown.deliveryFee,
       grandTotal: breakdown.grandTotal,
     };
-  }
-
-  /** Minimal Razorpay REST call using native https (no SDK dependency). */
-  private callRazorpay(method: 'GET' | 'POST', path: string, body?: Record<string, unknown>): Promise<any> {
-    if (!config.razorpayKeyId || !config.razorpayKeySecret) {
-      throw new AppError('Razorpay credentials not configured', 500);
-    }
-
-    const payload = body ? JSON.stringify(body) : undefined;
-    const auth = Buffer.from(`${config.razorpayKeyId}:${config.razorpayKeySecret}`).toString('base64');
-
-    return new Promise((resolve, reject) => {
-      const options: https.RequestOptions = {
-        hostname: 'api.razorpay.com',
-        path,
-        method,
-        headers: {
-          Authorization: `Basic ${auth}`,
-          'Content-Type': 'application/json',
-          ...(payload ? { 'Content-Length': Buffer.byteLength(payload) } : {}),
-        },
-      };
-
-      const req = https.request(options, (res) => {
-        let data = '';
-        res.on('data', (chunk) => { data += chunk; });
-        res.on('end', () => {
-          try {
-            const parsed = JSON.parse(data);
-            if (res.statusCode && res.statusCode >= 400) {
-              reject(new AppError(parsed.error?.description || 'Razorpay API error', res.statusCode));
-            } else {
-              resolve(parsed);
-            }
-          } catch {
-            reject(new AppError('Invalid response from Razorpay', 502));
-          }
-        });
-      });
-
-      req.on('error', () => reject(new AppError('Failed to connect to Razorpay', 502)));
-      if (payload) req.write(payload);
-      req.end();
-    });
   }
 }

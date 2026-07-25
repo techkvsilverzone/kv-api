@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 // Request is used for admin endpoints that don't need user context
 import { SavingsService } from '../services/savings.service';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { AppError } from '../utils/appError';
 
 export class SavingsController {
   private savingsService: SavingsService;
@@ -28,14 +29,63 @@ export class SavingsController {
     }
   };
 
-  public recordPayment = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  public createInstallmentOrder = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const scheme = await this.savingsService.recordPayment(
+      const order = await this.savingsService.createInstallmentOrder(
         req.user!._id.toString(),
         req.params.schemeId as string,
-        Number(req.body.amount),
-        Number(req.body.month),
       );
+      res.status(201).json(order);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public verifyInstallmentPayment = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
+      if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+        throw new AppError('razorpayOrderId, razorpayPaymentId and razorpaySignature are required', 400);
+      }
+      const scheme = await this.savingsService.verifyAndRecordInstallment(
+        req.user!._id.toString(),
+        req.params.schemeId as string,
+        { orderId: razorpayOrderId, paymentId: razorpayPaymentId, signature: razorpaySignature },
+      );
+      res.status(200).json({ success: true, scheme });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /** Admin-only manual/offline collection entry — see admin.routes.ts (`admin`, not `adminOrStaff`). */
+  public adminRecordPayment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const amount = Number(req.body.amount);
+      const materialRate = req.body.materialRate !== undefined ? Number(req.body.materialRate) : undefined;
+      const scheme = await this.savingsService.recordPaymentAsAdmin(req.params.id as string, amount, materialRate);
+      res.status(200).json(scheme);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public adminUpdatePaymentRow = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const scheme = await this.savingsService.adminUpdatePaymentRow(
+        req.params.id as string,
+        Number(req.params.index),
+        req.body,
+      );
+      res.status(200).json(scheme);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public adminDeletePaymentRow = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const scheme = await this.savingsService.adminDeletePaymentRow(req.params.id as string, Number(req.params.index));
       res.status(200).json(scheme);
     } catch (error) {
       next(error);

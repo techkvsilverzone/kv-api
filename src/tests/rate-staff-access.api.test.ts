@@ -143,6 +143,52 @@ describe('Admin panel access — staff mirrors admin except inventory and saving
     expect(res.status).toBe(204);
   });
 
+  it('rejects a staff user from POST /admin/savings/:id/pay with 403 (manual collections are admin-only)', async () => {
+    const spy = jest.spyOn(SavingsService.prototype, 'recordPaymentAsAdmin');
+
+    const res = await request(app)
+      .post('/api/v1/admin/savings/64f0000000000000000000aa/pay')
+      .set('x-test-user', staffHeader)
+      .send({ amount: 2000 });
+
+    expect(res.status).toBe(403);
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('allows an admin user to POST /admin/savings/:id/pay', async () => {
+    jest.spyOn(SavingsService.prototype, 'recordPaymentAsAdmin').mockResolvedValue({} as never);
+
+    const res = await request(app)
+      .post('/api/v1/admin/savings/64f0000000000000000000aa/pay')
+      .set('x-test-user', JSON.stringify({ isAdmin: true }))
+      .send({ amount: 2000 });
+
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects a staff user from PUT /admin/savings/:id/payments/:index with 403 (ledger row edits are admin-only)', async () => {
+    const spy = jest.spyOn(SavingsService.prototype, 'adminUpdatePaymentRow');
+
+    const res = await request(app)
+      .put('/api/v1/admin/savings/64f0000000000000000000aa/payments/0')
+      .set('x-test-user', staffHeader)
+      .send({ amount: 2500 });
+
+    expect(res.status).toBe(403);
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('rejects a staff user from DELETE /admin/savings/:id/payments/:index with 403', async () => {
+    const spy = jest.spyOn(SavingsService.prototype, 'adminDeletePaymentRow');
+
+    const res = await request(app)
+      .delete('/api/v1/admin/savings/64f0000000000000000000aa/payments/0')
+      .set('x-test-user', staffHeader);
+
+    expect(res.status).toBe(403);
+    expect(spy).not.toHaveBeenCalled();
+  });
+
   it('rejects a plain customer from POST /admin/silver-rates with 403', async () => {
     const res = await request(app)
       .post('/api/v1/admin/silver-rates')

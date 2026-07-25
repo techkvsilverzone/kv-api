@@ -1,4 +1,4 @@
-import { istDayKey, isSameIstDay, isIstSunday, msUntilNextDailyIST } from '../utils/time';
+import { istDayKey, isSameIstDay, isIstSunday, msUntilNextDailyIST, financialYearCode } from '../utils/time';
 
 describe('IST time helpers (#25)', () => {
   it('istDayKey rolls the day over at IST midnight, not UTC', () => {
@@ -43,5 +43,24 @@ describe('IST time helpers (#25)', () => {
     // 2026-06-13T20:00:00Z = 2026-06-14T01:30 IST → already Sunday in IST,
     // even though the UTC calendar date is still Saturday the 13th.
     expect(isIstSunday(new Date('2026-06-13T20:00:00.000Z'))).toBe(true);
+  });
+
+  it('financialYearCode covers Apr-Dec within the same FY as the calendar year', () => {
+    // Jul 2026 (07-22T05:00Z = 10:30 IST) → FY2026-27.
+    expect(financialYearCode(new Date('2026-07-22T05:00:00.000Z'))).toBe('2627');
+  });
+
+  it('financialYearCode covers Jan-Mar within the PRIOR calendar year\'s FY', () => {
+    // Nov 2023 → FY2023-24 (matches the shop's paper ledger sample, CD 07-Nov-23).
+    expect(financialYearCode(new Date('2023-11-07T05:00:00.000Z'))).toBe('2324');
+    // Jan 2024 is still within FY2023-24.
+    expect(financialYearCode(new Date('2024-01-15T05:00:00.000Z'))).toBe('2324');
+  });
+
+  it('financialYearCode rolls over on April 1 IST, not calendar-year Jan 1', () => {
+    // 2026-03-31T19:00:00Z = 2026-04-01T00:30 IST → already April in IST → FY2026-27.
+    expect(financialYearCode(new Date('2026-03-31T19:00:00.000Z'))).toBe('2627');
+    // 2026-03-31T17:00:00Z = 2026-03-31T22:30 IST → still March in IST → FY2025-26.
+    expect(financialYearCode(new Date('2026-03-31T17:00:00.000Z'))).toBe('2526');
   });
 });

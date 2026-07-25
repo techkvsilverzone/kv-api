@@ -65,6 +65,32 @@ describe('SavingsService admin passbook correction/deletion', () => {
 
       expect(updateSpy).toHaveBeenCalledWith('s1', { planName: 'Renamed Plan' });
     });
+
+    it('accepts maturityBenefits, trimming/dropping blank gift entries', async () => {
+      const updateSpy = jest
+        .spyOn(SavingsRepository.prototype, 'updateById')
+        .mockResolvedValue({ _id: 's1' } as never);
+
+      await new SavingsService().adminUpdateScheme('s1', {
+        maturityBenefits: { goldCoinValue: 64000, silverGrams: 40, gifts: ['Crackers Box', '  ', 'Sweets and Snacks'] },
+      });
+
+      expect(updateSpy).toHaveBeenCalledWith('s1', {
+        maturityBenefits: { goldCoinValue: 64000, silverGrams: 40, gifts: ['Crackers Box', 'Sweets and Snacks'] },
+      });
+    });
+
+    it('rejects a negative maturityBenefits.goldCoinValue', async () => {
+      await expect(
+        new SavingsService().adminUpdateScheme('s1', { maturityBenefits: { goldCoinValue: -1 } }),
+      ).rejects.toThrow(AppError);
+    });
+
+    it('rejects a negative maturityBenefits.silverGrams', async () => {
+      await expect(
+        new SavingsService().adminUpdateScheme('s1', { maturityBenefits: { silverGrams: -1 } }),
+      ).rejects.toThrow(AppError);
+    });
   });
 
   describe('adminDeleteScheme', () => {
