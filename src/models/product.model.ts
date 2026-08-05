@@ -25,7 +25,10 @@ export interface IProduct extends Document {
   productGroupCode: string;
   name: string;
   description?: string;
-  material: string;
+  material?: string;
+  category: string;
+  subcategory?: string;
+  tags: string[];
   weight: number;
   price: number;
   originalPrice?: number;
@@ -79,8 +82,11 @@ const ProductSchema = new Schema<IProduct>(
     productGroupCode: { type: String, required: true, unique: true, uppercase: true, trim: true },
     name: { type: String, required: true, trim: true },
     description: { type: String },
-    material: { type: String, required: true },
-    weight: { type: Number, required: true },
+    material: { type: String },
+    category: { type: String, default: '', trim: true },
+    subcategory: { type: String, trim: true },
+    tags: { type: [String], default: [] },
+    weight: { type: Number, required: false, default: 0 },
     price: { type: Number, required: true },
     quantity: { type: Number, required: true, default: 0 },
     originalPrice: { type: Number },
@@ -102,7 +108,9 @@ const ProductSchema = new Schema<IProduct>(
 );
 
 ProductSchema.index({ material: 1 });
+ProductSchema.index({ category: 1, subcategory: 1 });
+ProductSchema.index({ tags: 1 });
 ProductSchema.index({ price: 1 });
-ProductSchema.index({ name: 'text', description: 'text', material: 'text' });
+ProductSchema.index({ name: 'text', description: 'text', material: 'text', category: 'text', tags: 'text' });
 
 export const Product: Model<IProduct> = mongoose.model<IProduct>('Product', ProductSchema);

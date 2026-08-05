@@ -106,14 +106,17 @@ describe('POST /admin/products – frontend-shaped payload', () => {
     expect(response.body.message).toContain('price');
   });
 
-  it('returns 400 for missing category', async () => {
+  it('accepts a missing category (server no longer requires it; the admin form enforces it client-side)', async () => {
+    const capture: { payload?: any } = {};
+    stubRepo(capture);
+
     const response = await request(app)
       .post('/api/v1/admin/products')
       .set('Authorization', 'Bearer admin-token')
       .send({ name: 'Test', weight: 5, price: 500 });
 
-    expect(response.status).toBe(400);
-    expect(response.body.message).toContain('category');
+    expect(response.status).toBe(201);
+    expect(capture.payload.category).toBe('');
   });
 });
 

@@ -25,7 +25,7 @@ export class ProductService {
   }
 
   public async createProduct(data: any) {
-    const payload = this.validateCreatePayload(data);
+    const payload = await this.validateCreatePayload(data);
     try {
       const product = await this.productRepository.create(payload);
 
@@ -45,7 +45,7 @@ export class ProductService {
     }
   }
 
-  private dispatchPromotionalEmails(product: { name: string; material: string; price: number }): void {
+  private dispatchPromotionalEmails(product: { name: string; category?: string; material?: string; price: number }): void {
     if (!config.brevoSmtpUser || !config.brevoSmtpPassword) {
       return;
     }
@@ -59,7 +59,7 @@ export class ProductService {
 
         await sendNewProductPromotion({
           productName: product.name,
-          category: product.material,
+          category: product.category || product.material || '',
           price: product.price,
           recipients: recipientEmails,
         });
@@ -75,26 +75,65 @@ export class ProductService {
     return await this.attachStock(enriched);
   }
 
-  /** Merges categories actually in use (distinct product material) with ones an
-   * admin has registered ahead of creating a product in them. */
+  /** Merges category/subcategory combinations actually in use on products with
+   * ones an admin has registered ahead of creating a product in them. Returns a
+   * two-level tree — only Jewellery has subcategories today, but any category
+   * can grow them via the admin Manage Categories tab. */
   public async getCategories() {
-    const [fromProducts, stored] = await Promise.all([
-      this.productRepository.getCategories(),
-      this.categoryRepository.findAllNames(),
+    const [usage, registered] = await Promise.all([
+      this.productRepository.getCategoryUsage(),
+      this.categoryRepository.findAll(),
     ]);
-    return Array.from(new Set([...fromProducts, ...stored])).sort();
+
+    const tree = new Map<string, Set<string>>();
+    const ensure = (name: string): Set<string> => {
+      let subs = tree.get(name);
+      if (!subs) {
+        subs = new Set<string>();
+        tree.set(name, subs);
+      }
+      return subs;
+    };
+
+    usage.forEach(({ category, subcategory }) => {
+      if (!category) return;
+      const subs = ensure(category);
+      if (subcategory) subs.add(subcategory);
+    });
+
+    registered.forEach((c) => {
+      if (c.parent) {
+        ensure(c.parent).add(c.name);
+      } else {
+        ensure(c.name);
+      }
+    });
+
+    return Array.from(tree.entries())
+      .map(([name, subs]) => ({ name, subcategories: Array.from(subs).sort() }))
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  public async createCategory(name: string) {
-    const trimmed = String(name || '').trim();
-    if (!trimmed) throw new AppError('Category name is required', 400);
-    await this.categoryRepository.create(trimmed);
+  public async getTags(): Promise<string[]> {
+    return this.productRepository.getTags();
   }
 
-  public async deleteCategory(name: string) {
+  public async createCategory(name: string, parent?: string) {
     const trimmed = String(name || '').trim();
     if (!trimmed) throw new AppError('Category name is required', 400);
-    await this.categoryRepository.delete(trimmed);
+    const parentTrimmed = parent ? String(parent).trim() : '';
+    await this.categoryRepository.create(trimmed, parentTrimmed || null);
+  }
+
+  public async deleteCategory(name: string, parent?: string) {
+    const trimmed = String(name || '').trim();
+    if (!trimmed) throw new AppError('Category name is required', 400);
+    const parentTrimmed = parent ? String(parent).trim() : '';
+    await this.categoryRepository.delete(trimmed, parentTrimmed || null);
+    // Deleting a top-level category also removes its registered subcategories.
+    if (!parentTrimmed) {
+      await this.categoryRepository.deleteChildren(trimmed);
+    }
   }
 
   public async getProductById(id: string) {
@@ -119,7 +158,7 @@ export class ProductService {
   }
 
   public async updateProduct(id: string, data: any) {
-    const payload = this.validateUpdatePayload(data);
+    const payload = await this.validateUpdatePayload(data);
     try {
       const product = await this.productRepository.update(id, payload);
       if (!product) throw new AppError('Product not found', 404);
@@ -142,7 +181,7 @@ export class ProductService {
     return await this.attachStock(enriched);
   }
 
-  private validateCreatePayload(data: any) {
+  private async validateCreatePayload(data: any) {
     const payload = data || {};
 
     const name = String(payload.itemName || payload.name || '').trim();
@@ -156,24 +195,34 @@ export class ProductService {
       ? rawCode.toUpperCase()
       : `${name.replace(/[^A-Z0-9]/gi, '').toUpperCase().slice(0, 20)}_${Date.now()}`;
 
-    const material = String(payload.material || payload.category || '').trim();
-    if (!material) {
-      throw new AppError('category is required', 400);
-    }
-
-    // Parse weight whether supplied as number (10), numeric string ("10"), or string with unit ("2g")
-    const rawWeight = payload.weightGm ?? payload.weight;
-    const weight = typeof rawWeight === 'string'
-      ? Number(rawWeight.replace(/[^\d.]/g, ''))
-      : Number(rawWeight);
-    if (!Number.isFinite(weight) || weight <= 0) {
-      throw new AppError('weight must be a positive number', 400);
-    }
+    // `material` is a free-text spec field (e.g. "925 Silver"); `category` is the
+    // fixed taxonomy (Jewellery, Coins, …). Neither is server-required — the admin
+    // form enforces category client-side.
+    const material = payload.material !== undefined ? String(payload.material).trim() : '';
+    const category = payload.category !== undefined ? String(payload.category).trim() : '';
+    const subcategory = await this.resolveSubcategory(category, payload.subcategory);
 
     // A fixed-price product needs a real listed price. A dynamic (non-fixed) product
     // computes its price live from weight/purity/making charge/wastage — `price` there
     // is only a display fallback, so the admin form allows leaving it 0/blank.
     const isFixedPrice = payload.isFixedPrice !== undefined ? Boolean(payload.isFixedPrice) : false;
+
+    // Parse weight whether supplied as number (10), numeric string ("10"), or string with
+    // unit ("2g"). A fixed-price product has no meaningful gram weight, so it's optional
+    // there; a dynamic product's price is computed from weight, so it stays required.
+    const rawWeight = payload.weightGm ?? payload.weight;
+    const hasWeight = rawWeight !== undefined && rawWeight !== null && rawWeight !== '';
+    const weight = hasWeight
+      ? (typeof rawWeight === 'string' ? Number(rawWeight.replace(/[^\d.]/g, '')) : Number(rawWeight))
+      : 0;
+    if (isFixedPrice) {
+      if (hasWeight && (!Number.isFinite(weight) || weight < 0)) {
+        throw new AppError('weight must be a non-negative number', 400);
+      }
+    } else if (!Number.isFinite(weight) || weight <= 0) {
+      throw new AppError('weight must be a positive number', 400);
+    }
+
     const price = Number(payload.price);
     if (isFixedPrice) {
       if (!Number.isFinite(price) || price <= 0) {
@@ -205,6 +254,9 @@ export class ProductService {
       productGroupCode,
       name,
       material,
+      category,
+      subcategory,
+      tags: this.normalizeTags(payload.tags),
       weight,
       price: normalizedPrice,
       quantity,
@@ -253,9 +305,14 @@ export class ProductService {
     return result;
   }
 
-  private validateUpdatePayload(data: any) {
+  private async validateUpdatePayload(data: any) {
     const payload = data || {};
     const update: Record<string, unknown> = {};
+
+    // Same dynamic-price carve-out used throughout: an update that doesn't say
+    // otherwise is treated as fixed-price for the purposes of these two fields
+    // (mirrors the pre-existing price behavior below; weight now follows suit).
+    const isFixedPrice = payload.isFixedPrice !== undefined ? Boolean(payload.isFixedPrice) : true;
 
     if (payload.name !== undefined || payload.itemName !== undefined) {
       const name = String(payload.name ?? payload.itemName).trim();
@@ -263,18 +320,39 @@ export class ProductService {
       update.name = name;
     }
 
-    if (payload.material !== undefined || payload.category !== undefined) {
-      const material = String(payload.material ?? payload.category).trim();
-      if (!material) throw new AppError('category must be a non-empty string', 400);
-      update.material = material;
+    if (payload.material !== undefined) {
+      update.material = String(payload.material).trim();
+    }
+
+    if (payload.category !== undefined) {
+      update.category = String(payload.category).trim();
+    }
+
+    if (payload.subcategory !== undefined) {
+      // Validating a subcategory requires knowing its parent category, so an update
+      // that touches subcategory must also send category (the admin edit form always
+      // sends both together).
+      if (payload.category === undefined) {
+        throw new AppError('category is required alongside subcategory', 400);
+      }
+      update.subcategory = await this.resolveSubcategory(String(payload.category).trim(), payload.subcategory);
+    }
+
+    if (payload.tags !== undefined) {
+      update.tags = this.normalizeTags(payload.tags);
     }
 
     if (payload.weight !== undefined || payload.weightGm !== undefined) {
       const rawWeight = payload.weightGm ?? payload.weight;
-      const weight = typeof rawWeight === 'string'
-        ? Number(rawWeight.replace(/[^\d.]/g, ''))
-        : Number(rawWeight);
-      if (!Number.isFinite(weight) || weight <= 0) {
+      const hasWeight = rawWeight !== undefined && rawWeight !== null && rawWeight !== '';
+      const weight = hasWeight
+        ? (typeof rawWeight === 'string' ? Number(rawWeight.replace(/[^\d.]/g, '')) : Number(rawWeight))
+        : 0;
+      if (isFixedPrice) {
+        if (hasWeight && (!Number.isFinite(weight) || weight < 0)) {
+          throw new AppError('weight must be a non-negative number', 400);
+        }
+      } else if (!Number.isFinite(weight) || weight <= 0) {
         throw new AppError('weight must be a positive number', 400);
       }
       update.weight = weight;
@@ -284,7 +362,6 @@ export class ProductService {
       // Same dynamic-price carve-out as create: only require price > 0 when this
       // update is (also) setting isFixedPrice:true. Otherwise price is a display
       // fallback for the live metal-rate calc and may be 0/blank.
-      const isFixedPrice = payload.isFixedPrice !== undefined ? Boolean(payload.isFixedPrice) : true;
       const price = Number(payload.price);
       if (isFixedPrice) {
         if (!Number.isFinite(price) || price <= 0) {
@@ -387,6 +464,55 @@ export class ProductService {
     }
 
     return update;
+  }
+
+  /**
+   * Validates that a subcategory belongs to the given category's registered
+   * children (Category docs with `parent === category`). Returns '' when no
+   * subcategory was supplied. Throws on a category/subcategory mismatch so a
+   * stray "Mens" can't attach to "Coins".
+   */
+  private async resolveSubcategory(category: string | undefined, rawSubcategory: unknown): Promise<string> {
+    const subcategory = rawSubcategory !== undefined && rawSubcategory !== null
+      ? String(rawSubcategory).trim()
+      : '';
+    if (!subcategory) return '';
+
+    if (!category) {
+      throw new AppError('subcategory requires a category', 400);
+    }
+
+    const registered = await this.categoryRepository.findAll();
+    const isValidChild = registered.some((c) => c.parent === category && c.name === subcategory);
+    if (!isValidChild) {
+      throw new AppError(`"${subcategory}" is not a registered subcategory of "${category}"`, 400);
+    }
+
+    return subcategory;
+  }
+
+  /**
+   * Normalize an optional tags list: accepts a string[] or a comma-separated
+   * string, trims each entry, drops empties, and de-duplicates case-insensitively.
+   * Returns [] for anything absent/empty, which clears existing tags on update
+   * (full-replace semantics, matching normalizeVariants/normalizeImages).
+   */
+  private normalizeTags(raw: unknown): string[] {
+    if (raw === undefined || raw === null || raw === '') return [];
+
+    const list = Array.isArray(raw) ? raw : String(raw).split(',');
+    const seen = new Set<string>();
+    const normalized: string[] = [];
+    for (const entry of list) {
+      const value = String(entry ?? '').trim();
+      if (!value) continue;
+      const key = value.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      normalized.push(value);
+    }
+
+    return normalized.slice(0, 20);
   }
 
   /**

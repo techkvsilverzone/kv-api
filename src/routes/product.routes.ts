@@ -18,7 +18,17 @@ const reviewController = new ReviewController();
  *         name: category
  *         schema:
  *           type: string
- *         description: Filter by category
+ *         description: Filter by category (comma-separated for multiple)
+ *       - in: query
+ *         name: subcategory
+ *         schema:
+ *           type: string
+ *         description: Filter by subcategory (comma-separated for multiple)
+ *       - in: query
+ *         name: tags
+ *         schema:
+ *           type: string
+ *         description: Filter by tag (comma-separated; matches any)
  *       - in: query
  *         name: metal
  *         schema:
@@ -104,11 +114,44 @@ router.get('/featured', productController.getFeatured);
  * @openapi
  * /products/categories:
  *   get:
- *     summary: Get all product categories
+ *     summary: Get the category/subcategory tree
+ *     description: Merges category/subcategory combinations actually in use on products
+ *       with ones an admin has pre-registered ahead of the first product that uses them.
  *     tags: [Products]
  *     responses:
  *       200:
- *         description: List of category names
+ *         description: Category tree
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                       subcategories:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ */
+router.get('/categories', productController.getCategories);
+
+/**
+ * @openapi
+ * /products/tags:
+ *   get:
+ *     summary: Get all tags in use across active products
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: List of tags
  *         content:
  *           application/json:
  *             schema:
@@ -122,15 +165,16 @@ router.get('/featured', productController.getFeatured);
  *                   items:
  *                     type: string
  */
-router.get('/categories', productController.getCategories);
+router.get('/tags', productController.getTags);
 
 /**
  * @openapi
  * /products/categories:
  *   post:
- *     summary: Register a new category (admin/staff)
+ *     summary: Register a new category or subcategory (admin/staff)
  *     description: Categories are otherwise derived from products in use — this lets an
- *       admin create one ahead of the first product that uses it.
+ *       admin create one ahead of the first product that uses it. Pass `parent` to
+ *       register a subcategory under an existing top-level category.
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -144,6 +188,9 @@ router.get('/categories', productController.getCategories);
  *             properties:
  *               name:
  *                 type: string
+ *               parent:
+ *                 type: string
+ *                 description: Omit for a top-level category.
  *     responses:
  *       201:
  *         description: Category registered (idempotent if it already exists)
@@ -160,9 +207,10 @@ router.post('/categories', protect, adminOrStaff, productController.createCatego
  * @openapi
  * /products/categories/{name}:
  *   delete:
- *     summary: Remove a registered category (admin/staff)
+ *     summary: Remove a registered category or subcategory (admin/staff)
  *     description: Only removes the standalone registration — products already using this
- *       category as their material are unaffected and it will keep appearing in the list.
+ *       category/subcategory are unaffected and it will keep appearing in the list while
+ *       in use. Deleting a top-level category also removes its registered subcategories.
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -172,6 +220,11 @@ router.post('/categories', protect, adminOrStaff, productController.createCatego
  *         required: true
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: parent
+ *         schema:
+ *           type: string
+ *         description: Pass when deleting a subcategory.
  *     responses:
  *       200:
  *         description: Category removed

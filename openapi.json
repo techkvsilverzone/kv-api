@@ -166,10 +166,29 @@
           },
           "material": {
             "type": "string",
+            "description": "Free-text spec (e.g. metal/purity blend); not the taxonomy category",
             "example": "Silver"
+          },
+          "category": {
+            "type": "string",
+            "description": "Top-level taxonomy category",
+            "example": "Jewellery"
+          },
+          "subcategory": {
+            "type": "string",
+            "description": "Only set for categories with children (currently Jewellery)",
+            "example": "Mens"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional free-text tags, also filterable"
           },
           "weight": {
             "type": "number",
+            "description": "Grams. Optional/0 for fixed-price products.",
             "example": 10
           },
           "weightInGrams": {
@@ -229,6 +248,33 @@
               "$ref": "#/components/schemas/ProductImage"
             }
           },
+          "variants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductVariant"
+            }
+          },
+          "isFixedPrice": {
+            "type": "boolean",
+            "description": "Flat price; no dynamic metal-rate calc",
+            "example": false
+          },
+          "makingCharge": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductCharge"
+              }
+            ],
+            "nullable": true
+          },
+          "wastage": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductCharge"
+              }
+            ],
+            "nullable": true
+          },
           "pricing": {
             "$ref": "#/components/schemas/ProductPricing"
           },
@@ -246,8 +292,6 @@
         "type": "object",
         "required": [
           "name",
-          "category",
-          "weight",
           "price"
         ],
         "properties": {
@@ -255,13 +299,31 @@
             "type": "string",
             "example": "Silver Lotus Ring"
           },
+          "material": {
+            "type": "string",
+            "description": "Free-text spec, e.g. metal/purity blend",
+            "example": "Silver"
+          },
           "category": {
             "type": "string",
-            "description": "Stored as material",
-            "example": "Silver"
+            "description": "Top-level taxonomy category",
+            "example": "Jewellery"
+          },
+          "subcategory": {
+            "type": "string",
+            "description": "Must be a registered child of category",
+            "example": "Mens"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional; a comma-separated string is also accepted. Full replacement on update."
           },
           "weight": {
             "type": "number",
+            "description": "Grams. Required unless isFixedPrice is true.",
             "example": 10
           },
           "price": {
@@ -291,7 +353,14 @@
           },
           "image": {
             "type": "string",
-            "description": "Base64 data URL or image URL"
+            "description": "Primary image (= images[0]); kept for backward compatibility"
+          },
+          "images": {
+            "type": "array",
+            "description": "Ordered gallery; images[0] is the primary image. Each entry is a base64 data URL (new upload) or an existing image reference echoed from a GET. Full replacement on update; empty array clears all images.",
+            "items": {
+              "type": "string"
+            }
           },
           "productGroupCode": {
             "type": "string",
@@ -305,6 +374,85 @@
           },
           "isActive": {
             "type": "boolean"
+          },
+          "variants": {
+            "type": "array",
+            "description": "Full replacement array on update; empty array clears all variants",
+            "items": {
+              "$ref": "#/components/schemas/ProductVariant"
+            }
+          },
+          "isFixedPrice": {
+            "type": "boolean",
+            "description": "When true, makingCharge/wastage are ignored/cleared"
+          },
+          "makingCharge": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductCharge"
+              }
+            ],
+            "nullable": true
+          },
+          "wastage": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductCharge"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "ProductCharge": {
+        "type": "object",
+        "required": [
+          "type",
+          "value"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "percentage",
+              "amount"
+            ],
+            "description": "percentage = percent (0-100); amount = flat rupee amount"
+          },
+          "value": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Non-negative; <= 100 when type is percentage",
+            "example": 12
+          }
+        }
+      },
+      "ProductVariant": {
+        "type": "object",
+        "required": [
+          "label",
+          "weight"
+        ],
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Free-text size name",
+            "example": "M"
+          },
+          "weight": {
+            "type": "string",
+            "description": "Per-variant weight (free-text)",
+            "example": "30g"
+          },
+          "height": {
+            "type": "string",
+            "description": "Display-only",
+            "example": "3cm"
+          },
+          "breadth": {
+            "type": "string",
+            "description": "Display-only",
+            "example": "2cm"
           }
         }
       },
@@ -1070,6 +1218,34 @@
           }
         }
       },
+      "DeliveryConfig": {
+        "type": "object",
+        "required": [
+          "chennai",
+          "otherDistrict",
+          "otherState"
+        ],
+        "properties": {
+          "chennai": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Destination city is Chennai",
+            "example": 150
+          },
+          "otherDistrict": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Same state (Tamil Nadu), not Chennai",
+            "example": 200
+          },
+          "otherState": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Any other state",
+            "example": 250
+          }
+        }
+      },
       "StoreConfig": {
         "type": "object",
         "properties": {
@@ -1236,6 +1412,315 @@
     }
   ],
   "paths": {
+    "/admin/silver-rates": {
+      "get": {
+        "summary": "Get all silver rate records",
+        "tags": [
+          "Admin"
+        ],
+        "deprecated": true,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of all silver rate records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ratePerGram": {
+                        "type": "number"
+                      },
+                      "purity": {
+                        "type": "string"
+                      },
+                      "updatedBy": {
+                        "type": "string"
+                      },
+                      "date": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "post": {
+        "summary": "Upsert today's silver rate for a purity",
+        "tags": [
+          "Admin"
+        ],
+        "deprecated": true,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "ratePerGram",
+                  "purity"
+                ],
+                "properties": {
+                  "ratePerGram": {
+                    "type": "number"
+                  },
+                  "purity": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Silver rate upserted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ratePerGram": {
+                      "type": "number"
+                    },
+                    "purity": {
+                      "type": "string"
+                    },
+                    "updatedBy": {
+                      "type": "string"
+                    },
+                    "date": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/admin/gold-rates": {
+      "get": {
+        "summary": "Get all gold rate records",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of all gold rate records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "date": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "rateDate": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "purity": {
+                        "type": "string"
+                      },
+                      "ratePerGram": {
+                        "type": "number"
+                      },
+                      "ratePerKg": {
+                        "type": "number"
+                      },
+                      "updatedBy": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "post": {
+        "summary": "Upsert today's gold rate",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "ratePerGram",
+                  "purity"
+                ],
+                "properties": {
+                  "ratePerGram": {
+                    "type": "number"
+                  },
+                  "purity": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Gold rate upserted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "date": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "rateDate": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "purity": {
+                      "type": "string"
+                    },
+                    "ratePerGram": {
+                      "type": "number"
+                    },
+                    "ratePerKg": {
+                      "type": "number"
+                    },
+                    "updatedBy": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/admin/rate-status": {
+      "get": {
+        "summary": "Authoritative daily price-update block flag (#25)",
+        "description": "Returns whether the admin panel should be locked because today's (IST) silver and/or gold rate has not been recorded. Computed by the 10:00 IST cron; safe for the client to use as the source of truth.\n",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current block status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "blocked": {
+                      "type": "boolean"
+                    },
+                    "staleMetals": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "silver",
+                          "gold"
+                        ]
+                      }
+                    },
+                    "checkedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
     "/admin/stats": {
       "get": {
         "summary": "Get dashboard statistics",
@@ -1346,6 +1831,99 @@
         }
       }
     },
+    "/admin/users/{id}": {
+      "put": {
+        "summary": "Update a user (admin only, not staff — user management is sensitive)",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "isAdmin": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated user"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deactivate a user (admin only). Soft delete — preserves order/return/savings history.",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deactivated"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
     "/products": {
       "post": {
         "summary": "Add new product",
@@ -1401,7 +1979,23 @@
             "schema": {
               "type": "string"
             },
-            "description": "Filter by category"
+            "description": "Filter by category (comma-separated for multiple)"
+          },
+          {
+            "in": "query",
+            "name": "subcategory",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by subcategory (comma-separated for multiple)"
+          },
+          {
+            "in": "query",
+            "name": "tags",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by tag (comma-separated; matches any)"
           },
           {
             "in": "query",
@@ -1463,6 +2057,25 @@
               "type": "boolean"
             },
             "description": "Only featured products"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "1-indexed page number (used with limit for infinite scroll). Filters/sort apply before paging."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "description": "Page size. When omitted the full result set is returned. A page beyond the last yields an empty array."
           }
         ],
         "responses": {
@@ -1711,6 +2324,330 @@
         }
       }
     },
+    "/admin/savings/{id}": {
+      "put": {
+        "summary": "Correct a savings/passbook record (admin only)",
+        "description": "Staff cannot call this — passbook records can only be modified by a full admin. The passbook number itself is never editable (it's the tracking key already handed out to the customer); only planName/monthlyAmount/duration/bonusAmount/totalPaid/ status/startDate can be corrected.\n",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "planName": {
+                    "type": "string"
+                  },
+                  "monthlyAmount": {
+                    "type": "integer",
+                    "minimum": 1000
+                  },
+                  "duration": {
+                    "type": "integer",
+                    "enum": [
+                      6,
+                      11,
+                      12
+                    ]
+                  },
+                  "bonusAmount": {
+                    "type": "number"
+                  },
+                  "totalPaid": {
+                    "type": "number"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Active",
+                      "Completed",
+                      "Cancelled"
+                    ]
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "maturityBenefits": {
+                    "type": "object",
+                    "properties": {
+                      "goldCoinValue": {
+                        "type": "number"
+                      },
+                      "silverGrams": {
+                        "type": "number"
+                      },
+                      "gifts": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated savings scheme"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a savings/passbook record (admin only)",
+        "description": "Staff cannot call this — passbook records can only be deleted by a full admin.",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Savings scheme deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/admin/savings/{id}/pay": {
+      "post": {
+        "summary": "Manually record a collection on a passbook (admin only)",
+        "description": "For cash/offline collections or corrections — not exposed to staff. `materialRate` defaults to the live silver rate; pass it to override (e.g. a backdated entry).\n",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "amount"
+                ],
+                "properties": {
+                  "amount": {
+                    "type": "number"
+                  },
+                  "materialRate": {
+                    "type": "number",
+                    "description": "Optional override of the live silver rate"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated scheme with payment history"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/admin/savings/{id}/payments/{index}": {
+      "put": {
+        "summary": "Correct a single ledger row (admin only)",
+        "description": "Staff cannot call this. Re-derives materialWeight/devidentMaterialWeight from any edited amount/rate.",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "index",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Zero-based index into the scheme's payments array"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number"
+                  },
+                  "materialRate": {
+                    "type": "number"
+                  },
+                  "devidentAmount": {
+                    "type": "number"
+                  },
+                  "devidentMaterialRate": {
+                    "type": "number"
+                  },
+                  "paidAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated savings scheme"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove an erroneous ledger row (admin only)",
+        "description": "Staff cannot call this. Adjusts totalPaid accordingly.",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "index",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated savings scheme"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
     "/admin/coupons": {
       "get": {
         "summary": "List all coupons",
@@ -1880,126 +2817,6 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
-          }
-        }
-      }
-    },
-    "/admin/silver-rates": {
-      "get": {
-        "summary": "Get all silver rate records",
-        "tags": [
-          "Admin"
-        ],
-        "deprecated": true,
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of all silver rate records",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "ratePerGram": {
-                        "type": "number"
-                      },
-                      "purity": {
-                        "type": "string"
-                      },
-                      "updatedBy": {
-                        "type": "string"
-                      },
-                      "date": {
-                        "type": "string",
-                        "format": "date-time"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        }
-      },
-      "post": {
-        "summary": "Upsert today's silver rate for a purity",
-        "tags": [
-          "Admin"
-        ],
-        "deprecated": true,
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "ratePerGram",
-                  "purity"
-                ],
-                "properties": {
-                  "ratePerGram": {
-                    "type": "number"
-                  },
-                  "purity": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Silver rate upserted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "ratePerGram": {
-                      "type": "number"
-                    },
-                    "purity": {
-                      "type": "string"
-                    },
-                    "updatedBy": {
-                      "type": "string"
-                    },
-                    "date": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
           }
         }
       }
@@ -2174,6 +2991,135 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/admin/returns/{id}/video": {
+      "get": {
+        "summary": "Stream the unboxing video attached to a return (video/mp4 or similar)",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video file stream"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/admin/return-videos/unmatched": {
+      "get": {
+        "summary": "List unboxing videos received via WhatsApp that could not be auto-matched to a return",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unmatched videos"
+          }
+        }
+      }
+    },
+    "/admin/return-videos/unmatched/{id}/file": {
+      "get": {
+        "summary": "Stream an unmatched video",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video file stream"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/admin/return-videos/unmatched/{id}/link": {
+      "post": {
+        "summary": "Manually link an unmatched WhatsApp video to a return request",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "returnId"
+                ],
+                "properties": {
+                  "returnId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return updated with the linked video"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
@@ -3005,6 +3951,349 @@
         }
       }
     },
+    "/admin/delivery-config": {
+      "get": {
+        "summary": "Get zone-based delivery charges",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delivery charge configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DeliveryConfig"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update zone-based delivery charges (full replace)",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Delivery configuration updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DeliveryConfig"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/admin/stall-config": {
+      "get": {
+        "summary": "Get offline-stall registration mode status",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stall config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "active": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "put": {
+        "summary": "Enable/disable offline-stall registration mode",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "active"
+                ],
+                "properties": {
+                  "active": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stall config updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "active": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/admin/invoice-config": {
+      "get": {
+        "summary": "Get invoice/company details (GSTIN, address)",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice config"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update invoice/company details (GSTIN, address) shown on customer invoices",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "gstin": {
+                    "type": "string"
+                  },
+                  "companyAddress": {
+                    "type": "string"
+                  },
+                  "companyPhone": {
+                    "type": "string"
+                  },
+                  "companyEmail": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invoice config updated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/admin/whatsapp/broadcast": {
+      "post": {
+        "summary": "Send a WhatsApp broadcast (festival promotions etc.) to customers",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "message"
+                ],
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Broadcast dispatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recipients": {
+                          "type": "integer"
+                        },
+                        "sent": {
+                          "type": "integer"
+                        },
+                        "failed": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
     "/admin/gift-vouchers": {
       "get": {
         "summary": "List all gift voucher denominations (incl. inactive)",
@@ -3296,7 +4585,8 @@
     },
     "/auth/forgot-password": {
       "post": {
-        "summary": "Initiate password reset",
+        "summary": "Email a password reset code",
+        "description": "Sends a 6-digit reset code to the address if it belongs to an account. Redeem it via POST /auth/reset-password. The response is deliberately generic so this cannot be used to enumerate registered accounts.\n",
         "tags": [
           "Auth"
         ],
@@ -3321,7 +4611,7 @@
         },
         "responses": {
           "200": {
-            "description": "Password reset link sent if the email exists",
+            "description": "Generic confirmation — does not reveal whether the email is registered",
             "content": {
               "application/json": {
                 "schema": {
@@ -3332,6 +4622,153 @@
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "summary": "Redeem a password reset code and set a new password",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "code",
+                  "newPassword"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "code": {
+                    "type": "string",
+                    "example": "123456"
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "minLength": 6
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password updated; sign in with the new password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/auth/otp/request": {
+      "post": {
+        "summary": "Request a one-time login code (emailed; also sent via WhatsApp once that channel is approved)",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generic confirmation — does not reveal whether the email is registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/auth/otp/verify": {
+      "post": {
+        "summary": "Verify a login OTP and start a session",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "code"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "code": {
+                    "type": "string",
+                    "example": "123456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated; sets httpOnly cookie and returns user + token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           }
         }
       }
@@ -3551,6 +4988,35 @@
         }
       }
     },
+    "/delivery-config": {
+      "get": {
+        "summary": "Get public zone-based delivery charges",
+        "tags": [
+          "Delivery"
+        ],
+        "responses": {
+          "200": {
+            "description": "Public delivery charge configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DeliveryConfig"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/gift-vouchers": {
       "get": {
         "summary": "List active gift voucher denominations",
@@ -3583,6 +5049,112 @@
         }
       }
     },
+    "/gold-rates/today": {
+      "get": {
+        "summary": "Get today's gold rate(s)",
+        "tags": [
+          "GoldRates"
+        ],
+        "responses": {
+          "200": {
+            "description": "Today's gold rates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "date": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "rateDate": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "purity": {
+                        "type": "string"
+                      },
+                      "ratePerGram": {
+                        "type": "number"
+                      },
+                      "ratePerKg": {
+                        "type": "number"
+                      },
+                      "updatedBy": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gold-rates/history": {
+      "get": {
+        "summary": "Get historical gold rates",
+        "tags": [
+          "GoldRates"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "days",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Number of days of history (default 30)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historical gold rates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "date": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "rateDate": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "purity": {
+                        "type": "string"
+                      },
+                      "ratePerGram": {
+                        "type": "number"
+                      },
+                      "ratePerKg": {
+                        "type": "number"
+                      },
+                      "updatedBy": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Check system health",
@@ -3604,6 +5176,52 @@
                     "timestamp": {
                       "type": "string",
                       "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/invoice-config": {
+      "get": {
+        "summary": "Get public invoice/company details (GSTIN, address) shown on customer invoices",
+        "tags": [
+          "InvoiceConfig"
+        ],
+        "responses": {
+          "200": {
+            "description": "Public invoice config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "companyName": {
+                          "type": "string"
+                        },
+                        "gstin": {
+                          "type": "string"
+                        },
+                        "companyAddress": {
+                          "type": "string"
+                        },
+                        "companyPhone": {
+                          "type": "string"
+                        },
+                        "companyEmail": {
+                          "type": "string"
+                        }
+                      }
                     }
                   }
                 }
@@ -4059,13 +5677,105 @@
     },
     "/products/categories": {
       "get": {
-        "summary": "Get all product categories",
+        "summary": "Get the category/subcategory tree",
+        "description": "Merges category/subcategory combinations actually in use on products with ones an admin has pre-registered ahead of the first product that uses them.",
         "tags": [
           "Products"
         ],
         "responses": {
           "200": {
-            "description": "List of category names",
+            "description": "Category tree",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "subcategories": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Register a new category or subcategory (admin/staff)",
+        "description": "Categories are otherwise derived from products in use — this lets an admin create one ahead of the first product that uses it. Pass `parent` to register a subcategory under an existing top-level category.",
+        "tags": [
+          "Products"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "parent": {
+                    "type": "string",
+                    "description": "Omit for a top-level category."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category registered (idempotent if it already exists)"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/products/tags": {
+      "get": {
+        "summary": "Get all tags in use across active products",
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tags",
             "content": {
               "application/json": {
                 "schema": {
@@ -4085,6 +5795,49 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/products/categories/{name}": {
+      "delete": {
+        "summary": "Remove a registered category or subcategory (admin/staff)",
+        "description": "Only removes the standalone registration — products already using this category/subcategory are unaffected and it will keep appearing in the list while in use. Deleting a top-level category also removes its registered subcategories.",
+        "tags": [
+          "Products"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "parent",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Pass when deleting a subcategory."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category removed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           }
         }
       }
@@ -4245,12 +5998,21 @@
                 "required": [
                   "orderId",
                   "reason",
-                  "items"
+                  "items",
+                  "faultType"
                 ],
                 "properties": {
                   "orderId": {
                     "type": "string",
                     "description": "Id of the order being returned"
+                  },
+                  "faultType": {
+                    "type": "string",
+                    "enum": [
+                      "kv_fault",
+                      "customer_preference"
+                    ],
+                    "description": "kv_fault (wrong/damaged/defective item) is refund/replacement-eligible and requires an unboxing video sent via WhatsApp; customer_preference is exchange/store-credit only."
                   },
                   "reason": {
                     "type": "string",
@@ -4359,6 +6121,34 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/returns/policy": {
+      "get": {
+        "summary": "Public returns policy info (WhatsApp number for unboxing videos, claim window)",
+        "tags": [
+          "Returns"
+        ],
+        "responses": {
+          "200": {
+            "description": "Policy info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "whatsappNumber": {
+                      "type": "string"
+                    },
+                    "claimWindowHours": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -4508,7 +6298,9 @@
                     },
                     "passbookNumber": {
                       "type": "string",
-                      "example": "PB-00000042"
+                      "nullable": true,
+                      "description": "Absent until this scheme's first payment is recorded.",
+                      "example": null
                     },
                     "planName": {
                       "type": "string"
@@ -4664,9 +6456,49 @@
         }
       }
     },
-    "/savings/{schemeId}/pay": {
+    "/savings/passbook/{passbookNumber}": {
+      "get": {
+        "summary": "Track a savings scheme by its passbook number",
+        "description": "Customers may only look up their own passbook; admin/staff can look up any.",
+        "tags": [
+          "Savings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "passbookNumber",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "PB-00000042"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The matching savings scheme"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/savings/{schemeId}/pay/create-order": {
       "post": {
-        "summary": "Record a monthly payment for a savings scheme",
+        "summary": "Create a Razorpay order for this scheme's next monthly installment",
+        "description": "The amount is always the scheme's own `monthlyAmount` — server-computed, never client input. Step 1 of the customer self-pay flow; step 2 is `/pay/verify`.\n",
         "tags": [
           "Savings"
         ],
@@ -4682,8 +6514,67 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Savings scheme id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Razorpay order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "amount": {
+                      "type": "integer",
+                      "description": "Paise"
+                    },
+                    "currency": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/savings/{schemeId}/pay/verify": {
+      "post": {
+        "summary": "Verify a Razorpay installment payment and record it on the ledger",
+        "description": "Verifies the payment signature, re-confirms the amount Razorpay actually captured matches the scheme's monthly amount, converts the collection to silver grams at the live rate, and mints the passbook if this was the scheme's first payment.\n",
+        "tags": [
+          "Savings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "schemeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -4693,18 +6584,19 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "amount",
-                  "month"
+                  "razorpayOrderId",
+                  "razorpayPaymentId",
+                  "razorpaySignature"
                 ],
                 "properties": {
-                  "amount": {
-                    "type": "number",
-                    "example": 2000
+                  "razorpayOrderId": {
+                    "type": "string"
                   },
-                  "month": {
-                    "type": "integer",
-                    "description": "Installment month number",
-                    "example": 1
+                  "razorpayPaymentId": {
+                    "type": "string"
+                  },
+                  "razorpaySignature": {
+                    "type": "string"
                   }
                 }
               }
@@ -4713,48 +6605,10 @@
         },
         "responses": {
           "200": {
-            "description": "Updated scheme with payment history",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "_id": {
-                      "type": "string"
-                    },
-                    "totalPaid": {
-                      "type": "number"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "Active",
-                        "Completed",
-                        "Cancelled"
-                      ]
-                    },
-                    "payments": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "month": {
-                            "type": "integer"
-                          },
-                          "amount": {
-                            "type": "number"
-                          },
-                          "paidAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
+            "description": "Updated scheme with payment history"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -5035,6 +6889,40 @@
                       },
                       "updatedBy": {
                         "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stall-config": {
+      "get": {
+        "summary": "Get public offline-stall registration mode status",
+        "tags": [
+          "StallConfig"
+        ],
+        "responses": {
+          "200": {
+            "description": "Public stall config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "active": {
+                          "type": "boolean"
+                        }
                       }
                     }
                   }
@@ -5370,6 +7258,56 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/webhooks/whatsapp": {
+      "get": {
+        "summary": "Meta WhatsApp Cloud API webhook subscription handshake",
+        "tags": [
+          "Webhooks"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "hub.mode",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hub.verify_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hub.challenge",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Echoes hub.challenge back when the verify token matches"
+          },
+          "403": {
+            "description": "Verify token mismatch"
+          }
+        }
+      },
+      "post": {
+        "summary": "Inbound WhatsApp messages (used to receive return unboxing videos)",
+        "tags": [
+          "Webhooks"
+        ],
+        "responses": {
+          "200": {
+            "description": "Always acknowledged immediately; processing happens async"
           }
         }
       }

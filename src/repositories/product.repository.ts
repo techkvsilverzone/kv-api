@@ -96,9 +96,18 @@ export class ProductRepository {
     return product.save();
   }
 
-  public async getCategories(): Promise<string[]> {
-    const result = await Product.distinct('material', { isActive: true });
-    return result.sort();
+  /** Distinct category/subcategory combinations actually in use, for building the category tree. */
+  public async getCategoryUsage(): Promise<Array<{ category: string; subcategory?: string }>> {
+    const result = await Product.aggregate([
+      { $match: { isActive: true, category: { $nin: [null, ''] } } },
+      { $group: { _id: { category: '$category', subcategory: '$subcategory' } } },
+    ]);
+    return result.map((r: any) => ({ category: r._id.category, subcategory: r._id.subcategory || undefined }));
+  }
+
+  public async getTags(): Promise<string[]> {
+    const result = await Product.distinct('tags', { isActive: true });
+    return (result as string[]).filter(Boolean).sort();
   }
 
   public async findAll(filters: any = {}): Promise<IProduct[]> {
@@ -106,7 +115,17 @@ export class ProductRepository {
 
     if (filters.category) {
       const cats = String(filters.category).split(',').map((c: string) => c.trim()).filter(Boolean);
-      query.material = cats.length === 1 ? cats[0] : { $in: cats };
+      query.category = cats.length === 1 ? cats[0] : { $in: cats };
+    }
+
+    if (filters.subcategory) {
+      const subs = String(filters.subcategory).split(',').map((s: string) => s.trim()).filter(Boolean);
+      query.subcategory = subs.length === 1 ? subs[0] : { $in: subs };
+    }
+
+    if (filters.tags) {
+      const tags = String(filters.tags).split(',').map((t: string) => t.trim()).filter(Boolean);
+      if (tags.length) query.tags = { $in: tags };
     }
 
     if (filters.metal) {

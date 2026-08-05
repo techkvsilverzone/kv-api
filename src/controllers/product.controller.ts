@@ -28,7 +28,7 @@ export class ProductController {
 
   public createCategory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      await this.productService.createCategory(req.body?.name);
+      await this.productService.createCategory(req.body?.name, req.body?.parent);
       res.status(201).json({ status: 'success' });
     } catch (error) {
       next(error);
@@ -37,8 +37,17 @@ export class ProductController {
 
   public deleteCategory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      await this.productService.deleteCategory(req.params.name as string);
+      await this.productService.deleteCategory(req.params.name as string, req.query.parent as string | undefined);
       res.status(200).json({ status: 'success' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getTags = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const tags = await this.productService.getTags();
+      res.status(200).json({ status: 'success', data: tags });
     } catch (error) {
       next(error);
     }
