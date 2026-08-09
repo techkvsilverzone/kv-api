@@ -185,6 +185,31 @@ export async function sendOtpWhatsApp(phone: string, code: string, expiryMinutes
   return sendWhatsAppText(phone, body);
 }
 
+/** A Diwali scheme has collected all its installments and is ready for the redemption payout
+ * to be computed — sent to the ops number, since that's a manual admin action (unlike
+ * Gold/Silver 11+1, whose bonus grams are credited automatically with no further step). */
+export async function sendDiwaliSchemeCompleted(
+  passbookNumber: string | undefined,
+  totalPaid: number,
+): Promise<WhatsAppSendResult> {
+  const body =
+    `🪔 KV Silver Zone: Diwali scheme ${passbookNumber ? `#${passbookNumber}` : '(no passbook yet)'} has collected all ` +
+    `installments — ₹${totalPaid.toLocaleString('en-IN')} total. Compute the redemption payout in the admin panel when ready.`;
+  return sendWhatsAppText(config.rateAlertRecipient, body);
+}
+
+/** The Diwali redemption payout has been computed — sent to the customer. */
+export async function sendDiwaliRedemptionReady(
+  phone: string,
+  input: { passbookNumber: string; goldGrams: number; goldCoinValue: number; silverGrams: number; giftsValue: number },
+): Promise<WhatsAppSendResult> {
+  const body =
+    `🪔 KV Silver Zone: Your Diwali scheme (Passbook #${input.passbookNumber}) redemption is ready — ` +
+    `${input.goldGrams}g gold (₹${input.goldCoinValue.toLocaleString('en-IN')}), ${input.silverGrams}g silver, and a ` +
+    `₹${input.giftsValue.toLocaleString('en-IN')} gift hamper. Visit the store to collect it.`;
+  return sendWhatsAppText(phone, body);
+}
+
 /** Admin-authored festival/promotional broadcast to a list of customer phone numbers. */
 export async function sendBroadcast(phones: string[], message: string): Promise<{ to: string; result: WhatsAppSendResult }[]> {
   const results: { to: string; result: WhatsAppSendResult }[] = [];

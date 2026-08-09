@@ -33,8 +33,8 @@ const rate = {
   createdAt: '2026-07-05T04:30:00.000Z',
 };
 
-const staffHeader = JSON.stringify({ isAdmin: false, role: 'staff' });
-const customerHeader = JSON.stringify({ isAdmin: false, role: 'customer' });
+const staffHeader = JSON.stringify({ _id: '64f0000000000000000000cc', isAdmin: false, role: 'staff' });
+const customerHeader = JSON.stringify({ _id: '64f0000000000000000000dd', isAdmin: false, role: 'customer' });
 const getAsStaff = (url: string) => request(app).get(url).set('x-test-user', staffHeader);
 const getAsCustomer = (url: string) => request(app).get(url).set('x-test-user', customerHeader);
 
@@ -143,13 +143,25 @@ describe('Admin panel access — staff mirrors admin except inventory and saving
     expect(res.status).toBe(204);
   });
 
-  it('rejects a staff user from POST /admin/savings/:id/pay with 403 (manual collections are admin-only)', async () => {
-    const spy = jest.spyOn(SavingsService.prototype, 'recordPaymentAsAdmin');
+  it('allows a staff user to POST /admin/savings/:id/pay (staff can record cash collections)', async () => {
+    const spy = jest.spyOn(SavingsService.prototype, 'recordPaymentAsAdmin').mockResolvedValue({} as never);
 
     const res = await request(app)
       .post('/api/v1/admin/savings/64f0000000000000000000aa/pay')
       .set('x-test-user', staffHeader)
       .send({ amount: 2000 });
+
+    expect(res.status).toBe(200);
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('rejects a staff user from POST /admin/savings/:id/cancel with 403 (cancellation is admin-only)', async () => {
+    const spy = jest.spyOn(SavingsService.prototype, 'cancelScheme');
+
+    const res = await request(app)
+      .post('/api/v1/admin/savings/64f0000000000000000000aa/cancel')
+      .set('x-test-user', staffHeader)
+      .send({});
 
     expect(res.status).toBe(403);
     expect(spy).not.toHaveBeenCalled();
@@ -160,7 +172,7 @@ describe('Admin panel access — staff mirrors admin except inventory and saving
 
     const res = await request(app)
       .post('/api/v1/admin/savings/64f0000000000000000000aa/pay')
-      .set('x-test-user', JSON.stringify({ isAdmin: true }))
+      .set('x-test-user', JSON.stringify({ _id: '64f0000000000000000000ee', isAdmin: true }))
       .send({ amount: 2000 });
 
     expect(res.status).toBe(200);

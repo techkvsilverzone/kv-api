@@ -7,6 +7,7 @@ import {
 } from '../repositories/deliveryConfig.repository';
 import { MetalRateService } from './metalrate.service';
 import { CouponService } from './coupon.service';
+import { MetalType } from '../models/metalrate.model';
 import { IProduct, IProductCharge } from '../models/product.model';
 import { AppError } from '../utils/appError';
 import Logger from '../utils/logger';
@@ -148,11 +149,22 @@ export class PricingService {
    * (callers then fall back to the product's static listed price).
    */
   public async getCurrentSilverRatePerGram(): Promise<number | null> {
-    const todays = await this.metalRateService.getTodayRates('SILVER');
+    return this.getCurrentRatePerGram('SILVER');
+  }
+
+  /**
+   * Current rate per gram for either metal, preferring today's rate and falling back to the
+   * most recent recorded rate. Returns null when no rate has ever been set for that metal.
+   * Generalizes what was previously silver-only logic so gold-denominated savings schemes
+   * (Gold 11+1, the Diwali hamper's gold coin) can price against the real gold rate instead
+   * of silently reusing silver's.
+   */
+  public async getCurrentRatePerGram(metal: MetalType): Promise<number | null> {
+    const todays = await this.metalRateService.getTodayRates(metal);
     if (todays.length > 0 && todays[0].ratePerGram > 0) {
       return todays[0].ratePerGram;
     }
-    const all = await this.metalRateService.getAllRates('SILVER');
+    const all = await this.metalRateService.getAllRates(metal);
     const latest = all
       .filter((r) => r.ratePerGram > 0)
       .sort((a, b) => (a.date < b.date ? 1 : -1))[0];

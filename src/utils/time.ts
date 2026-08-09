@@ -20,6 +20,14 @@ export function istDayKey(date: Date = new Date()): string {
   }).format(date);
 }
 
+/**
+ * The IST calendar month for a date, as a 'YYYY-MM' string. Used by the savings ledger to
+ * enforce "one installment per calendar month" (card rule 3) regardless of server timezone.
+ */
+export function istMonthKey(date: Date = new Date()): string {
+  return istDayKey(date).slice(0, 7);
+}
+
 /** True when `date` falls on the same IST calendar day as `reference` (default: now). */
 export function isSameIstDay(date: Date, reference: Date = new Date()): boolean {
   return istDayKey(date) === istDayKey(reference);
@@ -56,6 +64,14 @@ export function financialYearCode(date: Date = new Date()): string {
  */
 export function istMidnightUtc(dayKey: string): Date {
   return new Date(`${dayKey}T00:00:00+05:30`);
+}
+
+/** Calendar-month arithmetic (server-local, JS month-overflow semantics) — shared by the
+ * installment due-date calc (savings.service.ts) and the reminder cron. */
+export function addMonths(date: Date, months: number): Date {
+  const result = new Date(date);
+  result.setMonth(result.getMonth() + months);
+  return result;
 }
 
 /**

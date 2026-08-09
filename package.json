@@ -11,6 +11,7 @@
     "seed": "ts-node src/seed.ts",
     "seed:inventory": "ts-node src/utils/seedInventory.ts",
     "seed:categories": "ts-node src/utils/seedCategories.ts",
+    "seed:scheme-plans": "ts-node src/utils/seedSchemePlans.ts",
     "openapi": "ts-node src/utils/exportOpenapi.ts",
     "test:watch": "jest --watch"
   },

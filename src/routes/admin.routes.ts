@@ -19,6 +19,7 @@ import { UserRepository } from '../repositories/user.repository';
 import { sendBroadcast } from '../utils/whatsapp';
 import { InventoryController } from '../controllers/inventory.controller';
 import { GiftVoucherController } from '../controllers/giftVoucher.controller';
+import { SchemePlanController } from '../controllers/schemePlan.controller';
 import { protect, admin, adminOrStaff } from '../middlewares/auth.middleware';
 
 const filterConfigRepository = new FilterConfigRepository();
@@ -30,6 +31,7 @@ const invoiceConfigRepository = new InvoiceConfigRepository();
 const userRepositoryForBroadcast = new UserRepository();
 const inventoryController = new InventoryController();
 const giftVoucherController = new GiftVoucherController();
+const schemePlanController = new SchemePlanController();
 
 const router = Router();
 const productController = new ProductController();
@@ -688,8 +690,10 @@ router.delete('/savings/:id', admin, savingsController.adminDelete);
  *   post:
  *     summary: Manually record a collection on a passbook (admin only)
  *     description: >
- *       For cash/offline collections or corrections — not exposed to staff. `materialRate`
- *       defaults to the live silver rate; pass it to override (e.g. a backdated entry).
+ *       For cash/offline collections or corrections — staff and admin can both record a
+ *       collection; editing/deleting a ledger row afterward stays admin-only. `materialRate`
+ *       defaults to the live rate for the scheme's metal; pass it to override (e.g. a backdated
+ *       entry).
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
@@ -724,7 +728,9 @@ router.delete('/savings/:id', admin, savingsController.adminDelete);
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
-router.post('/savings/:id/pay', admin, savingsController.adminRecordPayment);
+// adminOrStaff only (inherited from the blanket router.use above) — per business decision,
+// staff can record cash/offline collections; editing or deleting a ledger row stays admin-only.
+router.post('/savings/:id/pay', savingsController.adminRecordPayment);
 
 /**
  * @openapi
@@ -810,6 +816,82 @@ router.put('/savings/:id/payments/:index', admin, savingsController.adminUpdateP
  *         $ref: '#/components/responses/NotFound'
  */
 router.delete('/savings/:id/payments/:index', admin, savingsController.adminDeletePaymentRow);
+
+/**
+ * @openapi
+ * /admin/savings/{id}/cancel:
+ *   post:
+ *     summary: Cancel a scheme early and compute its forfeit/redeemable split (admin only)
+ *     description: >
+ *       Card rule 6: forfeits the plan's earlyExitPenaltyPercent (default 10%) of the amount
+ *       paid, minus the ₹ value of any gifts already handed over (pass `giftsValueDeducted`).
+ *       The remainder is redeemable as goods only — no cash refund path exists.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               giftsValueDeducted:
+ *                 type: number
+ *               note:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Cancelled scheme with the computed forfeit split
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.post('/savings/:id/cancel', admin, savingsController.adminCancelScheme);
+
+/**
+ * @openapi
+ * /admin/savings/{id}/redemption/compute:
+ *   post:
+ *     summary: Compute a Diwali scheme's redemption payout (admin only)
+ *     description: >
+ *       Requires the scheme to have completed all its installments. Computes
+ *       totalValue = totalPaid + 1 bonus month, then splits it into a fixed gifts value, the
+ *       plan's silver coin (fixed weight, valued at today's silver rate), and gold — a fixed ₹
+ *       VALUE (the remainder), converted to however many grams that buys at today's gold rate.
+ *       Result is stored on the scheme's maturityBenefits.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Scheme with the computed redemption payout on maturityBenefits
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.post('/savings/:id/redemption/compute', admin, savingsController.adminComputeRedemption);
 
 /**
  * @openapi
@@ -2299,5 +2381,111 @@ router.put('/gift-vouchers/:id', admin, giftVoucherController.updateVoucher);
  *         $ref: '#/components/responses/NotFound'
  */
 router.delete('/gift-vouchers/:id', admin, giftVoucherController.deleteVoucher);
+
+/**
+ * @openapi
+ * /admin/scheme-plans:
+ *   get:
+ *     summary: List all savings scheme plans (incl. inactive)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of scheme plans
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+// Scheme plans define the money rules (amounts, penalties, hamper value, price-band
+// thresholds) behind every savings enrollment — kept admin-only, no staff-facing UI.
+router.get('/scheme-plans', admin, schemePlanController.getAllPlans);
+
+/**
+ * @openapi
+ * /admin/scheme-plans:
+ *   post:
+ *     summary: Create a savings scheme plan
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/SchemePlanInput'
+ *     responses:
+ *       201:
+ *         description: Scheme plan created
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.post('/scheme-plans', admin, schemePlanController.createPlan);
+
+/**
+ * @openapi
+ * /admin/scheme-plans/{id}:
+ *   put:
+ *     summary: Update a savings scheme plan
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/SchemePlanInput'
+ *     responses:
+ *       200:
+ *         description: Scheme plan updated
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.put('/scheme-plans/:id', admin, schemePlanController.updatePlan);
+
+/**
+ * @openapi
+ * /admin/scheme-plans/{id}:
+ *   delete:
+ *     summary: Delete a savings scheme plan
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: Scheme plan deleted
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.delete('/scheme-plans/:id', admin, schemePlanController.deletePlan);
 
 export default router;

@@ -1,68 +1,138 @@
+import mongoose from 'mongoose';
 import { SavingsRepository } from '../repositories/savings.repository';
+import { SchemePlanRepository } from '../repositories/schemePlan.repository';
 import { UserRepository } from '../repositories/user.repository';
 import { PricingService } from './pricing.service';
 import { ISavings } from '../models/savings.model';
-import { sendSavingsPaymentSuccess } from '../utils/whatsapp';
+import { ISchemePlan, SchemeType } from '../models/schemePlan.model';
+import { sendSavingsPaymentSuccess, sendDiwaliSchemeCompleted, sendDiwaliRedemptionReady } from '../utils/whatsapp';
 import { createRazorpayOrder, fetchRazorpayOrder, verifyRazorpaySignature } from '../utils/razorpay';
 import { AppError } from '../utils/appError';
+import { addMonths, istMonthKey } from '../utils/time';
 import Logger from '../utils/logger';
 
+const round2 = (n: number) => Math.round(n * 100) / 100;
 const round3 = (n: number) => Math.round(n * 1000) / 1000;
+
+/** Only these three (self-service, installment-based) products are open for enrollment today —
+ * GOLD_INCOME/SILVER_DEPOSIT are lump-sum deposit schemes reserved for a later phase. */
+const ENROLLABLE_TYPES: SchemeType[] = ['GOLD_11_1', 'SILVER_11_1', 'DIWALI'];
+const ALL_SCHEME_TYPES: SchemeType[] = ['GOLD_11_1', 'SILVER_11_1', 'DIWALI', 'GOLD_INCOME', 'SILVER_DEPOSIT'];
 
 export class SavingsService {
   private savingsRepository: SavingsRepository;
+  private schemePlanRepository: SchemePlanRepository;
   private userRepository: UserRepository;
   private pricingService: PricingService;
 
   constructor() {
     this.savingsRepository = new SavingsRepository();
+    this.schemePlanRepository = new SchemePlanRepository();
     this.userRepository = new UserRepository();
     this.pricingService = new PricingService();
   }
 
+  private async getPlanForScheme(scheme: ISavings): Promise<ISchemePlan | null> {
+    if (!scheme.planId) return null;
+    return this.schemePlanRepository.findById(scheme.planId.toString());
+  }
+
+  /**
+   * Card rule 2: an installment is due by the plan's cutoff day each month, but a late payment
+   * is still accepted — it just pushes maturity out by however many months it slipped. Computed
+   * at read time from the ledger, never stored: whichever is LATER of (a) the originally
+   * scheduled `start + duration months`, or (b) the last real payment's month + however many
+   * installments are still outstanding.
+   */
+  public getMaturityDate(scheme: ISavings): Date {
+    const scheduled = addMonths(scheme.startDate, scheme.duration);
+    const realPayments = scheme.payments.filter((p) => p.amount > 0);
+    if (realPayments.length === 0) return scheduled;
+    const lastPaidAt = realPayments.reduce(
+      (latest, p) => (p.paidAt > latest ? p.paidAt : latest),
+      realPayments[0].paidAt,
+    );
+    const remainingInstallments = Math.max(0, scheme.duration - realPayments.length);
+    const projectedFromLast = addMonths(lastPaidAt, remainingInstallments);
+    return projectedFromLast > scheduled ? projectedFromLast : scheduled;
+  }
+
+  private withMaturityDate(scheme: ISavings) {
+    return { ...scheme.toObject(), maturityDate: this.getMaturityDate(scheme) };
+  }
+
   /** Enrollment alone creates a scheme record but no passbook — that's issued on first payment. */
   public async enroll(userId: string, data: any) {
+    const schemeType = String(data.schemeType || 'SILVER_11_1') as SchemeType;
+    if (!ENROLLABLE_TYPES.includes(schemeType)) {
+      throw new AppError(`schemeType must be one of ${ENROLLABLE_TYPES.join(', ')}`, 400);
+    }
+
+    const plan = await this.schemePlanRepository.findByType(schemeType);
+    if (!plan || !plan.isActive) {
+      throw new AppError('This scheme is not currently available for enrollment', 400);
+    }
+
     const monthlyAmount = Number(data.monthlyAmount);
-    if (!Number.isInteger(monthlyAmount) || monthlyAmount < 1000) {
-      throw new AppError('monthlyAmount must be a whole number and at least 1000', 400);
+    if (!plan.monthlyAmounts.includes(monthlyAmount)) {
+      throw new AppError(`monthlyAmount must be one of: ${plan.monthlyAmounts.join(', ')}`, 400);
     }
 
-    const duration = Number(data.duration);
-    const allowedDurations = [6, 11, 12];
-    if (!allowedDurations.includes(duration)) {
-      throw new AppError('duration must be one of 6, 11, or 12', 400);
-    }
+    const bonusAmount = plan.bonusMonths > 0 ? monthlyAmount * plan.bonusMonths : 0;
+    // Diwali's gold portion is a VALUE, not a fixed weight — it's only known once
+    // computeDiwaliRedemption runs (needs totalPaid, which doesn't exist yet at enrollment).
+    // Snapshot just the fixed parts (gifts, silver coin weight) here for early display.
+    const maturityBenefits = plan.hamper
+      ? {
+          silverGrams: plan.hamper.silverCoinGrams,
+          giftsValue: plan.hamper.giftsValue,
+          gifts: plan.hamper.gifts ?? [],
+        }
+      : undefined;
 
-    const bonusAmount = duration === 11 ? monthlyAmount : 0;
     return await this.savingsRepository.create({
       user: userId,
-      ...data,
+      schemeType: plan.type,
+      planId: plan._id,
+      metal: plan.metal,
+      planName: plan.name,
       monthlyAmount,
-      duration,
+      duration: plan.durationMonths,
       totalPaid: 0,
       bonusAmount,
+      maturityBenefits,
+      startDate: data.startDate,
     });
   }
 
   public async getMySchemes(userId: string) {
-    return await this.savingsRepository.findByUserId(userId);
+    const schemes = await this.savingsRepository.findByUserId(userId);
+    return schemes.map((s) => this.withMaturityDate(s));
   }
 
   /**
-   * Core ledger-entry logic shared by the customer (post-Razorpay-verify) and admin
+   * Core ledger-entry logic shared by the customer (post-Razorpay-verify) and admin/staff
    * (manual/offline collection) payment paths.
    *
-   * - Resolves the material rate: an explicit override (admin only), else the live silver
-   *   rate (`PricingService.getCurrentSilverRatePerGram`).
-   * - Converts the collection to grams and mints the passbook on the very first payment
-   *   (see SavingsRepository.recordPayment).
-   * - Auto-credits the bonus/devident row and flips the scheme to Completed the moment an
-   *   11-month scheme's 11th real installment lands (see SavingsRepository.creditBonusMonth).
+   * - Resolves the material rate for the scheme's metal: an explicit override (admin only),
+   *   else the live rate for that metal (`PricingService.getCurrentRatePerGram`).
+   * - Rejects a second installment for the same calendar month (card rule 3).
+   * - Converts the collection to grams and mints the passbook (under this scheme's plan prefix)
+   *   on the very first payment (see SavingsRepository.recordPayment).
+   * - Auto-credits the bonus/devident row and flips the scheme to Completed the moment a
+   *   scheme's Nth real installment lands, N = the plan's duration. Schemes with no bonus
+   *   months (e.g. Diwali) complete on that same final installment instead.
    */
   private async applyPayment(
     schemeId: string,
     amount: number,
-    materialRateOverride?: number,
+    opts: {
+      materialRateOverride?: number;
+      method: 'ONLINE' | 'CASH';
+      razorpayOrderId?: string;
+      razorpayPaymentId?: string;
+      recordedBy?: string;
+    },
   ): Promise<ISavings> {
     const scheme = await this.savingsRepository.findById(schemeId);
     if (!scheme) throw new AppError('Savings scheme not found', 404);
@@ -74,46 +144,96 @@ export class SavingsService {
     if (realPaymentsSoFar >= scheme.duration) {
       throw new AppError('This scheme has already collected all its installments', 400);
     }
-    // Payment lowest cutoff: an installment can't undercut the scheme's own monthly
-    // amount — mirrors the >=1000 floor enforced at enrollment.
     if (!Number.isFinite(amount) || amount < scheme.monthlyAmount) {
-      throw new AppError(
-        `Payment must be at least the scheme's monthly amount (₹${scheme.monthlyAmount})`,
-        400,
-      );
+      throw new AppError(`Payment must be at least the scheme's monthly amount (₹${scheme.monthlyAmount})`, 400);
     }
 
-    const rate = materialRateOverride ?? (await this.pricingService.getCurrentSilverRatePerGram());
-    if (!rate || rate <= 0) {
-      throw new AppError('No silver rate is available to record this collection — set one first', 400);
+    // Card rule 3: only one installment accepted per calendar month — keyed off the real
+    // calendar month the collection is being made in (IST), not a scheduled slot, so a late
+    // catch-up payment still only occupies the month it's actually paid in.
+    const collectionMonthKey = istMonthKey(new Date());
+    if (scheme.payments.some((p) => p.amount > 0 && p.dueMonthKey === collectionMonthKey)) {
+      throw new AppError('An installment for this month has already been recorded', 400);
     }
+
+    // Diwali has no `metal` — its collections aren't gram-accumulated (the redemption payout
+    // is computed later, in bulk, from totalPaid — see computeDiwaliRedemption). Resolving a
+    // rate here would be meaningless AND would wrongly block every Diwali collection behind
+    // whatever the *silver* rate happens to be that day.
+    const metal = scheme.metal;
+    let rate = 0;
+    if (metal) {
+      const resolved = opts.materialRateOverride ?? (await this.pricingService.getCurrentRatePerGram(metal));
+      if (!resolved || resolved <= 0) {
+        throw new AppError(
+          `No ${metal.toLowerCase()} rate is available to record this collection — set one first`,
+          400,
+        );
+      }
+      rate = resolved;
+    }
+
+    const plan = await this.getPlanForScheme(scheme);
+    const passbookPrefix = plan?.passbookPrefix ?? 'PB';
 
     const month = scheme.payments.length + 1;
-    const materialWeight = round3(amount / rate);
-    // A real passbook is only minted once — on this scheme's first actual payment.
+    const materialWeight = metal ? round3(amount / rate) : 0;
     const isFirstPayment = scheme.payments.length === 0 && !scheme.passbookNumber;
 
     const updated = await this.savingsRepository.recordPayment(
       schemeId,
-      { month, amount, materialRate: rate, materialWeight },
+      {
+        month,
+        amount,
+        materialRate: rate,
+        materialWeight,
+        method: opts.method,
+        razorpayOrderId: opts.razorpayOrderId,
+        razorpayPaymentId: opts.razorpayPaymentId,
+        recordedBy: opts.recordedBy,
+        dueMonthKey: collectionMonthKey,
+      },
       isFirstPayment,
+      passbookPrefix,
     );
     if (!updated) throw new AppError('Savings scheme not found', 404);
 
     const realPaymentsNow = updated.payments.filter((p) => p.amount > 0).length;
     const alreadyHasDevident = updated.payments.some((p) => p.devidentAmount > 0);
-    if (updated.duration === 11 && realPaymentsNow === 11 && !alreadyHasDevident) {
-      const devidentAmount = updated.bonusAmount;
-      const withBonus = await this.savingsRepository.creditBonusMonth(schemeId, {
-        month: month + 1,
-        devidentAmount,
-        devidentMaterialRate: rate,
-        devidentMaterialWeight: round3(devidentAmount / rate),
-      });
-      if (withBonus) return withBonus;
+    const bonusMonths = plan?.bonusMonths ?? (updated.duration === 11 ? 1 : 0);
+
+    if (realPaymentsNow === updated.duration) {
+      if (bonusMonths > 0 && !alreadyHasDevident) {
+        const devidentAmount = updated.bonusAmount;
+        const withBonus = await this.savingsRepository.creditBonusMonth(schemeId, {
+          month: month + 1,
+          devidentAmount,
+          devidentMaterialRate: rate,
+          devidentMaterialWeight: round3(devidentAmount / rate),
+        });
+        if (withBonus) return withBonus;
+      } else if (bonusMonths === 0) {
+        const completed = await this.savingsRepository.updateById(schemeId, { status: 'Completed' });
+        if (completed) {
+          if (completed.schemeType === 'DIWALI') {
+            await this.notifyDiwaliCompleted(completed);
+          }
+          return completed;
+        }
+      }
     }
 
     return updated;
+  }
+
+  /** Alerts the ops number that a Diwali scheme is ready for the (manual, admin-triggered)
+   * redemption payout compute — best-effort, never blocks the response. */
+  private async notifyDiwaliCompleted(scheme: ISavings) {
+    try {
+      await sendDiwaliSchemeCompleted(scheme.passbookNumber, scheme.totalPaid);
+    } catch (error) {
+      Logger.error(`Diwali completion WhatsApp dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   /** WhatsApp payment-success confirmation — best-effort, never blocks the response. */
@@ -147,6 +267,10 @@ export class SavingsService {
     if (realPayments >= scheme.duration) {
       throw new AppError('This scheme has already collected all its installments', 400);
     }
+    const collectionMonthKey = istMonthKey(new Date());
+    if (scheme.payments.some((p) => p.amount > 0 && p.dueMonthKey === collectionMonthKey)) {
+      throw new AppError('An installment for this month has already been recorded', 400);
+    }
 
     const amountPaise = Math.round(scheme.monthlyAmount * 100);
     const order = await createRazorpayOrder(amountPaise, 'INR', `savings_${schemeId}_${Date.now()}`);
@@ -177,26 +301,161 @@ export class SavingsService {
       throw new AppError("Payment amount does not match the scheme's monthly amount", 400);
     }
 
-    const updated = await this.applyPayment(schemeId, scheme.monthlyAmount);
+    const updated = await this.applyPayment(schemeId, scheme.monthlyAmount, {
+      method: 'ONLINE',
+      razorpayOrderId: razorpay.orderId,
+      razorpayPaymentId: razorpay.paymentId,
+    });
     const payments = await this.savingsRepository.getPayments(schemeId);
     await this.notifyPaymentSuccess(userId, updated, scheme.monthlyAmount);
     return { ...updated, payments };
   }
 
   /**
-   * Admin-only manual/offline collection entry — e.g. a walk-in cash payment, or migrating
-   * a legacy paper-ledger row. Not exposed to staff (see admin.routes.ts: `admin`, not
-   * `adminOrStaff`). `materialRate` is an optional override of the live silver rate.
+   * Manual/offline collection entry — e.g. a walk-in cash payment, or migrating a legacy
+   * paper-ledger row. Staff and admin can both call this (see admin.routes.ts); editing or
+   * deleting an existing ledger row afterward stays admin-only. `materialRate` is an optional
+   * override of the live rate for the scheme's metal. `recordedBy` is the staff/admin user id.
    */
-  public async recordPaymentAsAdmin(schemeId: string, amount: number, materialRateOverride?: number) {
-    const updated = await this.applyPayment(schemeId, amount, materialRateOverride);
+  public async recordPaymentAsAdmin(
+    schemeId: string,
+    amount: number,
+    materialRateOverride: number | undefined,
+    recordedBy: string,
+  ) {
+    const updated = await this.applyPayment(schemeId, amount, {
+      materialRateOverride,
+      method: 'CASH',
+      recordedBy,
+    });
     const payments = await this.savingsRepository.getPayments(schemeId);
     await this.notifyPaymentSuccess(updated.userId.toString(), updated, amount);
     return { ...updated, payments };
   }
 
+  /**
+   * Card rule 6 (early exit): stopping before completing the scheme forfeits
+   * `plan.earlyExitPenaltyPercent` (default 10%) of the amount paid, plus the ₹ value of any
+   * gifts already handed over (admin enters this — the app has no gift-inventory link). The
+   * remainder is redeemable as goods only, never cash — this method just records the split;
+   * staff complete the in-store exchange separately.
+   */
+  public async cancelScheme(schemeId: string, cancelledBy: string, data: { giftsValueDeducted?: number; note?: string }) {
+    const scheme = await this.savingsRepository.findById(schemeId);
+    if (!scheme) throw new AppError('Savings scheme not found', 404);
+    if (scheme.status !== 'Active') {
+      throw new AppError(`This scheme is already ${scheme.status.toLowerCase()}`, 400);
+    }
+
+    const plan = await this.getPlanForScheme(scheme);
+    const penaltyPercent = plan?.earlyExitPenaltyPercent ?? 10;
+    const giftsValueDeducted = Math.max(0, Number(data.giftsValueDeducted) || 0);
+    const amountPaidAtCancellation = scheme.totalPaid;
+    const penaltyAmount = round2(amountPaidAtCancellation * (penaltyPercent / 100));
+    const netRedeemable = Math.max(0, round2(amountPaidAtCancellation - penaltyAmount - giftsValueDeducted));
+
+    const updated = await this.savingsRepository.cancelScheme(schemeId, {
+      cancelledAt: new Date(),
+      amountPaidAtCancellation,
+      penaltyPercent,
+      penaltyAmount,
+      giftsValueDeducted,
+      netRedeemable,
+      note: data.note ? String(data.note).trim() : undefined,
+      cancelledBy: new mongoose.Types.ObjectId(cancelledBy),
+    });
+    if (!updated) throw new AppError('Savings scheme not found', 404);
+    return updated;
+  }
+
+  /**
+   * Diwali redemption payout — business rule confirmed by the owner with a worked example
+   * (₹3,000/mo × 11 = ₹33,000 paid → ₹32,000 gold + ₹2,500 gifts + a silver coin, i.e. total
+   * VALUE handed back is ₹36,000 = paid + 1 bonus month, same "+1" pattern as Gold/Silver 11+1):
+   *
+   *   totalValue = totalPaid + monthlyAmount          (1 bonus month's worth, credited in kind)
+   *   goldValue  = totalValue − plan.hamper.giftsValue − (plan.hamper.silverCoinGrams × silverRate)
+   *   goldGrams  = goldValue / goldRate
+   *
+   * Gold is a fixed ₹ VALUE, not a fixed weight — it converts to however many grams that buys
+   * at the rate on the day of redemption, so the payout is fair regardless of how gold moved
+   * between enrollment and Diwali. No customer top-up or KV refund is ever needed. Admin
+   * triggers this once the scheme has completed all its installments (ahead of the festival);
+   * the result is stored on `maturityBenefits`, the same field 11+1 schemes use.
+   */
+  public async computeDiwaliRedemption(schemeId: string) {
+    const scheme = await this.savingsRepository.findById(schemeId);
+    if (!scheme) throw new AppError('Savings scheme not found', 404);
+    if (scheme.schemeType !== 'DIWALI') {
+      throw new AppError('Redemption payout only applies to Diwali schemes', 400);
+    }
+    if (scheme.status !== 'Completed') {
+      throw new AppError('This scheme must complete all its installments before the redemption payout can be computed', 400);
+    }
+    const plan = await this.getPlanForScheme(scheme);
+    const giftsValue = plan?.hamper?.giftsValue ?? 0;
+    const silverCoinGrams = plan?.hamper?.silverCoinGrams ?? 0;
+    const gifts = plan?.hamper?.gifts ?? [];
+
+    const [goldRate, silverRate] = await Promise.all([
+      this.pricingService.getCurrentRatePerGram('GOLD'),
+      silverCoinGrams > 0 ? this.pricingService.getCurrentRatePerGram('SILVER') : Promise.resolve(0),
+    ]);
+    if (!goldRate) throw new AppError('No gold rate is available to compute the redemption payout', 400);
+    if (silverCoinGrams > 0 && !silverRate) {
+      throw new AppError('No silver rate is available to compute the redemption payout', 400);
+    }
+
+    const totalValue = scheme.totalPaid + scheme.monthlyAmount;
+    const silverValue = round2(silverCoinGrams * (silverRate ?? 0));
+    const goldValue = round2(totalValue - giftsValue - silverValue);
+    if (goldValue < 0) {
+      throw new AppError(
+        `Plan configuration error — giftsValue (₹${giftsValue}) + silver coin value (₹${silverValue}) exceed the total payout value (₹${totalValue})`,
+        400,
+      );
+    }
+    const goldGrams = round3(goldValue / goldRate);
+
+    const updated = await this.savingsRepository.setMaturityBenefits(schemeId, {
+      goldCoinValue: goldValue,
+      goldGrams,
+      goldRatePerGram: goldRate,
+      silverGrams: silverCoinGrams,
+      silverValue,
+      silverRatePerGram: silverRate ?? undefined,
+      giftsValue,
+      gifts,
+      computedAt: new Date(),
+    });
+    if (!updated) throw new AppError('Savings scheme not found', 404);
+    await this.notifyDiwaliRedemptionReady(updated);
+    return updated;
+  }
+
+  /** Best-effort customer notification once the redemption payout is computed. */
+  private async notifyDiwaliRedemptionReady(scheme: ISavings) {
+    try {
+      if (!scheme.userId) return;
+      const user = await this.userRepository.findById(scheme.userId.toString());
+      const mb = scheme.maturityBenefits;
+      if (user?.phone && scheme.passbookNumber && mb) {
+        await sendDiwaliRedemptionReady(user.phone, {
+          passbookNumber: scheme.passbookNumber,
+          goldGrams: mb.goldGrams ?? 0,
+          goldCoinValue: mb.goldCoinValue ?? 0,
+          silverGrams: mb.silverGrams ?? 0,
+          giftsValue: mb.giftsValue ?? 0,
+        });
+      }
+    } catch (error) {
+      Logger.error(`Diwali redemption WhatsApp dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
   public async getAllSchemes() {
-    return await this.savingsRepository.findAll();
+    const schemes = await this.savingsRepository.findAll();
+    return schemes.map((s) => this.withMaturityDate(s));
   }
 
   /**
@@ -214,6 +473,20 @@ export class SavingsService {
       update.planName = planName;
     }
 
+    if (data.schemeType !== undefined) {
+      if (!ALL_SCHEME_TYPES.includes(data.schemeType)) {
+        throw new AppError(`schemeType must be one of ${ALL_SCHEME_TYPES.join(', ')}`, 400);
+      }
+      update.schemeType = data.schemeType;
+    }
+
+    if (data.metal !== undefined) {
+      if (data.metal !== null && !['GOLD', 'SILVER'].includes(data.metal)) {
+        throw new AppError('metal must be GOLD or SILVER', 400);
+      }
+      update.metal = data.metal ?? undefined;
+    }
+
     if (data.monthlyAmount !== undefined) {
       const monthlyAmount = Number(data.monthlyAmount);
       if (!Number.isInteger(monthlyAmount) || monthlyAmount < 1000) {
@@ -224,9 +497,8 @@ export class SavingsService {
 
     if (data.duration !== undefined) {
       const duration = Number(data.duration);
-      const allowedDurations = [6, 11, 12];
-      if (!allowedDurations.includes(duration)) {
-        throw new AppError('duration must be one of 6, 11, or 12', 400);
+      if (!Number.isInteger(duration) || duration < 1) {
+        throw new AppError('duration must be a positive whole number', 400);
       }
       update.duration = duration;
     }
@@ -248,9 +520,9 @@ export class SavingsService {
     }
 
     if (data.status !== undefined) {
-      const allowedStatuses = ['Active', 'Completed', 'Cancelled'];
+      const allowedStatuses = ['Active', 'Completed', 'Cancelled', 'Dropped'];
       if (!allowedStatuses.includes(data.status)) {
-        throw new AppError('status must be one of Active, Completed, or Cancelled', 400);
+        throw new AppError('status must be one of Active, Completed, Cancelled, or Dropped', 400);
       }
       update.status = data.status;
     }
@@ -361,6 +633,6 @@ export class SavingsService {
     if (!isStaffOrAdmin && scheme.userId.toString() !== requesterUserId) {
       throw new AppError('Not authorized', 403);
     }
-    return scheme;
+    return this.withMaturityDate(scheme);
   }
 }

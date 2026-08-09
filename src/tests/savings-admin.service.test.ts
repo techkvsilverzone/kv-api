@@ -23,9 +23,15 @@ describe('SavingsService admin passbook correction/deletion', () => {
       ).rejects.toThrow(AppError);
     });
 
-    it('rejects an invalid duration', async () => {
+    it('rejects a non-whole-number duration', async () => {
       await expect(
-        new SavingsService().adminUpdateScheme('s1', { duration: 7 }),
+        new SavingsService().adminUpdateScheme('s1', { duration: 7.5 }),
+      ).rejects.toThrow(AppError);
+    });
+
+    it('rejects an invalid schemeType', async () => {
+      await expect(
+        new SavingsService().adminUpdateScheme('s1', { schemeType: 'PLATINUM_SCHEME' }),
       ).rejects.toThrow(AppError);
     });
 

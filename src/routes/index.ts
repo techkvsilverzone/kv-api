@@ -24,6 +24,7 @@ import deliveryConfigRoutes from './deliveryConfig.routes';
 import stallConfigRoutes from './stallConfig.routes';
 import invoiceConfigRoutes from './invoiceConfig.routes';
 import whatsappWebhookRoutes from './whatsappWebhook.routes';
+import schemePlanRoutes from './schemePlan.routes';
 
 const router = Router();
 
@@ -49,6 +50,7 @@ router.use('/pricing-config', pricingConfigRoutes);
 router.use('/delivery-config', deliveryConfigRoutes);
 router.use('/stall-config', stallConfigRoutes);
 router.use('/invoice-config', invoiceConfigRoutes);
+router.use('/scheme-plans', schemePlanRoutes);
 router.use('/webhooks/whatsapp', whatsappWebhookRoutes);
 router.use('/admin', adminRoutes);
 router.use('/', miscRoutes);

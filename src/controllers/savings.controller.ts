@@ -58,12 +58,41 @@ export class SavingsController {
     }
   };
 
-  /** Admin-only manual/offline collection entry — see admin.routes.ts (`admin`, not `adminOrStaff`). */
-  public adminRecordPayment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  /** Staff and admin can both record a manual/offline collection — see admin.routes.ts. */
+  public adminRecordPayment = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const amount = Number(req.body.amount);
       const materialRate = req.body.materialRate !== undefined ? Number(req.body.materialRate) : undefined;
-      const scheme = await this.savingsService.recordPaymentAsAdmin(req.params.id as string, amount, materialRate);
+      const scheme = await this.savingsService.recordPaymentAsAdmin(
+        req.params.id as string,
+        amount,
+        materialRate,
+        req.user!._id.toString(),
+      );
+      res.status(200).json(scheme);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /** Admin-only early-exit cancellation — see savings.model.ts ICancellation. */
+  public adminCancelScheme = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const scheme = await this.savingsService.cancelScheme(req.params.id as string, req.user!._id.toString(), {
+        giftsValueDeducted: req.body.giftsValueDeducted,
+        note: req.body.note,
+      });
+      res.status(200).json(scheme);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /** Admin-only: compute a Diwali scheme's redemption payout (gold value/grams, silver
+   * value, gifts value) from today's gold/silver rates, once all installments are in. */
+  public adminComputeRedemption = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const scheme = await this.savingsService.computeDiwaliRedemption(req.params.id as string);
       res.status(200).json(scheme);
     } catch (error) {
       next(error);

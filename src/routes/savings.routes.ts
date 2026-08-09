@@ -19,21 +19,16 @@ const savingsController = new SavingsController();
  *         application/json:
  *           schema:
  *             type: object
- *             required: [planName, monthlyAmount, duration]
+ *             required: [schemeType, monthlyAmount]
  *             properties:
- *               planName:
+ *               schemeType:
  *                 type: string
- *                 example: Silver Saver
+ *                 enum: [GOLD_11_1, SILVER_11_1, DIWALI]
+ *                 description: Which catalog plan (see GET /scheme-plans) to enroll under.
  *               monthlyAmount:
  *                 type: integer
- *                 minimum: 1000
- *                 description: Whole number, at least 1000
- *                 example: 2000
- *               duration:
- *                 type: integer
- *                 enum: [6, 11, 12]
- *                 description: Scheme duration in months
- *                 example: 11
+ *                 description: Must be one of the chosen plan's monthlyAmounts.
+ *                 example: 5000
  *     responses:
  *       201:
  *         description: Enrollment created

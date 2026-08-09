@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Savings, ISavings, ISavingsPayment } from '../models/savings.model';
+import { Savings, ISavings, ISavingsPayment, ICancellation, IMaturityBenefits } from '../models/savings.model';
 import { financialYearCode } from '../utils/time';
 
 type PaymentRowPatch = Partial<
@@ -15,14 +15,16 @@ export class SavingsRepository {
    * alone no longer mints a passbook number. `passbookNumber` is a sparse-unique field
    * (see savings.model.ts) precisely so a fresh enrollment can sit with it unset.
    *
-   * Format matches the shop's existing paper ledger: `{financialYearCode}-{7-digit seq}`,
-   * e.g. '2425-0000111'. The sequence is a global running count of passbooks actually
-   * issued (not reset per financial year).
+   * Format is per-scheme-type: `{prefix}-{financialYearCode}-{7-digit seq}`, e.g.
+   * 'GLD-2425-0000012'. The sequence counts only passbooks already issued under that same
+   * prefix (not reset per financial year, not shared across scheme types). Pre-rework
+   * passbooks minted without a prefix (bare `2425-0000111`) are untouched and excluded from
+   * every prefix's count.
    */
-  private async generatePassbookNumber(): Promise<string> {
-    const count = await Savings.countDocuments({ passbookNumber: { $exists: true } });
+  public async generatePassbookNumber(prefix: string): Promise<string> {
+    const count = await Savings.countDocuments({ passbookNumber: { $regex: `^${prefix}-` } });
     const seq = (count + 1).toString().padStart(7, '0');
-    return `${financialYearCode(new Date())}-${seq}`;
+    return `${prefix}-${financialYearCode(new Date())}-${seq}`;
   }
 
   public async create(data: any): Promise<ISavings> {
@@ -30,12 +32,16 @@ export class SavingsRepository {
       userId: new mongoose.Types.ObjectId(String(data.user || data.userId)),
       // passbookNumber intentionally omitted — a real passbook is only issued once this
       // customer makes their first actual payment (see `recordPayment`).
+      schemeType: data.schemeType || 'SILVER_11_1',
+      planId: data.planId ? new mongoose.Types.ObjectId(String(data.planId)) : undefined,
+      metal: data.metal,
       planName: String(data.planName || 'Silver Savings'),
       monthlyAmount: Number(data.monthlyAmount || 0),
       duration: Number(data.duration || 11),
       bonusAmount: Number(data.bonusAmount || 0),
       totalPaid: Number(data.totalPaid || 0),
       status: 'Active',
+      maturityBenefits: data.maturityBenefits,
       startDate: data.startDate || new Date(),
     });
     return savings.save();
@@ -83,13 +89,25 @@ export class SavingsRepository {
   /**
    * `assignPassbook` is set by the caller (SavingsService) when this is the scheme's
    * first-ever payment and it doesn't already have a passbook number — that's the one
-   * moment a real passbook is minted. `materialRate`/`materialWeight` are already resolved
-   * by the caller (live silver rate, or an admin override) — this method just persists them.
+   * moment a real passbook is minted, using this scheme's `passbookPrefix`.
+   * `materialRate`/`materialWeight` are already resolved by the caller (live rate for the
+   * scheme's metal, or an admin override) — this method just persists them.
    */
   public async recordPayment(
     schemeId: string,
-    row: { month: number; amount: number; materialRate: number; materialWeight: number },
+    row: {
+      month: number;
+      amount: number;
+      materialRate: number;
+      materialWeight: number;
+      method: 'ONLINE' | 'CASH';
+      razorpayOrderId?: string;
+      razorpayPaymentId?: string;
+      recordedBy?: string;
+      dueMonthKey: string;
+    },
     assignPassbook = false,
+    passbookPrefix?: string,
   ): Promise<ISavings | null> {
     const update: Record<string, unknown> = {
       $inc: { totalPaid: row.amount },
@@ -103,11 +121,16 @@ export class SavingsRepository {
           devidentAmount: 0,
           devidentMaterialRate: 0,
           devidentMaterialWeight: 0,
+          method: row.method,
+          razorpayOrderId: row.razorpayOrderId,
+          razorpayPaymentId: row.razorpayPaymentId,
+          recordedBy: row.recordedBy ? new mongoose.Types.ObjectId(row.recordedBy) : undefined,
+          dueMonthKey: row.dueMonthKey,
         },
       },
     };
     if (assignPassbook) {
-      update.$set = { passbookNumber: await this.generatePassbookNumber() };
+      update.$set = { passbookNumber: await this.generatePassbookNumber(passbookPrefix || 'PB') };
     }
     return Savings.findByIdAndUpdate(schemeId, update, { new: true }).exec();
   }
@@ -115,7 +138,8 @@ export class SavingsRepository {
   /**
    * Appends the automatic bonus-month ledger row (no real collection — `amount`/
    * `materialRate`/`materialWeight` are all 0) and marks the scheme Completed. Called once,
-   * right after an 11-month scheme's 11th real payment — see SavingsService.applyPayment.
+   * right after a scheme's Nth real payment (N = plan.durationMonths) — see
+   * SavingsService.applyPayment.
    */
   public async creditBonusMonth(
     schemeId: string,
@@ -134,6 +158,7 @@ export class SavingsRepository {
             devidentAmount: row.devidentAmount,
             devidentMaterialRate: row.devidentMaterialRate,
             devidentMaterialWeight: row.devidentMaterialWeight,
+            method: 'ONLINE',
           },
         },
         $set: { status: 'Completed' },
@@ -181,6 +206,35 @@ export class SavingsRepository {
       devidentAmount: p.devidentAmount,
       devidentMaterialRate: p.devidentMaterialRate,
       devidentMaterialWeight: p.devidentMaterialWeight,
+      method: p.method,
+      razorpayOrderId: p.razorpayOrderId,
+      razorpayPaymentId: p.razorpayPaymentId,
+      recordedBy: p.recordedBy,
+      dueMonthKey: p.dueMonthKey,
     }));
+  }
+
+  /** Card rule 6 (early exit): records the forfeit/redeemable split and cancels the scheme. */
+  public async cancelScheme(schemeId: string, cancellation: ICancellation): Promise<ISavings | null> {
+    if (!mongoose.Types.ObjectId.isValid(schemeId)) return null;
+    return Savings.findByIdAndUpdate(
+      schemeId,
+      { $set: { status: 'Cancelled', cancellation } },
+      { new: true },
+    ).exec();
+  }
+
+  /** Diwali-only: persists the computed redemption payout (gold value/grams, silver value,
+   * gifts value) onto maturityBenefits once the scheme has completed all installments. */
+  public async setMaturityBenefits(schemeId: string, maturityBenefits: IMaturityBenefits): Promise<ISavings | null> {
+    if (!mongoose.Types.ObjectId.isValid(schemeId)) return null;
+    return Savings.findByIdAndUpdate(schemeId, { $set: { maturityBenefits } }, { new: true }).exec();
+  }
+
+  /** Reminder cron: active schemes of a given type, owner phone populated. */
+  public async findActiveByTypeWithUserPhone(schemeType: string): Promise<ISavings[]> {
+    return Savings.find({ status: 'Active', schemeType })
+      .populate('userId', 'name phone')
+      .exec();
   }
 }
