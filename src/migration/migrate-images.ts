@@ -45,26 +45,46 @@ function generateLegacyImageId(
     .slice(0, 24);
 }
 
-function parseBase64Image(value: string): {
+async function parseBase64Image(value: string): Promise<{
   buffer: Buffer;
   mimeType: string;
-} {
+}> {
   if (!value) {
     throw new Error('Empty imageBase64');
   }
 
-  const match = value.match(
+  const normalized = value.trim();
+
+  // Standard data URI:
+  // data:image/jpeg;base64,/9j/...
+  const dataUriMatch = normalized.match(
     /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/s,
   );
 
-  if (!match) {
-    throw new Error(
-      'Image is not a valid data URI in the expected format',
-    );
+  if (dataUriMatch) {
+    const mimeType = dataUriMatch[1];
+    const base64Data = dataUriMatch[2].replace(/\s/g, '');
+
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    if (!buffer.length) {
+      throw new Error('Decoded image buffer is empty');
+    }
+
+    return {
+      buffer,
+      mimeType,
+    };
   }
 
-  const mimeType = match[1];
-  const base64Data = match[2];
+  // Raw Base64 without a data URI prefix.
+  const base64Data = normalized.replace(/\s/g, '');
+
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(base64Data)) {
+    throw new Error(
+      'Image is neither a valid data URI nor valid raw Base64',
+    );
+  }
 
   const buffer = Buffer.from(base64Data, 'base64');
 
@@ -72,9 +92,18 @@ function parseBase64Image(value: string): {
     throw new Error('Decoded image buffer is empty');
   }
 
+  // Detect the actual image format from the binary content.
+  const detected = await sharp(buffer).metadata();
+
+  if (!detected.format) {
+    throw new Error(
+      'Unable to determine image format from raw Base64 data',
+    );
+  }
+
   return {
     buffer,
-    mimeType,
+    mimeType: `image/${detected.format}`,
   };
 }
 
@@ -146,7 +175,7 @@ async function migrateImage(
     };
   }
 
-  const parsed = parseBase64Image(image.imageBase64);
+  const parsed = await parseBase64Image(image.imageBase64);
 
   const sourceExtension = extensionFromMime(parsed.mimeType);
 
