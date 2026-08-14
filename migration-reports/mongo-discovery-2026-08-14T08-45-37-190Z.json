@@ -1,0 +1,1006 @@
+{
+  "generatedAt": "2026-08-14T08:45:37.189Z",
+  "database": "kv-silver-zone",
+  "modelCount": 26,
+  "models": [
+    {
+      "model": "Cart",
+      "collection": "carts",
+      "documentCount": 1,
+      "sampledDocuments": 1,
+      "schemaFields": [
+        "createdAt",
+        "items",
+        "updatedAt",
+        "userId"
+      ],
+      "fieldPresenceInSample": {
+        "createdAt": 1,
+        "items": 0,
+        "updatedAt": 1,
+        "userId": 1
+      },
+      "arrayStatsInSample": {
+        "items": {
+          "documentsWithValues": 0,
+          "totalItems": 0,
+          "maxItems": 0
+        }
+      },
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "Category",
+      "collection": "categories",
+      "documentCount": 11,
+      "sampledDocuments": 11,
+      "schemaFields": [
+        "createdAt",
+        "name",
+        "parent",
+        "updatedAt"
+      ],
+      "fieldPresenceInSample": {
+        "createdAt": 11,
+        "name": 11,
+        "parent": 3,
+        "updatedAt": 11
+      },
+      "arrayStatsInSample": {},
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "Coupon",
+      "collection": "coupons",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "code",
+        "createdAt",
+        "discountType",
+        "discountValue",
+        "expiryDate",
+        "isActive",
+        "maxUses",
+        "minOrderAmount",
+        "updatedAt",
+        "usedCount"
+      ],
+      "fieldPresenceInSample": {
+        "code": 0,
+        "createdAt": 0,
+        "discountType": 0,
+        "discountValue": 0,
+        "expiryDate": 0,
+        "isActive": 0,
+        "maxUses": 0,
+        "minOrderAmount": 0,
+        "updatedAt": 0,
+        "usedCount": 0
+      },
+      "arrayStatsInSample": {},
+      "enumDistributionInSample": {
+        "discountType": {}
+      },
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "DeliveryConfig",
+      "collection": "deliveryconfigs",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "chennai",
+        "createdAt",
+        "key",
+        "otherDistrict",
+        "otherState",
+        "updatedAt"
+      ],
+      "fieldPresenceInSample": {
+        "chennai": 0,
+        "createdAt": 0,
+        "key": 0,
+        "otherDistrict": 0,
+        "otherState": 0,
+        "updatedAt": 0
+      },
+      "arrayStatsInSample": {},
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "FilterConfig",
+      "collection": "filterconfigs",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "createdAt",
+        "hiddenCategories",
+        "key",
+        "metals",
+        "priceRanges",
+        "updatedAt"
+      ],
+      "fieldPresenceInSample": {
+        "createdAt": 0,
+        "hiddenCategories": 0,
+        "key": 0,
+        "metals": 0,
+        "priceRanges": 0,
+        "updatedAt": 0
+      },
+      "arrayStatsInSample": {
+        "hiddenCategories": {
+          "documentsWithValues": 0,
+          "totalItems": 0,
+          "maxItems": 0
+        },
+        "metals": {
+          "documentsWithValues": 0,
+          "totalItems": 0,
+          "maxItems": 0
+        },
+        "priceRanges": {
+          "documentsWithValues": 0,
+          "totalItems": 0,
+          "maxItems": 0
+        }
+      },
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "GiftVoucher",
+      "collection": "giftvouchers",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "amount",
+        "createdAt",
+        "description",
+        "imageBase64",
+        "isActive",
+        "label",
+        "sortOrder",
+        "updatedAt"
+      ],
+      "fieldPresenceInSample": {
+        "amount": 0,
+        "createdAt": 0,
+        "description": 0,
+        "imageBase64": 0,
+        "isActive": 0,
+        "label": 0,
+        "sortOrder": 0,
+        "updatedAt": 0
+      },
+      "arrayStatsInSample": {},
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "Inventory",
+      "collection": "inventories",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "createdAt",
+        "currentStock",
+        "productId",
+        "stockThreshold",
+        "updatedAt"
+      ],
+      "fieldPresenceInSample": {
+        "createdAt": 0,
+        "currentStock": 0,
+        "productId": 0,
+        "stockThreshold": 0,
+        "updatedAt": 0
+      },
+      "arrayStatsInSample": {},
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": [
+        "stockThreshold"
+      ]
+    },
+    {
+      "model": "InventoryTransaction",
+      "collection": "inventorytransactions",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "createdAt",
+        "date",
+        "performedBy",
+        "productId",
+        "quantity",
+        "reason",
+        "type",
+        "updatedAt"
+      ],
+      "fieldPresenceInSample": {
+        "createdAt": 0,
+        "date": 0,
+        "performedBy": 0,
+        "productId": 0,
+        "quantity": 0,
+        "reason": 0,
+        "type": 0,
+        "updatedAt": 0
+      },
+      "arrayStatsInSample": {},
+      "enumDistributionInSample": {
+        "type": {}
+      },
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "InvoiceConfig",
+      "collection": "invoiceconfigs",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "companyAddress",
+        "companyEmail",
+        "companyName",
+        "companyPhone",
+        "createdAt",
+        "gstin",
+        "key",
+        "updatedAt"
+      ],
+      "fieldPresenceInSample": {
+        "companyAddress": 0,
+        "companyEmail": 0,
+        "companyName": 0,
+        "companyPhone": 0,
+        "createdAt": 0,
+        "gstin": 0,
+        "key": 0,
+        "updatedAt": 0
+      },
+      "arrayStatsInSample": {},
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "MetalRate",
+      "collection": "metalrates",
+      "documentCount": 3,
+      "sampledDocuments": 3,
+      "schemaFields": [
+        "createdAt",
+        "date",
+        "karat",
+        "metal",
+        "ratePerGram",
+        "ratePerKg",
+        "updatedAt",
+        "updatedBy"
+      ],
+      "fieldPresenceInSample": {
+        "createdAt": 3,
+        "date": 3,
+        "karat": 1,
+        "metal": 3,
+        "ratePerGram": 3,
+        "ratePerKg": 3,
+        "updatedAt": 3,
+        "updatedBy": 3
+      },
+      "arrayStatsInSample": {},
+      "enumDistributionInSample": {
+        "metal": {
+          "SILVER": 2,
+          "GOLD": 1
+        }
+      },
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "Order",
+      "collection": "orders",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "couponCode",
+        "couponDiscount",
+        "createdAt",
+        "deliveredAt",
+        "deliveryFee",
+        "giftMessage",
+        "giftWrap",
+        "giftWrapFee",
+        "grandTotal",
+        "invoiceNumber",
+        "items",
+        "paymentMethod",
+        "paymentStatus",
+        "razorpayOrderId",
+        "razorpayPaymentId",
+        "shippingAddress",
+        "status",
+        "subtotal",
+        "tax",
+        "taxAmount",
+        "totalAmount",
+        "totalWithTax",
+        "updatedAt",
+        "userId"
+      ],
+      "fieldPresenceInSample": {
+        "couponCode": 0,
+        "couponDiscount": 0,
+        "createdAt": 0,
+        "deliveredAt": 0,
+        "deliveryFee": 0,
+        "giftMessage": 0,
+        "giftWrap": 0,
+        "giftWrapFee": 0,
+        "grandTotal": 0,
+        "invoiceNumber": 0,
+        "items": 0,
+        "paymentMethod": 0,
+        "paymentStatus": 0,
+        "razorpayOrderId": 0,
+        "razorpayPaymentId": 0,
+        "shippingAddress": 0,
+        "status": 0,
+        "subtotal": 0,
+        "tax": 0,
+        "taxAmount": 0,
+        "totalAmount": 0,
+        "totalWithTax": 0,
+        "updatedAt": 0,
+        "userId": 0
+      },
+      "arrayStatsInSample": {
+        "items": {
+          "documentsWithValues": 0,
+          "totalItems": 0,
+          "maxItems": 0
+        }
+      },
+      "enumDistributionInSample": {
+        "paymentMethod": {},
+        "paymentStatus": {},
+        "status": {}
+      },
+      "migrationAttentionFields": [
+        "tax",
+        "taxAmount",
+        "totalAmount",
+        "totalWithTax"
+      ]
+    },
+    {
+      "model": "OtpCode",
+      "collection": "otpcodes",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "attempts",
+        "codeHash",
+        "consumed",
+        "createdAt",
+        "expiresAt",
+        "identifier",
+        "purpose"
+      ],
+      "fieldPresenceInSample": {
+        "attempts": 0,
+        "codeHash": 0,
+        "consumed": 0,
+        "createdAt": 0,
+        "expiresAt": 0,
+        "identifier": 0,
+        "purpose": 0
+      },
+      "arrayStatsInSample": {},
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "PincodeRate",
+      "collection": "pincoderates",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "createdAt",
+        "label",
+        "pincode",
+        "rate",
+        "updatedAt"
+      ],
+      "fieldPresenceInSample": {
+        "createdAt": 0,
+        "label": 0,
+        "pincode": 0,
+        "rate": 0,
+        "updatedAt": 0
+      },
+      "arrayStatsInSample": {},
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "PricingConfig",
+      "collection": "pricingconfigs",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "createdAt",
+        "gstPercent",
+        "key",
+        "updatedAt"
+      ],
+      "fieldPresenceInSample": {
+        "createdAt": 0,
+        "gstPercent": 0,
+        "key": 0,
+        "updatedAt": 0
+      },
+      "arrayStatsInSample": {},
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "Product",
+      "collection": "products",
+      "documentCount": 18,
+      "sampledDocuments": 18,
+      "schemaFields": [
+        "category",
+        "createdAt",
+        "description",
+        "images",
+        "isActive",
+        "isFeatured",
+        "isFixedPrice",
+        "isSale",
+        "makingCharge",
+        "makingChargePerGram",
+        "makingChargePercent",
+        "makingCharges",
+        "material",
+        "metalValue",
+        "name",
+        "originalPrice",
+        "price",
+        "productGroupCode",
+        "purity",
+        "quantity",
+        "subcategory",
+        "tags",
+        "updatedAt",
+        "variants",
+        "wastage",
+        "weight"
+      ],
+      "fieldPresenceInSample": {
+        "category": 18,
+        "createdAt": 18,
+        "description": 2,
+        "images": 18,
+        "isActive": 18,
+        "isFeatured": 0,
+        "isFixedPrice": 0,
+        "isSale": 0,
+        "makingCharge": 0,
+        "makingChargePerGram": 0,
+        "makingChargePercent": 0,
+        "makingCharges": 0,
+        "material": 18,
+        "metalValue": 0,
+        "name": 18,
+        "originalPrice": 0,
+        "price": 18,
+        "productGroupCode": 18,
+        "purity": 2,
+        "quantity": 18,
+        "subcategory": 0,
+        "tags": 0,
+        "updatedAt": 18,
+        "variants": 0,
+        "wastage": 0,
+        "weight": 18
+      },
+      "arrayStatsInSample": {
+        "images": {
+          "documentsWithValues": 18,
+          "totalItems": 29,
+          "maxItems": 3
+        },
+        "tags": {
+          "documentsWithValues": 0,
+          "totalItems": 0,
+          "maxItems": 0
+        },
+        "variants": {
+          "documentsWithValues": 0,
+          "totalItems": 0,
+          "maxItems": 0
+        }
+      },
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": [
+        "originalPrice"
+      ]
+    },
+    {
+      "model": "RateStatus",
+      "collection": "ratestatuses",
+      "documentCount": 1,
+      "sampledDocuments": 1,
+      "schemaFields": [
+        "blocked",
+        "checkedAt",
+        "createdAt",
+        "key",
+        "staleMetals",
+        "updatedAt"
+      ],
+      "fieldPresenceInSample": {
+        "blocked": 1,
+        "checkedAt": 1,
+        "createdAt": 1,
+        "key": 1,
+        "staleMetals": 0,
+        "updatedAt": 1
+      },
+      "arrayStatsInSample": {
+        "staleMetals": {
+          "documentsWithValues": 0,
+          "totalItems": 0,
+          "maxItems": 0
+        }
+      },
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "Return",
+      "collection": "returns",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "createdAt",
+        "description",
+        "faultType",
+        "items",
+        "orderId",
+        "reason",
+        "refundAmount",
+        "status",
+        "updatedAt",
+        "userId",
+        "videoFilePath",
+        "videoMimeType",
+        "videoReceivedAt",
+        "videoReferenceCode",
+        "videoSenderPhone",
+        "videoStatus"
+      ],
+      "fieldPresenceInSample": {
+        "createdAt": 0,
+        "description": 0,
+        "faultType": 0,
+        "items": 0,
+        "orderId": 0,
+        "reason": 0,
+        "refundAmount": 0,
+        "status": 0,
+        "updatedAt": 0,
+        "userId": 0,
+        "videoFilePath": 0,
+        "videoMimeType": 0,
+        "videoReceivedAt": 0,
+        "videoReferenceCode": 0,
+        "videoSenderPhone": 0,
+        "videoStatus": 0
+      },
+      "arrayStatsInSample": {
+        "items": {
+          "documentsWithValues": 0,
+          "totalItems": 0,
+          "maxItems": 0
+        }
+      },
+      "enumDistributionInSample": {
+        "faultType": {},
+        "status": {},
+        "videoStatus": {}
+      },
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "Review",
+      "collection": "reviews",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "comment",
+        "createdAt",
+        "productId",
+        "rating",
+        "updatedAt",
+        "userId"
+      ],
+      "fieldPresenceInSample": {
+        "comment": 0,
+        "createdAt": 0,
+        "productId": 0,
+        "rating": 0,
+        "updatedAt": 0,
+        "userId": 0
+      },
+      "arrayStatsInSample": {},
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "Savings",
+      "collection": "savings",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "bonusAmount",
+        "cancellation",
+        "createdAt",
+        "duration",
+        "maturityBenefits",
+        "metal",
+        "monthlyAmount",
+        "passbookNumber",
+        "payments",
+        "planId",
+        "planName",
+        "schemeType",
+        "startDate",
+        "status",
+        "totalPaid",
+        "updatedAt",
+        "userId"
+      ],
+      "fieldPresenceInSample": {
+        "bonusAmount": 0,
+        "cancellation": 0,
+        "createdAt": 0,
+        "duration": 0,
+        "maturityBenefits": 0,
+        "metal": 0,
+        "monthlyAmount": 0,
+        "passbookNumber": 0,
+        "payments": 0,
+        "planId": 0,
+        "planName": 0,
+        "schemeType": 0,
+        "startDate": 0,
+        "status": 0,
+        "totalPaid": 0,
+        "updatedAt": 0,
+        "userId": 0
+      },
+      "arrayStatsInSample": {
+        "payments": {
+          "documentsWithValues": 0,
+          "totalItems": 0,
+          "maxItems": 0
+        }
+      },
+      "enumDistributionInSample": {
+        "metal": {},
+        "schemeType": {},
+        "status": {}
+      },
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "SchemePlan",
+      "collection": "schemeplans",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "bonusMonths",
+        "createdAt",
+        "description",
+        "durationMonths",
+        "earlyExitPenaltyPercent",
+        "hamper",
+        "isActive",
+        "maxConsecutiveMissedMonths",
+        "metal",
+        "monthlyAmounts",
+        "name",
+        "passbookPrefix",
+        "paymentDueDayOfMonth",
+        "redemptionMode",
+        "sortOrder",
+        "type",
+        "updatedAt"
+      ],
+      "fieldPresenceInSample": {
+        "bonusMonths": 0,
+        "createdAt": 0,
+        "description": 0,
+        "durationMonths": 0,
+        "earlyExitPenaltyPercent": 0,
+        "hamper": 0,
+        "isActive": 0,
+        "maxConsecutiveMissedMonths": 0,
+        "metal": 0,
+        "monthlyAmounts": 0,
+        "name": 0,
+        "passbookPrefix": 0,
+        "paymentDueDayOfMonth": 0,
+        "redemptionMode": 0,
+        "sortOrder": 0,
+        "type": 0,
+        "updatedAt": 0
+      },
+      "arrayStatsInSample": {
+        "monthlyAmounts": {
+          "documentsWithValues": 0,
+          "totalItems": 0,
+          "maxItems": 0
+        }
+      },
+      "enumDistributionInSample": {
+        "metal": {},
+        "redemptionMode": {},
+        "type": {}
+      },
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "SilverRate",
+      "collection": "silverrates",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "createdAt",
+        "purity",
+        "rateDate",
+        "ratePerGram",
+        "ratePerKg",
+        "updatedAt",
+        "updatedBy"
+      ],
+      "fieldPresenceInSample": {
+        "createdAt": 0,
+        "purity": 0,
+        "rateDate": 0,
+        "ratePerGram": 0,
+        "ratePerKg": 0,
+        "updatedAt": 0,
+        "updatedBy": 0
+      },
+      "arrayStatsInSample": {},
+      "enumDistributionInSample": {
+        "purity": {}
+      },
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "StallConfig",
+      "collection": "stallconfigs",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "active",
+        "createdAt",
+        "key",
+        "updatedAt"
+      ],
+      "fieldPresenceInSample": {
+        "active": 0,
+        "createdAt": 0,
+        "key": 0,
+        "updatedAt": 0
+      },
+      "arrayStatsInSample": {},
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "StoreConfig",
+      "collection": "storeconfigs",
+      "documentCount": 1,
+      "sampledDocuments": 1,
+      "schemaFields": [
+        "createdAt",
+        "isDark",
+        "key",
+        "marqueeMessages",
+        "theme",
+        "updatedAt"
+      ],
+      "fieldPresenceInSample": {
+        "createdAt": 1,
+        "isDark": 1,
+        "key": 1,
+        "marqueeMessages": 0,
+        "theme": 1,
+        "updatedAt": 1
+      },
+      "arrayStatsInSample": {
+        "marqueeMessages": {
+          "documentsWithValues": 0,
+          "totalItems": 0,
+          "maxItems": 0
+        }
+      },
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "UnmatchedReturnVideo",
+      "collection": "unmatchedreturnvideos",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "caption",
+        "createdAt",
+        "filePath",
+        "linkedReturnId",
+        "mimeType",
+        "receivedAt",
+        "senderPhone",
+        "updatedAt"
+      ],
+      "fieldPresenceInSample": {
+        "caption": 0,
+        "createdAt": 0,
+        "filePath": 0,
+        "linkedReturnId": 0,
+        "mimeType": 0,
+        "receivedAt": 0,
+        "senderPhone": 0,
+        "updatedAt": 0
+      },
+      "arrayStatsInSample": {},
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "User",
+      "collection": "users",
+      "documentCount": 3,
+      "sampledDocuments": 3,
+      "schemaFields": [
+        "addresses",
+        "anniversaryDate",
+        "createdAt",
+        "dateOfBirth",
+        "email",
+        "isActive",
+        "isAdmin",
+        "isStallRegistration",
+        "name",
+        "passwordHash",
+        "phone",
+        "role",
+        "updatedAt"
+      ],
+      "fieldPresenceInSample": {
+        "addresses": 0,
+        "anniversaryDate": 0,
+        "createdAt": 3,
+        "dateOfBirth": 0,
+        "email": 3,
+        "isActive": 3,
+        "isAdmin": 3,
+        "isStallRegistration": 3,
+        "name": 3,
+        "passwordHash": 3,
+        "phone": 0,
+        "role": 2,
+        "updatedAt": 3
+      },
+      "arrayStatsInSample": {
+        "addresses": {
+          "documentsWithValues": 0,
+          "totalItems": 0,
+          "maxItems": 0
+        }
+      },
+      "enumDistributionInSample": {
+        "role": {
+          "staff": 1,
+          "admin": 1,
+          "<missing>": 1
+        }
+      },
+      "migrationAttentionFields": []
+    },
+    {
+      "model": "Wishlist",
+      "collection": "wishlists",
+      "documentCount": 0,
+      "sampledDocuments": 0,
+      "schemaFields": [
+        "createdAt",
+        "items",
+        "updatedAt",
+        "userId"
+      ],
+      "fieldPresenceInSample": {
+        "createdAt": 0,
+        "items": 0,
+        "updatedAt": 0,
+        "userId": 0
+      },
+      "arrayStatsInSample": {
+        "items": {
+          "documentsWithValues": 0,
+          "totalItems": 0,
+          "maxItems": 0
+        }
+      },
+      "enumDistributionInSample": {},
+      "migrationAttentionFields": []
+    }
+  ],
+  "collections": {
+    "actual": [
+      "carts",
+      "categories",
+      "coupons",
+      "deliveryconfigs",
+      "filterconfigs",
+      "giftvouchers",
+      "inventories",
+      "inventorytransactions",
+      "invoiceconfigs",
+      "metalrates",
+      "orders",
+      "otpcodes",
+      "pincoderates",
+      "pricingconfigs",
+      "products",
+      "ratestatuses",
+      "returns",
+      "reviews",
+      "savings",
+      "schemeplans",
+      "silverrates",
+      "stallconfigs",
+      "storeconfigs",
+      "unmatchedreturnvideos",
+      "users",
+      "wishlists"
+    ],
+    "modelCollections": [
+      "carts",
+      "categories",
+      "coupons",
+      "deliveryconfigs",
+      "filterconfigs",
+      "giftvouchers",
+      "inventories",
+      "inventorytransactions",
+      "invoiceconfigs",
+      "metalrates",
+      "orders",
+      "otpcodes",
+      "pincoderates",
+      "pricingconfigs",
+      "products",
+      "ratestatuses",
+      "returns",
+      "reviews",
+      "savings",
+      "schemeplans",
+      "silverrates",
+      "stallconfigs",
+      "storeconfigs",
+      "unmatchedreturnvideos",
+      "users",
+      "wishlists"
+    ],
+    "orphanCollections": []
+  }
+}

@@ -30,7 +30,7 @@ export class SilverRateRepository {
 
   public async upsertTodayRate(
     ratePerGram: number,
-    purity: string,
+    purity: ISilverRate['purity'],
     updatedBy?: string,
   ): Promise<ISilverRate> {
     const today = new Date();

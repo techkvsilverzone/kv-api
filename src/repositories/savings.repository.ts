@@ -232,7 +232,7 @@ export class SavingsRepository {
   }
 
   /** Reminder cron: active schemes of a given type, owner phone populated. */
-  public async findActiveByTypeWithUserPhone(schemeType: string): Promise<ISavings[]> {
+  public async findActiveByTypeWithUserPhone(schemeType: ISavings['schemeType']): Promise<ISavings[]> {
     return Savings.find({ status: 'Active', schemeType })
       .populate('userId', 'name phone')
       .exec();
