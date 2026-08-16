@@ -1,14 +1,14 @@
 import mongoose from 'mongoose';
 import { Pool, PoolClient } from 'pg';
-import { connectMongo, disconnectMongo } from '../utils/db';
+import { connectMongo, disconnectMongo } from './mongoConnection';
 import { config } from '../config';
-import { User } from '../models/user.model';
-import { Category } from '../models/category.model';
-import { Product } from '../models/product.model';
-import { Cart } from '../models/cart.model';
-import { MetalRate } from '../models/metalrate.model';
-import { RateStatus } from '../models/rateStatus.model';
-import { StoreConfig } from '../models/storeConfig.model';
+import { User } from './models/user.model';
+import { Category } from './models/category.model';
+import { Product } from './models/product.model';
+import { Cart } from './models/cart.model';
+import { MetalRate } from './models/metalrate.model';
+import { RateStatus } from './models/rateStatus.model';
+import { StoreConfig } from './models/storeConfig.model';
 
 const pgUrl = process.env.POSTGRES_MIGRATION_URL;
 

@@ -1,4 +1,4 @@
-import { IAddress } from '../models/user.model';
+import { IAddress } from '../domain/user';
 
 /**
  * The single place a user document is turned into a client-facing payload.

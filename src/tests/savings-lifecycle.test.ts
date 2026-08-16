@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { SavingsService } from '../services/savings.service';
 import { SavingsRepository } from '../repositories/savings.repository';
 import { SchemePlanRepository } from '../repositories/schemePlan.repository';
@@ -15,10 +14,11 @@ import * as whatsapp from '../utils/whatsapp';
 // Diwali-payments-require-a-silver-rate bug this file was written to catch) can't hide behind
 // an isolated single-call mock.
 
-const ADMIN_ID = new mongoose.Types.ObjectId().toString();
+// PostgreSQL identities are numeric strings, not ObjectIds.
+const ADMIN_ID = '42';
 
 /** Minimal in-memory stand-in for the Mongo-backed SavingsRepository. Plain objects, not real
- * Mongoose documents — good enough because SavingsService only ever reads plain fields off
+ * domain objects — good enough because SavingsService only ever reads plain fields off
  * what the repository returns, plus `.toObject()` for the maturityDate read-path. */
 class FakeSavingsStore {
   private docs = new Map<string, any>();

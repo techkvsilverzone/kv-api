@@ -17,7 +17,19 @@ export const config = {
   corsMethods: process.env.CORS_METHODS || 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
   corsAllowedHeaders:
     process.env.CORS_ALLOWED_HEADERS || 'Content-Type,Authorization,X-Requested-With',
+  // Runtime persistence. `MONGO_URI` is retained ONLY for the one-off scripts in
+  // src/migration/ — no runtime code path reads it any more.
   mongoUri: process.env.MONGO_URI, //|| 'mongodb://localhost:27017/kv-silver-zone',
+  postgres: {
+    // Runtime connection string. Deliberately separate from
+    // POSTGRES_MIGRATION_URL, which belongs to the migration scripts.
+    url: process.env.POSTGRES_URL || '',
+    max: Number(process.env.POSTGRES_POOL_MAX || 10),
+    idleTimeoutMillis: Number(process.env.POSTGRES_IDLE_TIMEOUT_MS || 30_000),
+    connectionTimeoutMillis: Number(process.env.POSTGRES_CONNECTION_TIMEOUT_MS || 10_000),
+    statementTimeoutMillis: Number(process.env.POSTGRES_STATEMENT_TIMEOUT_MS || 30_000),
+    ssl: process.env.POSTGRES_SSL === 'true',
+  },
   jwtSecret: process.env.JWT_SECRET || 'super-secret-key',
   jwtExpire: process.env.JWT_EXPIRE || '30d',
   // Cookie-based auth (httpOnly JWT). For cross-site cookies set
@@ -29,6 +41,11 @@ export const config = {
   cookieSameSite: (process.env.COOKIE_SAMESITE as 'lax' | 'strict' | 'none') || 'lax',
   cookieDomain: process.env.COOKIE_DOMAIN || undefined,
   cookieMaxAgeDays: Number(process.env.COOKIE_MAX_AGE_DAYS || 30),
+  // Product images live on disk and are served by Nginx, never streamed out of
+  // the database (spec §13). `imageStorageRoot` is where this process writes
+  // them; `imagePublicBase` is the URL prefix Nginx maps onto that directory.
+  imageStorageRoot: process.env.IMAGE_STORAGE_ROOT || '/opt/kvs/storage/products',
+  imagePublicBase: process.env.IMAGE_PUBLIC_BASE || '/images/products',
   razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',
   razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || '',
   brevoSmtpUser: process.env.BREVO_SMTP_USER || '',

@@ -1,10 +1,8 @@
-import mongoose from 'mongoose';
 import { SavingsRepository } from '../repositories/savings.repository';
 import { SchemePlanRepository } from '../repositories/schemePlan.repository';
 import { UserRepository } from '../repositories/user.repository';
 import { PricingService } from './pricing.service';
-import { ISavings } from '../models/savings.model';
-import { ISchemePlan, SchemeType } from '../models/schemePlan.model';
+import { ISavings, ISchemePlan, SchemeType } from '../domain/savings';
 import { sendSavingsPaymentSuccess, sendDiwaliSchemeCompleted, sendDiwaliRedemptionReady } from '../utils/whatsapp';
 import { createRazorpayOrder, fetchRazorpayOrder, verifyRazorpaySignature } from '../utils/razorpay';
 import { AppError } from '../utils/appError';
@@ -58,7 +56,7 @@ export class SavingsService {
   }
 
   private withMaturityDate(scheme: ISavings) {
-    return { ...scheme.toObject(), maturityDate: this.getMaturityDate(scheme) };
+    return { ...scheme, maturityDate: this.getMaturityDate(scheme) };
   }
 
   /** Enrollment alone creates a scheme record but no passbook — that's issued on first payment. */
@@ -362,7 +360,7 @@ export class SavingsService {
       giftsValueDeducted,
       netRedeemable,
       note: data.note ? String(data.note).trim() : undefined,
-      cancelledBy: new mongoose.Types.ObjectId(cancelledBy),
+      cancelledBy,
     });
     if (!updated) throw new AppError('Savings scheme not found', 404);
     return updated;

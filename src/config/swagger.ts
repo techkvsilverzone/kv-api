@@ -569,7 +569,9 @@ const options: swaggerJsdoc.Options = {
     },
     security: [{ cookieAuth: [] }, { bearerAuth: [] }],
   },
-  apis: ['./src/routes/*.ts', './src/models/*.ts'],
+  // Only route files carry @openapi annotations; the Mongoose models that used to
+  // be scanned here never did, and now live under src/migration/ as migration tooling.
+  apis: ['./src/routes/*.ts'],
 };
 
 export const specs = swaggerJsdoc(options);

@@ -1,58 +1,63 @@
 import bcrypt from 'bcryptjs';
 import Logger from './logger';
-import { User } from '../models/user.model';
+import { query } from '../infrastructure/postgres/pool';
+
+/**
+ * Ensures the built-in admin and staff accounts exist with known credentials.
+ * Runs on every boot (see server.ts), so it must be idempotent.
+ *
+ * `ON CONFLICT (email)` collapses the previous find-then-update-or-create pair
+ * into one atomic statement — two instances starting simultaneously can no
+ * longer race to insert the same account.
+ */
+const upsertSystemUser = async (params: {
+  email: string;
+  name: string;
+  password: string;
+  isAdmin: boolean;
+  role: 'admin' | 'staff';
+}): Promise<void> => {
+  const passwordHash = await bcrypt.hash(params.password, 10);
+
+  const result = await query<{ inserted: boolean }>(
+    `INSERT INTO users (email, password_hash, name, is_admin, role, is_active)
+     VALUES ($1, $2, $3, $4, $5, TRUE)
+     ON CONFLICT (email) DO UPDATE SET
+       password_hash = EXCLUDED.password_hash,
+       name          = EXCLUDED.name,
+       is_admin      = EXCLUDED.is_admin,
+       role          = EXCLUDED.role,
+       is_active     = TRUE,
+       updated_at    = NOW()
+     RETURNING (xmax = 0) AS inserted`,
+    [params.email, passwordHash, params.name, params.isAdmin, params.role],
+  );
+
+  const inserted = result.rows[0]?.inserted === true;
+  Logger.info(
+    inserted
+      ? `Default ${params.role} user created successfully (${params.email})`
+      : `${params.role} user already exists (updated password/hash)`,
+  );
+};
 
 export const seedAdmin = async () => {
   try {
-    const adminEmail = 'admin@kvsilverzone.com';
-    const staffEmail = 'staff@kvsilverzone.com';
-    const adminPasswordHash = await bcrypt.hash('adminkvz123', 10);
-    const staffPasswordHash = await bcrypt.hash('staffkvz123', 10);
+    await upsertSystemUser({
+      email: 'admin@kvsilverzone.com',
+      name: 'System Admin',
+      password: 'adminkvz123',
+      isAdmin: true,
+      role: 'admin',
+    });
 
-    const existing = await User.findOne({ email: adminEmail });
-    const existingStaff = await User.findOne({ email: staffEmail });
-
-    if (existing) {
-      existing.passwordHash = adminPasswordHash;
-      existing.name = 'System Admin';
-      existing.isAdmin = true;
-      existing.role = 'admin';
-      existing.isActive = true;
-      await existing.save();
-      Logger.info('Admin user already exists (updated password/hash)');
-    } else {
-      await User.create({
-        email: adminEmail,
-        passwordHash: adminPasswordHash,
-        name: 'System Admin',
-        isAdmin: true,
-        role: 'admin',
-        isActive: true,
-      });
-      Logger.info('Default admin user created successfully');
-      Logger.info('Credentials: admin@kvsilverzone.com / adminkvz123');
-    }
-
-    if (existingStaff) {
-      existingStaff.passwordHash = staffPasswordHash;
-      existingStaff.name = 'System Staff';
-      existingStaff.isAdmin = false;
-      existingStaff.role = 'staff';
-      existingStaff.isActive = true;
-      await existingStaff.save();
-      Logger.info('Staff user already exists (updated password/hash)');
-    } else {
-      await User.create({
-        email: staffEmail,
-        passwordHash: staffPasswordHash,
-        name: 'System Staff',
-        isAdmin: false,
-        role: 'staff',
-        isActive: true,
-      });
-      Logger.info('Default staff user created successfully');
-      Logger.info('Credentials: staff@kvsilverzone.com / staffkvz123');
-    }
+    await upsertSystemUser({
+      email: 'staff@kvsilverzone.com',
+      name: 'System Staff',
+      password: 'staffkvz123',
+      isAdmin: false,
+      role: 'staff',
+    });
   } catch (error) {
     Logger.error(`Error seeding admin user: ${String(error)}`);
   }

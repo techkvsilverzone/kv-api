@@ -1,5 +1,5 @@
 import { SchemePlanRepository } from '../repositories/schemePlan.repository';
-import { ISchemeHamper, SchemeType } from '../models/schemePlan.model';
+import { ISchemeHamper, SchemeType } from '../domain/savings';
 import { AppError } from '../utils/appError';
 
 const SCHEME_TYPES: SchemeType[] = ['GOLD_11_1', 'SILVER_11_1', 'DIWALI', 'GOLD_INCOME', 'SILVER_DEPOSIT'];

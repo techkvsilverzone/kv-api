@@ -153,7 +153,7 @@ const SAVINGS_REMINDER_COPY: Record<SavingsReminderKind, string> = {
 export async function sendSavingsReminder(
   phone: string,
   kind: SavingsReminderKind,
-  input: { passbookNumber?: string; monthlyAmount: number },
+  input: { passbookNumber?: string | null; monthlyAmount: number },
 ): Promise<WhatsAppSendResult> {
   const label = input.passbookNumber ? `Passbook #${input.passbookNumber}` : 'your savings enrollment';
   const body =
@@ -189,7 +189,7 @@ export async function sendOtpWhatsApp(phone: string, code: string, expiryMinutes
  * to be computed — sent to the ops number, since that's a manual admin action (unlike
  * Gold/Silver 11+1, whose bonus grams are credited automatically with no further step). */
 export async function sendDiwaliSchemeCompleted(
-  passbookNumber: string | undefined,
+  passbookNumber: string | null | undefined,
   totalPaid: number,
 ): Promise<WhatsAppSendResult> {
   const body =

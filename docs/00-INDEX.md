@@ -17,6 +17,8 @@ Docs are numbered **oldest → newest** (01 = earliest, highest number = most re
 | 11 | [pricing-config](11-pricing-config.md) | Admin-configurable GST rate |
 | 12 | [products-pricing-stock](12-products-pricing-stock.md) | Live silver pricing & inventory stock |
 | 13 | [API_CHANGES_AND_FIXES](13-API_CHANGES_AND_FIXES.md) | Latest API changes & fixes (variants, pricing config, delivery config) |
+| 14 | [POSTGRES_SCHEMA](14-POSTGRES_SCHEMA.md) | PostgreSQL schema reference (tables, constraints, indexes) — regenerate after schema changes |
+| 15 | [POSTGRES_MIGRATION](15-POSTGRES_MIGRATION.md) | MongoDB → PostgreSQL runtime migration: architecture, query translation, transactions, testing, limitations |
 
 > Not moved (kept in place by request): `README.md`, `CLAUDE.md`, `.claude/`, `.wolf/`.
 > Also left in place: `.github/copilot-instructions.md` and `database/sqlserver/README.md` (tooling / folder-specific files).

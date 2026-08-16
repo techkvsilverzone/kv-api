@@ -1,5 +1,5 @@
 import { PricingService, resolvePurityFraction, resolveDeliveryZone } from '../services/pricing.service';
-import { IProduct } from '../models/product.model';
+import { IProduct } from '../domain/catalog';
 import { ProductRepository } from '../repositories/product.repository';
 import { PricingConfigRepository } from '../repositories/pricingConfig.repository';
 

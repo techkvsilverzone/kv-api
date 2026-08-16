@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { config } from '../config';
-import Logger from './logger';
+import Logger from '../utils/logger';
 
 export const connectMongo = async (): Promise<void> => {
   const uri = config.mongoUri || 'mongodb://localhost:27017/kv-silver-zone';

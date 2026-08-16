@@ -1,47 +1,140 @@
-import mongoose from 'mongoose';
-import { GiftVoucher, IGiftVoucher } from '../models/giftVoucher.model';
+import { IGiftVoucher } from '../domain/commerce';
+import { query, queryOne, queryRows } from '../infrastructure/postgres/pool';
+import { persistImage } from '../infrastructure/storage/productImages';
+import { toBigIntParam, toBool, toDate, toNum } from '../infrastructure/postgres/mapping';
+
+export { IGiftVoucher };
+
+interface GiftVoucherRow {
+  id: string;
+  label: string;
+  amount: number;
+  description: string | null;
+  image_url: string | null;
+  is_active: boolean;
+  sort_order: number;
+  created_at: Date | null;
+  updated_at: Date | null;
+}
+
+/**
+ * Voucher artwork follows the same rule as product images: the database holds a
+ * URL, never binary. `imageBase64` echoes that URL so the existing admin panel
+ * and storefront keep working unchanged.
+ */
+const mapVoucher = (row: GiftVoucherRow): IGiftVoucher => ({
+  _id: String(row.id),
+  label: row.label,
+  amount: toNum(row.amount),
+  description: row.description,
+  imageUrl: row.image_url,
+  imageBase64: row.image_url,
+  isActive: toBool(row.is_active, true),
+  sortOrder: toNum(row.sort_order, 1),
+  createdAt: toDate(row.created_at),
+  updatedAt: toDate(row.updated_at),
+});
+
+const SELECT = `
+  SELECT id, label, amount, description, image_url, is_active, sort_order, created_at, updated_at
+  FROM gift_vouchers`;
+
+const RETURNING = `
+  RETURNING id, label, amount, description, image_url, is_active, sort_order, created_at, updated_at`;
 
 export class GiftVoucherRepository {
   public async findActive(): Promise<IGiftVoucher[]> {
-    return GiftVoucher.find({ isActive: true }).sort({ sortOrder: 1, amount: 1 }).exec();
+    const rows = await queryRows<GiftVoucherRow>(
+      `${SELECT} WHERE is_active = TRUE ORDER BY sort_order ASC, amount ASC`,
+    );
+    return rows.map(mapVoucher);
   }
 
   public async findAll(): Promise<IGiftVoucher[]> {
-    return GiftVoucher.find().sort({ sortOrder: 1, amount: 1 }).exec();
+    const rows = await queryRows<GiftVoucherRow>(`${SELECT} ORDER BY sort_order ASC, amount ASC`);
+    return rows.map(mapVoucher);
   }
 
   public async findById(id: string): Promise<IGiftVoucher | null> {
-    if (!mongoose.Types.ObjectId.isValid(id)) return null;
-    return GiftVoucher.findById(id).exec();
+    const voucherId = toBigIntParam(id);
+    if (!voucherId) return null;
+
+    const row = await queryOne<GiftVoucherRow>(`${SELECT} WHERE id = $1`, [voucherId]);
+    return row ? mapVoucher(row) : null;
   }
 
   public async create(data: Partial<IGiftVoucher>): Promise<IGiftVoucher> {
-    const voucher = new GiftVoucher({
-      label: String(data.label || '').trim(),
-      amount: Number(data.amount || 0),
-      description: data.description,
-      imageBase64: data.imageBase64,
-      isActive: data.isActive !== false,
-      sortOrder: Number(data.sortOrder ?? 1),
-    });
-    return voucher.save();
+    const inserted = await queryOne<GiftVoucherRow>(
+      `INSERT INTO gift_vouchers (label, amount, description, is_active, sort_order)
+       VALUES ($1, $2, $3, $4, $5)
+       ${RETURNING}`,
+      [
+        String(data.label || '').trim(),
+        Number(data.amount || 0),
+        data.description ?? null,
+        data.isActive !== false,
+        Number(data.sortOrder ?? 1),
+      ],
+    );
+
+    // The artwork is written after the insert so the file can be filed under
+    // the voucher's own id.
+    const source = data.imageBase64 ?? data.imageUrl;
+    if (typeof source === 'string' && source.trim()) {
+      const url = await persistImage(`gift-vouchers/${inserted!.id}`, 0, source);
+      if (url) {
+        const updated = await queryOne<GiftVoucherRow>(
+          `UPDATE gift_vouchers SET image_url = $1, updated_at = NOW() WHERE id = $2 ${RETURNING}`,
+          [url, String(inserted!.id)],
+        );
+        return mapVoucher(updated!);
+      }
+    }
+
+    return mapVoucher(inserted!);
   }
 
   public async update(id: string, data: Partial<IGiftVoucher>): Promise<IGiftVoucher | null> {
-    if (!mongoose.Types.ObjectId.isValid(id)) return null;
-    const updateData: any = {};
-    if (data.label !== undefined) updateData.label = String(data.label).trim();
-    if (data.amount !== undefined) updateData.amount = Number(data.amount);
-    if (data.description !== undefined) updateData.description = data.description;
-    if (data.imageBase64 !== undefined) updateData.imageBase64 = data.imageBase64;
-    if (data.isActive !== undefined) updateData.isActive = Boolean(data.isActive);
-    if (data.sortOrder !== undefined) updateData.sortOrder = Number(data.sortOrder);
-    return GiftVoucher.findByIdAndUpdate(id, updateData, { new: true }).exec();
+    const voucherId = toBigIntParam(id);
+    if (!voucherId) return null;
+
+    const assignments: string[] = [];
+    const values: unknown[] = [];
+    const push = (column: string, value: unknown): void => {
+      values.push(value);
+      assignments.push(`${column} = $${values.length}`);
+    };
+
+    if (data.label !== undefined) push('label', String(data.label).trim());
+    if (data.amount !== undefined) push('amount', Number(data.amount));
+    if (data.description !== undefined) push('description', data.description);
+    if (data.isActive !== undefined) push('is_active', Boolean(data.isActive));
+    if (data.sortOrder !== undefined) push('sort_order', Number(data.sortOrder));
+
+    const source = data.imageBase64 ?? data.imageUrl;
+    if (source !== undefined) {
+      const value = typeof source === 'string' ? source.trim() : '';
+      push('image_url', value ? await persistImage(`gift-vouchers/${voucherId}`, 0, value) : null);
+    }
+
+    if (!assignments.length) return this.findById(id);
+
+    values.push(voucherId);
+    const row = await queryOne<GiftVoucherRow>(
+      `UPDATE gift_vouchers SET ${assignments.join(', ')}, updated_at = NOW()
+       WHERE id = $${values.length}
+       ${RETURNING}`,
+      values,
+    );
+
+    return row ? mapVoucher(row) : null;
   }
 
   public async delete(id: string): Promise<boolean> {
-    if (!mongoose.Types.ObjectId.isValid(id)) return false;
-    const result = await GiftVoucher.findByIdAndDelete(id).exec();
-    return result !== null;
+    const voucherId = toBigIntParam(id);
+    if (!voucherId) return false;
+
+    const result = await query('DELETE FROM gift_vouchers WHERE id = $1', [voucherId]);
+    return (result.rowCount ?? 0) > 0;
   }
 }

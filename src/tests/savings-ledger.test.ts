@@ -1,6 +1,5 @@
-import mongoose from 'mongoose';
 import { SavingsRepository } from '../repositories/savings.repository';
-import { Savings } from '../models/savings.model';
+import * as pool from '../infrastructure/postgres/pool';
 import { SavingsService } from '../services/savings.service';
 import { SchemePlanRepository } from '../repositories/schemePlan.repository';
 import { UserRepository } from '../repositories/user.repository';
@@ -17,18 +16,68 @@ import * as razorpay from '../utils/razorpay';
 //   plan.bonusMonths > 0), and completes the scheme.
 // - Customer payments only ever happen through the Razorpay create-order/verify pair; staff and
 //   admin can additionally record/correct collections directly (edit/delete stays admin-only).
+const SCHEME_ID = '77';
+
+/**
+ * Stands in for the PostgreSQL layer: `withTransaction` runs the repository's
+ * callback against a fake client that records every statement, so the tests can
+ * assert on the SQL actually issued. Mocking here keeps the same
+ * "no database required" contract the Mongoose-model mocks used to give.
+ */
+function mockDb(options: { ledgerRow?: { id: string; amount: number } | null; passbookCount?: number } = {}) {
+  const { ledgerRow = { id: '5', amount: 2000 }, passbookCount = 4 } = options;
+  const statements: Array<{ sql: string; params: readonly unknown[] }> = [];
+
+  const respond = (sql: string) => {
+    if (/FROM savings_payments[\s\S]*OFFSET/.test(sql)) {
+      return ledgerRow ? { rowCount: 1, rows: [ledgerRow] } : { rowCount: 0, rows: [] };
+    }
+    if (/count\(\*\)::int AS count FROM savings_accounts/.test(sql)) {
+      return { rowCount: 1, rows: [{ count: passbookCount }] };
+    }
+    if (/INSERT INTO savings_accounts/.test(sql)) {
+      return { rowCount: 1, rows: [{ id: SCHEME_ID }] };
+    }
+    // Row locks and plain writes: report one affected row so the repository
+    // treats the target as present.
+    return { rowCount: 1, rows: [{ id: SCHEME_ID }] };
+  };
+
+  const client = {
+    query: jest.fn(async (sql: string, params: readonly unknown[] = []) => {
+      statements.push({ sql, params });
+      return respond(sql);
+    }),
+  };
+
+  jest
+    .spyOn(pool, 'withTransaction')
+    .mockImplementation(async (work: any) => work(client as never));
+  jest
+    .spyOn(pool, 'queryOne')
+    .mockImplementation(async (sql: string, params: readonly unknown[] = []) => {
+      statements.push({ sql, params });
+      return respond(sql).rows[0] as never;
+    });
+
+  /** All statements whose SQL matches `pattern`. */
+  const matching = (pattern: RegExp) => statements.filter((s) => pattern.test(s.sql));
+
+  return { statements, matching };
+}
+
 describe('SavingsRepository — ledger row persistence', () => {
   afterEach(() => jest.restoreAllMocks());
 
   describe('create (enrollment)', () => {
     it('does not set a passbookNumber at enrollment', async () => {
-      jest.spyOn(Savings.prototype, 'save').mockImplementation(function (this: unknown) {
-        return Promise.resolve(this);
-      } as never);
+      const db = mockDb();
+      jest
+        .spyOn(SavingsRepository.prototype, 'findById')
+        .mockResolvedValue({ passbookNumber: null } as never);
 
-      const userId = new mongoose.Types.ObjectId().toString();
       const created = await new SavingsRepository().create({
-        user: userId,
+        user: '9',
         schemeType: 'SILVER_11_1',
         metal: 'SILVER',
         planName: 'Silver 11+1',
@@ -36,17 +85,22 @@ describe('SavingsRepository — ledger row persistence', () => {
         duration: 11,
       });
 
-      expect(created.passbookNumber).toBeUndefined();
+      const [insert] = db.matching(/INSERT INTO savings_accounts/);
+      expect(insert).toBeDefined();
+      expect(insert.sql).not.toMatch(/passbook_number/);
+      expect(created.passbookNumber).toBeNull();
     });
   });
 
   describe('generatePassbookNumber', () => {
     it('counts only passbooks already issued under the same prefix', async () => {
-      const countSpy = jest.spyOn(Savings, 'countDocuments').mockResolvedValue(4 as never);
+      const db = mockDb({ passbookCount: 4 });
 
       const number = await new SavingsRepository().generatePassbookNumber('GLD');
 
-      expect(countSpy).toHaveBeenCalledWith({ passbookNumber: { $regex: '^GLD-' } });
+      const [count] = db.matching(/count\(\*\)::int AS count FROM savings_accounts/);
+      expect(count.sql).toMatch(/passbook_number LIKE \$1/);
+      expect(count.params).toEqual(['GLD-%']);
       expect(number).toMatch(/^GLD-\d{4}-\d{7}$/);
       expect(number).toContain('-0000005');
     });
@@ -54,13 +108,11 @@ describe('SavingsRepository — ledger row persistence', () => {
 
   describe('recordPayment', () => {
     it('mints a passbook number under the given prefix when assignPassbook is true', async () => {
-      jest.spyOn(Savings, 'countDocuments').mockResolvedValue(4 as never);
-      const updateSpy = jest.spyOn(Savings, 'findByIdAndUpdate').mockReturnValue({
-        exec: jest.fn().mockResolvedValue({ passbookNumber: 'SLV-2627-0000005' }),
-      } as never);
+      const db = mockDb({ passbookCount: 4 });
+      jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue({} as never);
 
       await new SavingsRepository().recordPayment(
-        'scheme1',
+        SCHEME_ID,
         {
           month: 1,
           amount: 2000,
@@ -73,21 +125,25 @@ describe('SavingsRepository — ledger row persistence', () => {
         'SLV',
       );
 
-      const [, update] = updateSpy.mock.calls[0] as [unknown, Record<string, unknown>];
-      expect(update.$set).toMatchObject({ passbookNumber: expect.stringMatching(/^SLV-\d{4}-\d{7}$/) });
-      expect(update.$push).toMatchObject({
-        payments: expect.objectContaining({ amount: 2000, materialRate: 95.5, materialWeight: 20.942, method: 'ONLINE' }),
-      });
+      const [insert] = db.matching(/INSERT INTO savings_payments/);
+      expect(insert.params).toEqual(
+        expect.arrayContaining([2000, 95.5, 20.942, 'ONLINE', '2025-01']),
+      );
+
+      const [passbook] = db.matching(/SET passbook_number/);
+      expect(passbook.params[1]).toMatch(/^SLV-\d{4}-\d{7}$/);
+
+      // The running total moves with the ledger row, in the same transaction.
+      const [total] = db.matching(/total_paid = total_paid \+/);
+      expect(total.params).toEqual([SCHEME_ID, 2000]);
     });
 
     it('does not touch passbookNumber on a later payment', async () => {
-      const countSpy = jest.spyOn(Savings, 'countDocuments');
-      const updateSpy = jest.spyOn(Savings, 'findByIdAndUpdate').mockReturnValue({
-        exec: jest.fn().mockResolvedValue({}),
-      } as never);
+      const db = mockDb();
+      jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue({} as never);
 
       await new SavingsRepository().recordPayment(
-        'scheme1',
+        SCHEME_ID,
         {
           month: 2,
           amount: 2000,
@@ -100,72 +156,66 @@ describe('SavingsRepository — ledger row persistence', () => {
         'SLV',
       );
 
-      expect(countSpy).not.toHaveBeenCalled();
-      const [, update] = updateSpy.mock.calls[0] as [unknown, Record<string, unknown>];
-      expect(update).not.toHaveProperty('$set');
+      expect(db.matching(/passbook_number/)).toHaveLength(0);
+      expect(db.matching(/INSERT INTO savings_payments/)).toHaveLength(1);
     });
   });
 
   describe('creditBonusMonth', () => {
-    it('pushes a zero-collection devident row and marks the scheme Completed', async () => {
-      const updateSpy = jest.spyOn(Savings, 'findByIdAndUpdate').mockReturnValue({
-        exec: jest.fn().mockResolvedValue({}),
-      } as never);
+    it('writes a zero-collection devident row and marks the scheme Completed', async () => {
+      const db = mockDb();
+      jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue({} as never);
 
-      await new SavingsRepository().creditBonusMonth('scheme1', {
+      await new SavingsRepository().creditBonusMonth(SCHEME_ID, {
         month: 12,
         devidentAmount: 6000,
         devidentMaterialRate: 100,
         devidentMaterialWeight: 60,
       });
 
-      const [, update] = updateSpy.mock.calls[0] as [unknown, Record<string, unknown>];
-      expect(update.$push).toMatchObject({
-        payments: expect.objectContaining({ amount: 0, materialRate: 0, devidentAmount: 6000, devidentMaterialWeight: 60 }),
-      });
-      expect(update.$set).toEqual({ status: 'Completed' });
+      const [insert] = db.matching(/INSERT INTO savings_payments/);
+      // amount / material_rate / material_weight are literal zeros in the
+      // statement; only the devident figures are bound.
+      expect(insert.sql).toMatch(/VALUES \(\$1,\$2,0,NOW\(\),0,0,\$3,\$4,\$5,'ONLINE'\)/);
+      expect(insert.params).toEqual([SCHEME_ID, 12, 6000, 100, 60]);
+
+      expect(db.matching(/status = 'Completed'/)).toHaveLength(1);
     });
   });
 
   describe('updatePaymentRow / deletePaymentRow', () => {
-    const buildScheme = () => ({
-      totalPaid: 4000,
-      payments: [
-        { amount: 2000, materialRate: 100, materialWeight: 20 },
-        { amount: 2000, materialRate: 100, materialWeight: 20 },
-      ],
-      save: jest.fn().mockImplementation(function (this: unknown) {
-        return Promise.resolve(this);
-      }),
-    });
-
-    const validId = new mongoose.Types.ObjectId().toString();
-
     it('adjusts totalPaid when a row amount is corrected', async () => {
-      const scheme = buildScheme();
-      jest.spyOn(Savings, 'findById').mockReturnValue({ exec: jest.fn().mockResolvedValue(scheme) } as never);
+      const db = mockDb({ ledgerRow: { id: '5', amount: 2000 } });
+      jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue({} as never);
 
-      const updated: any = await new SavingsRepository().updatePaymentRow(validId, 0, { amount: 2500 });
+      await new SavingsRepository().updatePaymentRow(SCHEME_ID, 0, { amount: 2500 });
 
-      expect(updated.payments[0].amount).toBe(2500);
-      expect(updated.totalPaid).toBe(4500); // 4000 - 2000 + 2500
+      const [rowUpdate] = db.matching(/UPDATE savings_payments SET/);
+      expect(rowUpdate.params).toEqual([2500, '5']);
+
+      // 4000 - 2000 + 2500 = 4500, expressed as a relative adjustment so the
+      // stored total cannot drift from a stale read.
+      const [total] = db.matching(/total_paid = total_paid - \$2 \+ \$3/);
+      expect(total.params).toEqual([SCHEME_ID, 2000, 2500]);
     });
 
     it('subtracts the row amount from totalPaid on delete', async () => {
-      const scheme = buildScheme();
-      jest.spyOn(Savings, 'findById').mockReturnValue({ exec: jest.fn().mockResolvedValue(scheme) } as never);
+      const db = mockDb({ ledgerRow: { id: '5', amount: 2000 } });
+      jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue({} as never);
 
-      const updated: any = await new SavingsRepository().deletePaymentRow(validId, 0);
+      await new SavingsRepository().deletePaymentRow(SCHEME_ID, 0);
 
-      expect(updated.payments).toHaveLength(1);
-      expect(updated.totalPaid).toBe(2000);
+      const [remove] = db.matching(/DELETE FROM savings_payments WHERE id = \$1/);
+      expect(remove.params).toEqual(['5']);
+
+      const [total] = db.matching(/GREATEST\(0, total_paid - \$2\)/);
+      expect(total.params).toEqual([SCHEME_ID, 2000]);
     });
 
     it('returns null for an out-of-range index', async () => {
-      const scheme = buildScheme();
-      jest.spyOn(Savings, 'findById').mockReturnValue({ exec: jest.fn().mockResolvedValue(scheme) } as never);
+      mockDb({ ledgerRow: null });
 
-      expect(await new SavingsRepository().updatePaymentRow(validId, 5, { amount: 1 })).toBeNull();
+      expect(await new SavingsRepository().updatePaymentRow(SCHEME_ID, 5, { amount: 1 })).toBeNull();
     });
   });
 });
@@ -331,7 +381,7 @@ describe('SavingsService — applyPayment (via recordPaymentAsAdmin)', () => {
       devidentAmount: 0,
       dueMonthKey: PAST_MONTH_KEY,
     }));
-    const planId = new mongoose.Types.ObjectId();
+    const planId = '101';
     jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue(
       baseScheme({
         schemeType: 'DIWALI',
@@ -435,7 +485,7 @@ describe('SavingsService — applyPayment (via recordPaymentAsAdmin)', () => {
   });
 
   it('mints the passbook under the scheme plan own prefix when a plan is attached', async () => {
-    const planId = new mongoose.Types.ObjectId();
+    const planId = '101';
     jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue(baseScheme({ schemeType: 'GOLD_11_1', metal: 'GOLD', planId }) as never);
     jest.spyOn(PricingService.prototype, 'getCurrentRatePerGram').mockResolvedValue(8000);
     jest.spyOn(SchemePlanRepository.prototype, 'findById').mockResolvedValue({ passbookPrefix: 'GLD', bonusMonths: 1 } as never);

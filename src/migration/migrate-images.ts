@@ -6,8 +6,8 @@ import sharp from 'sharp';
 import { Pool, PoolClient } from 'pg';
 import mongoose from 'mongoose';
 
-import { connectMongo, disconnectMongo } from '../utils/db';
-import { Product } from '../models/product.model';
+import { connectMongo, disconnectMongo } from './mongoConnection';
+import { Product } from './models/product.model';
 
 const POSTGRES_URL = process.env.POSTGRES_MIGRATION_URL;
 

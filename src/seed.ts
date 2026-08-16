@@ -1,15 +1,15 @@
 import { seedAdmin } from './utils/seeder';
 import Logger from './utils/logger';
-import { connectMongo, disconnectMongo } from './utils/db';
+import { connectPostgres, disconnectPostgres } from './infrastructure/postgres/pool';
 
 const seed = async () => {
   try {
-    Logger.info('Connecting to MongoDB for seeding...');
-    await connectMongo();
+    Logger.info('Connecting to PostgreSQL for seeding...');
+    await connectPostgres();
 
     await seedAdmin();
 
-    await disconnectMongo();
+    await disconnectPostgres();
 
     Logger.info('Seeding completed');
     process.exit(0);

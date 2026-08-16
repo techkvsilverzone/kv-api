@@ -1,7 +1,7 @@
-import { connectMongo, disconnectMongo } from './db';
-import { Category } from '../models/category.model';
-import { Product } from '../models/product.model';
-import Logger from './logger';
+import { connectMongo, disconnectMongo } from './mongoConnection';
+import { Category } from './models/category.model';
+import { Product } from './models/product.model';
+import Logger from '../utils/logger';
 
 /** Seeded taxonomy. Only Jewellery has subcategories today. */
 const TAXONOMY: Record<string, string[]> = {

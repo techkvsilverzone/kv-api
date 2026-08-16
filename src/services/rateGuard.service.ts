@@ -1,7 +1,7 @@
 import { MetalRateRepository } from '../repositories/metalrate.repository';
 import { RateStatusRepository, RateStatusView } from '../repositories/rateStatus.repository';
-import { StaleMetal } from '../models/rateStatus.model';
-import { MetalType } from '../models/metalrate.model';
+import { StaleMetal } from '../domain/rates';
+import { MetalType } from '../domain/rates';
 import { sendRateUpdateReminder, sendRateUpdateSuccessNotice } from '../utils/whatsapp';
 import { isSameIstDay, isIstSunday } from '../utils/time';
 import Logger from '../utils/logger';
