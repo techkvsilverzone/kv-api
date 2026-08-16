@@ -1,13 +1,14 @@
-import { Product } from '../models/product.model';
-import { InventoryTransaction } from '../models/inventoryTransaction.model';
+import { ProductRepository } from '../repositories/product.repository';
 import { InventoryRepository, TransactionFilters } from '../repositories/inventory.repository';
 import { AppError } from '../utils/appError';
 
 export class InventoryService {
   private inventoryRepository: InventoryRepository;
+  private productRepository: ProductRepository;
 
   constructor() {
     this.inventoryRepository = new InventoryRepository();
+    this.productRepository = new ProductRepository();
   }
 
   /** Ensure an Inventory doc exists for the product; returns current stock */
@@ -17,7 +18,7 @@ export class InventoryService {
   }
 
   public async stockInward(productId: string, quantity: number, reason: string, performedBy: string) {
-    const product = await Product.findById(productId);
+    const product = await this.productRepository.findById(productId);
     if (!product) throw new AppError('Product not found', 404);
 
     const currentStock = await this.getOrInitStock(productId);
@@ -43,7 +44,7 @@ export class InventoryService {
   }
 
   public async stockOutward(productId: string, quantity: number, reason: string, performedBy: string) {
-    const product = await Product.findById(productId);
+    const product = await this.productRepository.findById(productId);
     if (!product) throw new AppError('Product not found', 404);
 
     const currentStock = await this.getOrInitStock(productId);
@@ -76,7 +77,7 @@ export class InventoryService {
   }
 
   public async reconcile(productId: string, physicalCount: number, reason: string, performedBy: string) {
-    const product = await Product.findById(productId);
+    const product = await this.productRepository.findById(productId);
     if (!product) throw new AppError('Product not found', 404);
 
     const currentStock = await this.getOrInitStock(productId);
@@ -153,7 +154,7 @@ export class InventoryService {
     }
 
     const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const recentMovements = await InventoryTransaction.countDocuments({ date: { $gte: since } });
+    const recentMovements = await this.inventoryRepository.countTransactionsSince(since);
 
     return {
       totalItemsInStock,

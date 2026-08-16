@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import request from 'supertest';
 import app from '../app';
 import { UserRepository } from '../repositories/user.repository';
@@ -12,10 +11,11 @@ jest.mock('../middlewares/auth.middleware', () => ({
   adminOrStaff: (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
-const ADDRESS_ID = new mongoose.Types.ObjectId();
+// PostgreSQL identities are numeric strings, not ObjectIds.
+const ADDRESS_ID = '31';
 const BCRYPT_HASH = '$2a$10$abcdefghijklmnopqrstuvOJ3S1nQ8p8w0J8p8w0J8p8w0J8p8w0';
 
-/** Stands in for a Mongoose user doc — `toObject()` yields the raw stored shape. */
+/** A user as the PostgreSQL repository now returns it: a plain domain object. */
 const userDoc = (overrides: Record<string, any> = {}) => {
   const plain = {
     _id: 'u1',
@@ -41,7 +41,7 @@ const userDoc = (overrides: Record<string, any> = {}) => {
     ],
     ...overrides,
   };
-  return { ...plain, toObject: () => plain };
+  return plain;
 };
 
 describe('User payload shape is identical across every endpoint that returns one', () => {

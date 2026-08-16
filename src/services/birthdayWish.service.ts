@@ -1,4 +1,4 @@
-import { User } from '../models/user.model';
+import { UserRepository } from '../repositories/user.repository';
 import { sendBirthdayWish, sendAnniversaryWish } from '../utils/whatsapp';
 import Logger from '../utils/logger';
 
@@ -11,14 +11,10 @@ const isSameMonthDay = (date: Date, now: Date): boolean =>
  * to run once a day (see server.ts).
  */
 export class BirthdayWishService {
+  private userRepository = new UserRepository();
+
   public async runDailyWishes(now: Date = new Date()): Promise<{ birthdays: number; anniversaries: number }> {
-    const candidates = await User.find({
-      isActive: true,
-      phone: { $exists: true, $ne: '' },
-      $or: [{ dateOfBirth: { $exists: true, $ne: null } }, { anniversaryDate: { $exists: true, $ne: null } }],
-    })
-      .select('name phone dateOfBirth anniversaryDate')
-      .exec();
+    const candidates = await this.userRepository.findCelebrationCandidates();
 
     let birthdays = 0;
     let anniversaries = 0;

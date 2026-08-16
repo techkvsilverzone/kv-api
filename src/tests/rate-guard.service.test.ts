@@ -3,6 +3,12 @@ import { MetalRateRepository } from '../repositories/metalrate.repository';
 import { RateStatusRepository } from '../repositories/rateStatus.repository';
 import * as whatsapp from '../utils/whatsapp';
 
+// A fixed Monday, 10:30 IST — past the cutoff and deliberately NOT a Sunday.
+// These cases used the real `new Date()`, so every Sunday the service's Sunday
+// exemption short-circuited them and they failed for reasons unrelated to what
+// they assert. The Sunday branch has its own case at the bottom of this file.
+const MONDAY = new Date('2026-06-15T05:00:00.000Z');
+
 describe('RateGuardService.checkAndNotify (#25 B2)', () => {
   let reminderSpy: jest.SpyInstance;
   let successSpy: jest.SpyInstance;
@@ -29,7 +35,7 @@ describe('RateGuardService.checkAndNotify (#25 B2)', () => {
   it('blocks and notifies when both metals are missing today rate', async () => {
     jest.spyOn(MetalRateRepository.prototype, 'findLatest').mockResolvedValue(null);
 
-    const status = await new RateGuardService().checkAndNotify();
+    const status = await new RateGuardService().checkAndNotify(MONDAY);
 
     expect(status.blocked).toBe(true);
     expect(status.staleMetals).toEqual(['silver', 'gold']);
@@ -38,7 +44,7 @@ describe('RateGuardService.checkAndNotify (#25 B2)', () => {
   });
 
   it('does not block when both metals have today rate (IST)', async () => {
-    const now = new Date();
+    const now = MONDAY;
     jest
       .spyOn(MetalRateRepository.prototype, 'findLatest')
       .mockResolvedValue({ date: now } as never);
@@ -51,7 +57,7 @@ describe('RateGuardService.checkAndNotify (#25 B2)', () => {
   });
 
   it('blocks only the stale metal when one is fresh', async () => {
-    const now = new Date();
+    const now = MONDAY;
     const old = new Date('2000-01-01T00:00:00.000Z');
     jest
       .spyOn(MetalRateRepository.prototype, 'findLatest')

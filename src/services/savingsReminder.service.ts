@@ -2,7 +2,7 @@ import { SavingsRepository } from '../repositories/savings.repository';
 import { SchemePlanRepository } from '../repositories/schemePlan.repository';
 import { sendSavingsReminder, sendWhatsAppText, SavingsReminderKind } from '../utils/whatsapp';
 import { addMonths } from '../utils/time';
-import { ISavings } from '../models/savings.model';
+import { ISavings } from '../domain/savings';
 import Logger from '../utils/logger';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;

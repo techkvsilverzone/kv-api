@@ -1,5 +1,5 @@
 import { ProductRepository } from '../repositories/product.repository';
-import { IProductCharge } from '../models/product.model';
+import { IProductCharge } from '../domain/catalog';
 import { UserRepository } from '../repositories/user.repository';
 import { InventoryRepository } from '../repositories/inventory.repository';
 import { CategoryRepository } from '../repositories/category.repository';
@@ -45,7 +45,12 @@ export class ProductService {
     }
   }
 
-  private dispatchPromotionalEmails(product: { name: string; category?: string; material?: string; price: number }): void {
+  private dispatchPromotionalEmails(product: {
+    name: string;
+    category?: string | null;
+    material?: string | null;
+    price: number;
+  }): void {
     if (!config.brevoSmtpUser || !config.brevoSmtpPassword) {
       return;
     }
@@ -612,9 +617,12 @@ export class ProductService {
   }
 
   private mapPersistenceError(error: unknown): AppError {
-    const err = error as { code?: number; name?: string; message?: string; errors?: Record<string, { message?: string }> };
+    const err = error as { code?: number | string; name?: string; message?: string; errors?: Record<string, { message?: string }> };
 
-    if (err.code === 11000) {
+    // 23505 is PostgreSQL's unique_violation; 11000 was Mongo's duplicate-key
+    // code. Both are kept so the 409 contract holds regardless of which layer
+    // raised it.
+    if (err.code === '23505' || err.code === 11000) {
       return new AppError('A product with this productGroupCode already exists', 409);
     }
 

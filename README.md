@@ -1,6 +1,6 @@
 # KV Silver Zone API
 
-A Node.js Express TypeScript API with a clean architecture.
+A Node.js + Express 5 + TypeScript API over PostgreSQL 17, with a clean architecture.
 
 ## Getting Started
 
@@ -16,30 +16,25 @@ A Node.js Express TypeScript API with a clean architecture.
    npm install
    ```
 
-2. Create a `.env` file from the placeholder (optional, default values provided in `src/config/index.ts`):
+2. Create a `.env` file. `.env.example` lists every variable; the essentials are:
    ```bash
-   PORT=3000
+   PORT=5000
    NODE_ENV=development
    CORS_ORIGINS=*
    CORS_CREDENTIALS=false
-   CORS_METHODS=GET,POST,PUT,PATCH,DELETE,OPTIONS
-   CORS_ALLOWED_HEADERS=Content-Type,Authorization,X-Requested-With
-   MONGO_URI=mongodb://localhost:27017/kv-silver-zone
-   SQL_SERVER_AUTH_TYPE=windows
-   SQL_SERVER_HOST=DESKTOP-TOL96KV
-   SQL_SERVER_INSTANCE=SQLEXPRESS
-   SQL_SERVER_PORT=1433
-   SQL_SERVER_DATABASE=KVSilverZone
-   SQL_SERVER_USER=
-   SQL_SERVER_PASSWORD=
-   SQL_SERVER_ENCRYPT=false
-   SQL_SERVER_TRUST_CERT=true
-   BREVO_API_KEY=
-   BREVO_SENDER_EMAIL=
-   BREVO_SENDER_NAME=KV Silver Zone
+
+   # Runtime persistence (required — the pool refuses to start without it)
+   POSTGRES_URL=postgresql://user:password@host:5432/kvs_ecommerce
+
+   JWT_SECRET=change-me
+
+   # Product images are written here and served by Nginx from IMAGE_PUBLIC_BASE
+   IMAGE_STORAGE_ROOT=/opt/kvs/storage/products
+   IMAGE_PUBLIC_BASE=/images/products
    ```
 
-For SQL login instead of Windows auth, set `SQL_SERVER_AUTH_TYPE=sql` and provide `SQL_SERVER_USER` and `SQL_SERVER_PASSWORD`.
+`MONGO_URI` and `POSTGRES_MIGRATION_URL` are needed **only** by the one-off
+scripts in `src/migration/`; no runtime code reads them.
 
 For CORS in production, set `CORS_ORIGINS` to a comma-separated allowlist (for example: `https://app.example.com,https://admin.example.com`) and set `CORS_CREDENTIALS=true` only when needed.
 
@@ -74,8 +69,8 @@ The project follows a clean architecture pattern:
 
 - **Controllers**: Handle incoming requests and return responses.
 - **Services**: Contain business logic and interact with repositories.
-- **Repositories**: Handle data access and persistence.
-- **Models**: Define data structures and interfaces.
+- **Repositories**: Handle data access — hand-written parameterized SQL against PostgreSQL. No ORM.
+- **Domain**: Plain TypeScript interfaces describing each aggregate.
 - **Routes**: Define API endpoints and link them to controllers.
 - **Middlewares**: Process requests before they reach controllers (e.g., authentication, global error handling).
 - **Config**: Manage environment variables, swagger definitions, and application configuration.
@@ -85,10 +80,20 @@ The project follows a clean architecture pattern:
 
 - `GET /api/health`: Check the status of the API.
 
-## SQL Server Scripts (Product Catalog)
+## Database
 
-Database design and seed scripts for SQL Server are available in:
+PostgreSQL 17, accessed through `pg` with no ORM. The schema is applied on the
+server; [docs/14-POSTGRES_SCHEMA.md](docs/14-POSTGRES_SCHEMA.md) is the checked-in
+reference and [docs/15-POSTGRES_MIGRATION.md](docs/15-POSTGRES_MIGRATION.md)
+describes the MongoDB → PostgreSQL migration.
 
-- [database/sqlserver/README.md](database/sqlserver/README.md)
+```bash
+npm run migration:verify   # READ-ONLY: run every repository read path against the database
+```
 
-The `Product` APIs are wired to SQL Server tables (`kv.ProductGroup`, `kv.ProductImage`, `kv.vw_ProductCatalog`).
+### Legacy artifacts (not used at runtime)
+
+- `database/sqlserver/*.sql` — from an earlier SQL Server → MongoDB migration.
+  The application has not touched SQL Server for a long time.
+- `src/migration/` — MongoDB → PostgreSQL tooling, and the only place Mongoose
+  still exists.

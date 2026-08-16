@@ -49,7 +49,7 @@ export class ReturnService {
     const created = await this.returnRepository.create({ ...data, userId, faultType });
 
     return {
-      ...created.toObject(),
+      ...created,
       // Only meaningful for kv_fault claims, but harmless to always include.
       videoInstructions:
         created.videoStatus === 'awaiting'

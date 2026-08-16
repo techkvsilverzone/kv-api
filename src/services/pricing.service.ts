@@ -7,8 +7,8 @@ import {
 } from '../repositories/deliveryConfig.repository';
 import { MetalRateService } from './metalrate.service';
 import { CouponService } from './coupon.service';
-import { MetalType } from '../models/metalrate.model';
-import { IProduct, IProductCharge } from '../models/product.model';
+import { MetalType } from '../domain/rates';
+import { IProduct, IProductCharge } from '../domain/catalog';
 import { AppError } from '../utils/appError';
 import Logger from '../utils/logger';
 
@@ -113,7 +113,10 @@ export const resolveDeliveryZone = (address?: CheckoutAddress | null): DeliveryZ
  * into a fraction of pure metal in [0, 1]. Silver jewelry defaults to 0.925
  * when purity is absent; non-silver materials default to 1.
  */
-export const resolvePurityFraction = (purity: string | undefined, material: string | undefined): number => {
+export const resolvePurityFraction = (
+  purity: string | null | undefined,
+  material: string | null | undefined,
+): number => {
   const digits = String(purity ?? '').match(/[\d.]+/);
   if (digits) {
     const value = Number(digits[0]);
@@ -273,7 +276,8 @@ export class PricingService {
 
   private enrichWithRate(product: IProduct, ratePerGram: number | null): Record<string, unknown> {
     const breakdown = this.computeUnitPrice(product, ratePerGram);
-    const base = typeof product.toObject === 'function' ? product.toObject() : product;
+    // Products are plain domain objects now, so there is no document to unwrap.
+    const base = product as unknown as Record<string, unknown>;
     return {
       ...base,
       price: breakdown.unitPrice,

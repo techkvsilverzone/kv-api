@@ -1,6 +1,6 @@
-import { connectMongo, disconnectMongo } from './db';
-import { SchemePlan, ISchemePlan, SchemeType } from '../models/schemePlan.model';
-import { Savings } from '../models/savings.model';
+import { connectPostgres, disconnectPostgres, query } from '../infrastructure/postgres/pool';
+import { ISchemePlan, SchemeType } from '../domain/savings';
+import { SchemePlanRepository } from '../repositories/schemePlan.repository';
 import Logger from './logger';
 
 /**
@@ -84,33 +84,44 @@ interface SeedReport {
  * untouched. Safe to re-run.
  */
 export async function seedSchemePlans(options: { apply: boolean }): Promise<SeedReport> {
+  const repository = new SchemePlanRepository();
   const plansCreated: string[] = [];
   const plansAlreadyPresent: string[] = [];
 
   for (const seed of PLAN_SEEDS) {
-    const existing = await SchemePlan.findOne({ type: seed.type });
+    // eslint-disable-next-line no-await-in-loop
+    const existing = await repository.findByType(seed.type);
     if (existing) {
       plansAlreadyPresent.push(seed.type);
       continue;
     }
     plansCreated.push(seed.type);
     if (options.apply) {
-      await SchemePlan.create(seed);
+      // eslint-disable-next-line no-await-in-loop
+      await repository.create(seed);
     }
   }
 
-  // Pre-rework enrollments predate `schemeType` — they're all silver gram-ledger schemes
-  // (the only kind that existed), so backfill them onto SILVER_11_1 and its seeded plan.
-  const silverPlan = await SchemePlan.findOne({ type: 'SILVER_11_1' });
-  const legacyFilter = { schemeType: { $exists: false } };
-  const savingsBackfilled = await Savings.countDocuments(legacyFilter);
+  // Pre-rework enrollments predate `scheme_type` — they're all silver gram-ledger
+  // schemes (the only kind that existed), so backfill them onto SILVER_11_1 and
+  // its seeded plan. The column is NOT NULL in PostgreSQL, so "missing" means a
+  // row the migration defaulted to SILVER_11_1 without ever linking a plan.
+  const silverPlan = await repository.findByType('SILVER_11_1');
+  const legacyCount = await query<{ count: number }>(
+    `SELECT count(*)::int AS count FROM savings_accounts WHERE plan_id IS NULL`,
+  );
+  const savingsBackfilled = legacyCount.rows[0]?.count ?? 0;
+
   if (options.apply && savingsBackfilled > 0) {
     if (!silverPlan) {
-      throw new Error('Cannot backfill legacy Savings docs — SILVER_11_1 plan was not found/created');
+      throw new Error('Cannot backfill legacy savings rows — SILVER_11_1 plan was not found/created');
     }
-    await Savings.updateMany(legacyFilter, {
-      $set: { schemeType: 'SILVER_11_1', metal: 'SILVER', planId: silverPlan._id },
-    });
+    await query(
+      `UPDATE savings_accounts
+       SET scheme_type = 'SILVER_11_1', metal = 'SILVER', plan_id = $1, updated_at = NOW()
+       WHERE plan_id IS NULL`,
+      [silverPlan._id],
+    );
   }
 
   return { plansCreated, plansAlreadyPresent, savingsBackfilled };
@@ -121,11 +132,11 @@ if (require.main === module) {
   const apply = process.argv.includes('--apply');
   (async () => {
     try {
-      await connectMongo();
+      await connectPostgres();
       const report = await seedSchemePlans({ apply });
       Logger.info(`[${apply ? 'APPLY' : 'DRY RUN'}] plans created: ${report.plansCreated.join(', ') || '(none)'}`);
       Logger.info(`[${apply ? 'APPLY' : 'DRY RUN'}] plans already present: ${report.plansAlreadyPresent.join(', ') || '(none)'}`);
-      Logger.info(`[${apply ? 'APPLY' : 'DRY RUN'}] legacy Savings docs to backfill onto SILVER_11_1: ${report.savingsBackfilled}`);
+      Logger.info(`[${apply ? 'APPLY' : 'DRY RUN'}] legacy savings rows to backfill onto SILVER_11_1: ${report.savingsBackfilled}`);
       if (!apply) {
         Logger.info('Dry run only — re-run with `-- --apply` to write these changes.');
       }
@@ -133,7 +144,7 @@ if (require.main === module) {
       Logger.error(`Scheme plan seed failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exitCode = 1;
     } finally {
-      await disconnectMongo();
+      await disconnectPostgres();
     }
   })();
 }

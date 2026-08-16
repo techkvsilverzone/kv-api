@@ -1,5 +1,5 @@
 import { UserRepository, AddressData } from '../repositories/user.repository';
-import { IAddress } from '../models/user.model';
+import { IAddress } from '../domain/user';
 import { CouponRepository } from '../repositories/coupon.repository';
 import { StallConfigRepository } from '../repositories/stallConfig.repository';
 import { AppError } from '../utils/appError';

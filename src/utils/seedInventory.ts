@@ -1,46 +1,43 @@
-import { connectMongo, disconnectMongo } from './db';
-import { Product } from '../models/product.model';
-import { Inventory } from '../models/inventory.model';
+import { connectPostgres, disconnectPostgres, query } from '../infrastructure/postgres/pool';
 import Logger from './logger';
 
 /**
- * One-time reconciliation: create an Inventory.currentStock document for every
- * product that does not have one yet, seeded from the product's listed
- * `quantity`. Idempotent — existing inventory docs are left untouched.
+ * One-time reconciliation: create an `inventory` row for every product that
+ * does not have one yet, seeded from the product's listed `quantity`.
+ * Idempotent — existing inventory rows are left untouched.
+ *
+ * `Product.quantity` remains the seed value only; `inventory.current_stock` is
+ * the authoritative figure once a row exists (spec §25).
  */
 export async function seedInventoryFromProducts(): Promise<{ created: number; skipped: number }> {
-  const products = await Product.find({}, { quantity: 1 }).lean();
-  let created = 0;
-  let skipped = 0;
+  const total = await query<{ count: number }>('SELECT count(*)::int AS count FROM products');
 
-  for (const product of products as Array<{ _id: any; quantity?: number }>) {
-    const existing = await Inventory.findOne({ productId: product._id });
-    if (existing) {
-      skipped += 1;
-      continue;
-    }
-    await Inventory.create({
-      productId: product._id,
-      currentStock: Math.max(0, Math.floor(Number(product.quantity) || 0)),
-    });
-    created += 1;
-  }
+  // A single set-based insert: `ON CONFLICT DO NOTHING` is exactly the
+  // "never clobber an existing row" rule, enforced by the unique index on
+  // product_id rather than by a read-then-write loop.
+  const inserted = await query(
+    `INSERT INTO inventory (product_id, current_stock)
+     SELECT p.id, GREATEST(0, floor(COALESCE(p.quantity, 0))::int)
+     FROM products p
+     ON CONFLICT (product_id) DO NOTHING`,
+  );
 
-  return { created, skipped };
+  const created = inserted.rowCount ?? 0;
+  return { created, skipped: (total.rows[0]?.count ?? 0) - created };
 }
 
 // Allow running directly: `npm run seed:inventory`
 if (require.main === module) {
   (async () => {
     try {
-      await connectMongo();
+      await connectPostgres();
       const result = await seedInventoryFromProducts();
       Logger.info(`Inventory seed complete — created ${result.created}, skipped ${result.skipped}`);
     } catch (error) {
       Logger.error(`Inventory seed failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exitCode = 1;
     } finally {
-      await disconnectMongo();
+      await disconnectPostgres();
     }
   })();
 }

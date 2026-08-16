@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { SavingsService } from '../services/savings.service';
 import { SavingsRepository } from '../repositories/savings.repository';
 import { SchemePlanRepository } from '../repositories/schemePlan.repository';
@@ -7,7 +6,10 @@ import { PricingService } from '../services/pricing.service';
 import * as whatsapp from '../utils/whatsapp';
 import { AppError } from '../utils/appError';
 
-const ADMIN_ID = new mongoose.Types.ObjectId().toString();
+// PostgreSQL identities are numeric strings, not ObjectIds.
+const ADMIN_ID = '42';
+let nextPlanId = 100;
+const newPlanId = (): string => String(nextPlanId++);
 
 // Covers the multi-scheme-type rework: plan-driven enrollment, the early-exit forfeit (card
 // rule 6), the Diwali gold price-band settlement, and the Diwali 3-consecutive-missed-months
@@ -49,7 +51,7 @@ describe('SavingsService — enroll (plan-driven)', () => {
   });
 
   it('creates the scheme stamped from the plan (type, metal, duration, bonus, planId)', async () => {
-    const planId = new mongoose.Types.ObjectId();
+    const planId = newPlanId();
     jest.spyOn(SchemePlanRepository.prototype, 'findByType').mockResolvedValue({
       _id: planId,
       type: 'GOLD_11_1',
@@ -80,7 +82,7 @@ describe('SavingsService — enroll (plan-driven)', () => {
 
   it('snapshots the Diwali hamper into maturityBenefits at enrollment', async () => {
     jest.spyOn(SchemePlanRepository.prototype, 'findByType').mockResolvedValue({
-      _id: new mongoose.Types.ObjectId(),
+      _id: newPlanId(),
       type: 'DIWALI',
       isActive: true,
       metal: undefined,
@@ -129,12 +131,12 @@ describe('SavingsService — cancelScheme (card rule 6: early-exit forfeit)', ()
       giftsValueDeducted: 0,
       netRedeemable: 9000,
       note: undefined,
-      cancelledBy: expect.any(mongoose.Types.ObjectId),
+      cancelledBy: ADMIN_ID,
     });
   });
 
   it('uses the plan penalty percent and deducts gift value', async () => {
-    const planId = new mongoose.Types.ObjectId();
+    const planId = newPlanId();
     jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue({
       status: 'Active',
       totalPaid: 10000,
@@ -176,7 +178,7 @@ describe('SavingsService — Diwali redemption payout', () => {
 
   const diwaliScheme = (overrides: Record<string, unknown> = {}) => ({
     schemeType: 'DIWALI',
-    planId: new mongoose.Types.ObjectId(),
+    planId: newPlanId(),
     status: 'Completed',
     totalPaid: 33000,
     monthlyAmount: 3000,

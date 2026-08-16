@@ -1,5 +1,5 @@
 import { AppError } from '../utils/appError';
-import { IMetalRate, MetalType } from '../models/metalrate.model';
+import { IMetalRate, MetalType } from '../domain/rates';
 import { MetalRateRepository } from '../repositories/metalrate.repository';
 import { istDayKey, istMidnightUtc } from '../utils/time';
 
