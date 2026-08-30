@@ -1,6 +1,7 @@
 import { SavingsRepository } from '../repositories/savings.repository';
 import { SchemePlanRepository } from '../repositories/schemePlan.repository';
 import { UserRepository } from '../repositories/user.repository';
+import { IdProofRepository } from '../repositories/idProof.repository';
 import { PricingService } from './pricing.service';
 import { ISavings, ISchemePlan, SchemeType } from '../domain/savings';
 import { sendSavingsPaymentSuccess, sendDiwaliSchemeCompleted, sendDiwaliRedemptionReady } from '../utils/whatsapp';
@@ -12,21 +13,24 @@ import Logger from '../utils/logger';
 const round2 = (n: number) => Math.round(n * 100) / 100;
 const round3 = (n: number) => Math.round(n * 1000) / 1000;
 
-/** Only these three (self-service, installment-based) products are open for enrollment today —
- * GOLD_INCOME/SILVER_DEPOSIT are lump-sum deposit schemes reserved for a later phase. */
-const ENROLLABLE_TYPES: SchemeType[] = ['GOLD_11_1', 'SILVER_11_1', 'DIWALI'];
-const ALL_SCHEME_TYPES: SchemeType[] = ['GOLD_11_1', 'SILVER_11_1', 'DIWALI', 'GOLD_INCOME', 'SILVER_DEPOSIT'];
+/** Open for enrollment today — GOLD_INCOME/SILVER_DEPOSIT are lump-sum deposit schemes reserved
+ * for a later phase. SILVER_SMART (item 4, "KV Smart Purchase Plan") is FLEXIBLE-mode: any
+ * amount, any time, within the plan's duration window — see `applyPayment`/`createInstallmentOrder`. */
+const ENROLLABLE_TYPES: SchemeType[] = ['GOLD_11_1', 'SILVER_11_1', 'DIWALI', 'SILVER_SMART'];
+const ALL_SCHEME_TYPES: SchemeType[] = ['GOLD_11_1', 'SILVER_11_1', 'DIWALI', 'GOLD_INCOME', 'SILVER_DEPOSIT', 'SILVER_SMART'];
 
 export class SavingsService {
   private savingsRepository: SavingsRepository;
   private schemePlanRepository: SchemePlanRepository;
   private userRepository: UserRepository;
+  private idProofRepository: IdProofRepository;
   private pricingService: PricingService;
 
   constructor() {
     this.savingsRepository = new SavingsRepository();
     this.schemePlanRepository = new SchemePlanRepository();
     this.userRepository = new UserRepository();
+    this.idProofRepository = new IdProofRepository();
     this.pricingService = new PricingService();
   }
 
@@ -71,9 +75,28 @@ export class SavingsService {
       throw new AppError('This scheme is not currently available for enrollment', 400);
     }
 
-    const monthlyAmount = Number(data.monthlyAmount);
-    if (!plan.monthlyAmounts.includes(monthlyAmount)) {
-      throw new AppError(`monthlyAmount must be one of: ${plan.monthlyAmounts.join(', ')}`, 400);
+    // Item 4: FLEXIBLE plans (KV Smart Purchase Plan) have no customer-chosen denomination at
+    // enrollment — every individual payment picks its own amount later (>= minPaymentAmount).
+    // `monthlyAmount` is still stored (the column is NOT NULL) as that floor, purely so
+    // `applyPayment`'s existing "amount >= scheme.monthlyAmount" floor check keeps working
+    // unmodified for both payment modes.
+    let monthlyAmount: number;
+    if (plan.paymentMode === 'FLEXIBLE') {
+      monthlyAmount = plan.minPaymentAmount ?? 100;
+    } else {
+      monthlyAmount = Number(data.monthlyAmount);
+      if (!plan.monthlyAmounts.includes(monthlyAmount)) {
+        throw new AppError(`monthlyAmount must be one of: ${plan.monthlyAmounts.join(', ')}`, 400);
+      }
+    }
+
+    // Item 2: KYC is required once per customer (not per scheme) — any prior submission
+    // unblocks enrollment regardless of its verification status, since review is async and
+    // happens in the background (business decision: non-blocking). Checked last, after the
+    // request itself is validated, so a bad request reports its own error first.
+    const idProof = await this.idProofRepository.findByUserId(userId);
+    if (!idProof) {
+      throw new AppError('Submit your ID proof before enrolling in a savings scheme', 400);
     }
 
     const bonusAmount = plan.bonusMonths > 0 ? monthlyAmount * plan.bonusMonths : 0;
@@ -138,19 +161,31 @@ export class SavingsService {
     if (scheme.status !== 'Active') {
       throw new AppError(`This scheme is ${scheme.status.toLowerCase()} and can no longer accept payments`, 400);
     }
+
+    const plan = await this.getPlanForScheme(scheme);
+    const isFlexible = plan?.paymentMode === 'FLEXIBLE';
+
+    // Item 4 (KV Smart Purchase Plan): a FLEXIBLE scheme's `duration` is a TIME WINDOW from
+    // enrollment (pay any number of times within it), not a payment-count cap like every other
+    // scheme — cap on the window instead. FIXED plans keep the original count-based cap.
     const realPaymentsSoFar = scheme.payments.filter((p) => p.amount > 0).length;
-    if (realPaymentsSoFar >= scheme.duration) {
+    if (isFlexible) {
+      if (new Date() > addMonths(scheme.startDate, scheme.duration)) {
+        throw new AppError('This scheme\'s payment window has closed', 400);
+      }
+    } else if (realPaymentsSoFar >= scheme.duration) {
       throw new AppError('This scheme has already collected all its installments', 400);
     }
     if (!Number.isFinite(amount) || amount < scheme.monthlyAmount) {
-      throw new AppError(`Payment must be at least the scheme's monthly amount (₹${scheme.monthlyAmount})`, 400);
+      throw new AppError(`Payment must be at least ₹${scheme.monthlyAmount}`, 400);
     }
 
     // Card rule 3: only one installment accepted per calendar month — keyed off the real
     // calendar month the collection is being made in (IST), not a scheduled slot, so a late
-    // catch-up payment still only occupies the month it's actually paid in.
+    // catch-up payment still only occupies the month it's actually paid in. Item 4: FLEXIBLE
+    // plans are explicitly "pay anytime, any number of times" — this restriction doesn't apply.
     const collectionMonthKey = istMonthKey(new Date());
-    if (scheme.payments.some((p) => p.amount > 0 && p.dueMonthKey === collectionMonthKey)) {
+    if (!isFlexible && scheme.payments.some((p) => p.amount > 0 && p.dueMonthKey === collectionMonthKey)) {
       throw new AppError('An installment for this month has already been recorded', 400);
     }
 
@@ -171,7 +206,6 @@ export class SavingsService {
       rate = resolved;
     }
 
-    const plan = await this.getPlanForScheme(scheme);
     const passbookPrefix = plan?.passbookPrefix ?? 'PB';
 
     const month = scheme.payments.length + 1;
@@ -200,7 +234,10 @@ export class SavingsService {
     const alreadyHasDevident = updated.payments.some((p) => p.devidentAmount > 0);
     const bonusMonths = plan?.bonusMonths ?? (updated.duration === 11 ? 1 : 0);
 
-    if (realPaymentsNow === updated.duration) {
+    // Item 4: a FLEXIBLE scheme never auto-completes on a payment count — it stays Active for
+    // its whole time window regardless of how many payments land, and is closed out manually
+    // (redemption happens in-store) once the customer is done or the window has passed.
+    if (!isFlexible && realPaymentsNow === updated.duration) {
       if (bonusMonths > 0 && !alreadyHasDevident) {
         const devidentAmount = updated.bonusAmount;
         const withBonus = await this.savingsRepository.creditBonusMonth(schemeId, {
@@ -251,34 +288,57 @@ export class SavingsService {
   }
 
   /**
-   * Step 1 of customer self-pay: create a Razorpay order for this scheme's monthly
-   * amount. The amount is always server-computed from the scheme — never client input.
+   * Step 1 of customer self-pay: create a Razorpay order for this installment. FIXED plans use
+   * the scheme's monthly amount, server-computed — client input is never trusted. FLEXIBLE
+   * plans (item 4) let the customer pick their own amount each time, so `amount` is REQUIRED
+   * for those and validated against the plan's floor here — once accepted, it's baked into the
+   * Razorpay order and re-derived from there (not from client input again) at verify time.
    */
-  public async createInstallmentOrder(userId: string, schemeId: string) {
+  public async createInstallmentOrder(userId: string, schemeId: string, amount?: number) {
     const scheme = await this.savingsRepository.findById(schemeId);
     if (!scheme) throw new AppError('Savings scheme not found', 404);
     if (scheme.userId.toString() !== userId) throw new AppError('Not authorized', 403);
     if (scheme.status !== 'Active') {
       throw new AppError(`This scheme is ${scheme.status.toLowerCase()} and can no longer accept payments`, 400);
     }
+
+    const plan = await this.getPlanForScheme(scheme);
+    const isFlexible = plan?.paymentMode === 'FLEXIBLE';
+
     const realPayments = scheme.payments.filter((p) => p.amount > 0).length;
-    if (realPayments >= scheme.duration) {
+    if (isFlexible) {
+      if (new Date() > addMonths(scheme.startDate, scheme.duration)) {
+        throw new AppError('This scheme\'s payment window has closed', 400);
+      }
+    } else if (realPayments >= scheme.duration) {
       throw new AppError('This scheme has already collected all its installments', 400);
     }
+
     const collectionMonthKey = istMonthKey(new Date());
-    if (scheme.payments.some((p) => p.amount > 0 && p.dueMonthKey === collectionMonthKey)) {
+    if (!isFlexible && scheme.payments.some((p) => p.amount > 0 && p.dueMonthKey === collectionMonthKey)) {
       throw new AppError('An installment for this month has already been recorded', 400);
     }
 
-    const amountPaise = Math.round(scheme.monthlyAmount * 100);
+    let payAmount = scheme.monthlyAmount;
+    if (isFlexible) {
+      payAmount = Number(amount);
+      if (!Number.isFinite(payAmount) || payAmount < scheme.monthlyAmount) {
+        throw new AppError(`amount must be at least ₹${scheme.monthlyAmount}`, 400);
+      }
+    }
+
+    const amountPaise = Math.round(payAmount * 100);
     const order = await createRazorpayOrder(amountPaise, 'INR', `savings_${schemeId}_${Date.now()}`);
     return { id: order.id, amount: order.amount, currency: order.currency };
   }
 
   /**
-   * Step 2: verify the Razorpay signature, re-confirm the amount actually captured
-   * matches the scheme's monthly amount (closes the same tamper loop as product
-   * checkout — see PaymentService.verifyAndCreateOrder), then apply the payment.
+   * Step 2: verify the Razorpay signature, re-confirm the amount actually captured is valid,
+   * then apply the payment. FIXED plans require an exact match on the scheme's monthly amount
+   * (closes the same tamper loop as product checkout — see PaymentService.verifyAndCreateOrder).
+   * FLEXIBLE plans (item 4) instead trust the CAPTURED order's own amount as the ground truth —
+   * it was already server-validated (>= the plan floor) at create-order time and can't be
+   * altered client-side without breaking the Razorpay signature check above.
    */
   public async verifyAndRecordInstallment(
     userId: string,
@@ -293,19 +353,28 @@ export class SavingsService {
     if (!scheme) throw new AppError('Savings scheme not found', 404);
     if (scheme.userId.toString() !== userId) throw new AppError('Not authorized', 403);
 
+    const plan = await this.getPlanForScheme(scheme);
+    const isFlexible = plan?.paymentMode === 'FLEXIBLE';
+
     const razorpayOrder = await fetchRazorpayOrder(razorpay.orderId);
-    const expectedPaise = Math.round(scheme.monthlyAmount * 100);
-    if (Number(razorpayOrder?.amount) !== expectedPaise) {
+    const capturedPaise = Number(razorpayOrder?.amount);
+    let payAmount = scheme.monthlyAmount;
+    if (isFlexible) {
+      payAmount = capturedPaise / 100;
+      if (!Number.isFinite(payAmount) || payAmount < scheme.monthlyAmount) {
+        throw new AppError('Captured payment amount is invalid for this scheme', 400);
+      }
+    } else if (capturedPaise !== Math.round(scheme.monthlyAmount * 100)) {
       throw new AppError("Payment amount does not match the scheme's monthly amount", 400);
     }
 
-    const updated = await this.applyPayment(schemeId, scheme.monthlyAmount, {
+    const updated = await this.applyPayment(schemeId, payAmount, {
       method: 'ONLINE',
       razorpayOrderId: razorpay.orderId,
       razorpayPaymentId: razorpay.paymentId,
     });
     const payments = await this.savingsRepository.getPayments(schemeId);
-    await this.notifyPaymentSuccess(userId, updated, scheme.monthlyAmount);
+    await this.notifyPaymentSuccess(userId, updated, payAmount);
     return { ...updated, payments };
   }
 

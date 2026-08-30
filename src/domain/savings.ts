@@ -8,7 +8,14 @@
  * so none of the scheme rules had to be touched.
  */
 
-export type SchemeType = 'GOLD_11_1' | 'SILVER_11_1' | 'DIWALI' | 'GOLD_INCOME' | 'SILVER_DEPOSIT';
+export type SchemeType = 'GOLD_11_1' | 'SILVER_11_1' | 'DIWALI' | 'GOLD_INCOME' | 'SILVER_DEPOSIT' | 'SILVER_SMART';
+/**
+ * FIXED = pick one of `monthlyAmounts` at enrollment, pay exactly that once per calendar month
+ * (the original 3 self-service schemes). FLEXIBLE = "KV Smart Purchase Plan" (item 4, 2026-08-30
+ * business requirement) — pay ANY amount >= `minPaymentAmount`, any number of times, any time
+ * within the plan's `durationMonths` window from enrollment. No bonus month.
+ */
+export type SchemePaymentMode = 'FIXED' | 'FLEXIBLE';
 export type SchemeMetal = 'GOLD' | 'SILVER';
 
 export interface ISavingsPayment {
@@ -114,8 +121,12 @@ export interface ISchemePlan {
   metal?: SchemeMetal | null;
   durationMonths: number;
   bonusMonths: number;
-  /** Selectable fixed monthly amounts, stored in `scheme_plan_monthly_amounts`. */
+  paymentMode: SchemePaymentMode;
+  /** FIXED plans only — selectable fixed monthly amounts, stored in `scheme_plan_monthly_amounts`. */
   monthlyAmounts: number[];
+  /** FLEXIBLE plans only — the admin-configurable floor a customer's self-chosen payment must
+   * meet (item 4: "starts from ₹100, admin configurable"). */
+  minPaymentAmount?: number | null;
   passbookPrefix: string;
   paymentDueDayOfMonth: number;
   earlyExitPenaltyPercent: number;

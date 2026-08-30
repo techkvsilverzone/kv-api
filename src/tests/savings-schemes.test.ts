@@ -1,6 +1,7 @@
 import { SavingsService } from '../services/savings.service';
 import { SavingsRepository } from '../repositories/savings.repository';
 import { SchemePlanRepository } from '../repositories/schemePlan.repository';
+import { IdProofRepository } from '../repositories/idProof.repository';
 import { SavingsReminderService } from '../services/savingsReminder.service';
 import { PricingService } from '../services/pricing.service';
 import * as whatsapp from '../utils/whatsapp';
@@ -50,6 +51,18 @@ describe('SavingsService — enroll (plan-driven)', () => {
     );
   });
 
+  it('rejects enrollment when the customer has no ID proof on file (item 2)', async () => {
+    jest.spyOn(SchemePlanRepository.prototype, 'findByType').mockResolvedValue({
+      isActive: true,
+      monthlyAmounts: [5000],
+    } as never);
+    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue(null);
+
+    await expect(new SavingsService().enroll('u1', { schemeType: 'GOLD_11_1', monthlyAmount: 5000 })).rejects.toThrow(
+      /Submit your ID proof/,
+    );
+  });
+
   it('creates the scheme stamped from the plan (type, metal, duration, bonus, planId)', async () => {
     const planId = newPlanId();
     jest.spyOn(SchemePlanRepository.prototype, 'findByType').mockResolvedValue({
@@ -64,6 +77,7 @@ describe('SavingsService — enroll (plan-driven)', () => {
       hamper: undefined,
     } as never);
     const createSpy = jest.spyOn(SavingsRepository.prototype, 'create').mockResolvedValue({} as never);
+    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue({ verificationStatus: 'Pending' } as never);
 
     await new SavingsService().enroll('u1', { schemeType: 'GOLD_11_1', monthlyAmount: 5000 });
 
@@ -93,6 +107,7 @@ describe('SavingsService — enroll (plan-driven)', () => {
       hamper: { goldCoinPurity: '916', silverCoinGrams: 30, giftsValue: 2500, gifts: ['Crackers Box', 'Sweets and Snacks'] },
     } as never);
     const createSpy = jest.spyOn(SavingsRepository.prototype, 'create').mockResolvedValue({} as never);
+    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue({ verificationStatus: 'Pending' } as never);
 
     await new SavingsService().enroll('u1', { schemeType: 'DIWALI', monthlyAmount: 3000 });
 

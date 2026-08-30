@@ -20,6 +20,8 @@ interface SchemePlanRow {
   metal: string | null;
   duration_months: number;
   bonus_months: number;
+  payment_mode: string;
+  min_payment_amount: number | null;
   passbook_prefix: string;
   payment_due_day_of_month: number | null;
   early_exit_penalty_percent: number | null;
@@ -66,9 +68,11 @@ const mapPlan = (row: SchemePlanRow): ISchemePlan => ({
   metal: (row.metal as ISchemePlan['metal']) ?? null,
   durationMonths: toNum(row.duration_months),
   bonusMonths: toNum(row.bonus_months),
+  paymentMode: (row.payment_mode as ISchemePlan['paymentMode']) || 'FIXED',
   monthlyAmounts: Array.isArray(row.monthly_amounts)
     ? (row.monthly_amounts as unknown[]).map((v) => toNum(v))
     : [],
+  minPaymentAmount: toNumOrNull(row.min_payment_amount),
   passbookPrefix: row.passbook_prefix,
   paymentDueDayOfMonth: toNum(row.payment_due_day_of_month, 10),
   earlyExitPenaltyPercent: toNum(row.early_exit_penalty_percent, 10),
@@ -83,7 +87,7 @@ const mapPlan = (row: SchemePlanRow): ISchemePlan => ({
 const SELECT = `
   SELECT
     p.id, p.type, p.name, p.description, p.is_active, p.metal, p.duration_months,
-    p.bonus_months, p.passbook_prefix, p.payment_due_day_of_month,
+    p.bonus_months, p.payment_mode, p.min_payment_amount, p.passbook_prefix, p.payment_due_day_of_month,
     p.early_exit_penalty_percent, p.max_consecutive_missed_months, p.redemption_mode,
     p.gold_coin_purity, p.silver_coin_grams, p.gifts_value, p.gifts, p.sort_order,
     p.created_at, p.updated_at,
@@ -106,6 +110,8 @@ const COLUMNS: Record<string, string> = {
   metal: 'metal',
   durationMonths: 'duration_months',
   bonusMonths: 'bonus_months',
+  paymentMode: 'payment_mode',
+  minPaymentAmount: 'min_payment_amount',
   passbookPrefix: 'passbook_prefix',
   paymentDueDayOfMonth: 'payment_due_day_of_month',
   earlyExitPenaltyPercent: 'early_exit_penalty_percent',

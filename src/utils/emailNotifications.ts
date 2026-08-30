@@ -348,6 +348,32 @@ export async function sendPasswordResetEmail(input: {
   });
 }
 
+/** Verify a phone number entered at signup (or re-verification later). Fallback channel for
+ * item 1's mobile OTP while WhatsApp OTP is disabled/pending Meta template approval. */
+export async function sendPhoneVerificationEmail(input: {
+  email: string;
+  name?: string;
+  code: string;
+  expiryMinutes: number;
+}): Promise<void> {
+  const html = buildLightThemeEmail({
+    title: 'Verify Your Phone Number',
+    intro: `Hi ${input.name || 'there'}, use the code below to verify your mobile number on KV Silver Zone. It expires in ${input.expiryMinutes} minutes.`,
+    detailsTable: `
+      <div style="text-align:center;padding:16px 0;">
+        <span style="display:inline-block;font-size:32px;font-weight:700;letter-spacing:0.3em;color:#0f766e;">${input.code}</span>
+      </div>
+    `,
+    closing: "If you didn't request this code, you can safely ignore this email.",
+  });
+
+  await sendEmail({
+    to: [{ email: input.email, name: input.name }],
+    subject: `${input.code} is your KV Silver Zone phone verification code`,
+    htmlContent: html,
+  });
+}
+
 export async function sendContactUsEmail(input: {
   name: string;
   email: string;

@@ -51,6 +51,15 @@ export class SavingsReminderService {
       const plan = planByType.get(scheme.schemeType);
       const realPayments = scheme.payments.filter((p) => p.amount > 0).length;
 
+      // Item 4 (KV Smart Purchase Plan): a FLEXIBLE-mode scheme has no fixed monthly due date
+      // to be overdue against — the customer pays any amount, any number of times, any time
+      // within the plan's window — so the whole "next installment due" framing below doesn't
+      // apply. Skip it here rather than reminding someone about a payment that was never due.
+      if (plan?.paymentMode === 'FLEXIBLE') {
+        skipped++;
+        continue;
+      }
+
       // Diwali removal — card rule 2: 3+ consecutive missed months drops the member.
       if (scheme.schemeType === 'DIWALI' && plan?.maxConsecutiveMissedMonths) {
         const missedMonths = Math.max(0, monthsElapsed(scheme.startDate, now) - realPayments);

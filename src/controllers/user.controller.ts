@@ -3,6 +3,7 @@ import { UserService } from '../services/user.service';
 import { OtpService } from '../services/otp.service';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { setAuthCookie, clearAuthCookie } from '../utils/authCookie';
+import Logger from '../utils/logger';
 
 export class UserController {
   private userService: UserService;
@@ -17,7 +18,21 @@ export class UserController {
     try {
       const result = await this.userService.signup(req.body);
       setAuthCookie(res, result.token);
-      res.status(201).json(result);
+
+      // Item 1: fire the first-time mobile verification code. Best-effort — the account is
+      // already created and the customer already has a session; a dispatch failure here
+      // shouldn't fail signup itself (they can retry via "Verify phone" in Profile).
+      let phoneVerification: { message: string; channel: 'whatsapp' | 'email' } | undefined;
+      try {
+        const userId = (result.user as { _id?: string })?._id;
+        if (userId) {
+          phoneVerification = await this.otpService.requestPhoneVerification(userId);
+        }
+      } catch (otpError) {
+        Logger.error(`Signup phone verification dispatch failed: ${otpError instanceof Error ? otpError.message : String(otpError)}`);
+      }
+
+      res.status(201).json({ ...result, phoneVerification });
     } catch (error) {
       next(error);
     }
@@ -46,6 +61,26 @@ export class UserController {
     try {
       const result = await this.otpService.verifyLoginOtp(req.body?.email, req.body?.code);
       setAuthCookie(res, result.token);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /** Item 1: request a WhatsApp/email code to verify the calling (authenticated) user's own
+   * phone number — normally triggered right after signup. */
+  public requestPhoneVerification = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this.otpService.requestPhoneVerification(req.user!._id.toString());
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public verifyPhoneOtp = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this.otpService.verifyPhoneOtp(req.user!._id.toString(), req.body?.code);
       res.status(200).json(result);
     } catch (error) {
       next(error);

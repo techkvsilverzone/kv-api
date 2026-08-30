@@ -176,10 +176,12 @@ router.get('/passbook/:passbookNumber', protect, savingsController.getByPassbook
  * @openapi
  * /savings/{schemeId}/pay/create-order:
  *   post:
- *     summary: Create a Razorpay order for this scheme's next monthly installment
+ *     summary: Create a Razorpay order for this scheme's next installment
  *     description: >
- *       The amount is always the scheme's own `monthlyAmount` — server-computed, never
- *       client input. Step 1 of the customer self-pay flow; step 2 is `/pay/verify`.
+ *       For a FIXED-mode scheme (Gold/Silver 11+1, Diwali) the amount is always the scheme's own
+ *       `monthlyAmount` — server-computed, request body ignored. For a FLEXIBLE-mode scheme (item
+ *       4, KV Smart Purchase Plan) `amount` is REQUIRED and must be >= the plan's minimum. Step 1
+ *       of the customer self-pay flow; step 2 is `/pay/verify`.
  *     tags: [Savings]
  *     security:
  *       - bearerAuth: []
@@ -189,6 +191,16 @@ router.get('/passbook/:passbookNumber', protect, savingsController.getByPassbook
  *         required: true
  *         schema:
  *           type: string
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               amount:
+ *                 type: number
+ *                 description: Required for FLEXIBLE-mode schemes only; ignored for FIXED-mode schemes.
  *     responses:
  *       201:
  *         description: Razorpay order

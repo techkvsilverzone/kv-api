@@ -29,6 +29,8 @@ export interface IUser {
   email: string;
   passwordHash: string;
   phone?: string | null;
+  /** Verified via a WhatsApp/email OTP sent at signup (item 1, mobile verification). */
+  phoneVerified: boolean;
   isAdmin: boolean;
   isActive: boolean;
   role?: 'admin' | 'staff' | 'customer' | null;

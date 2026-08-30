@@ -22,6 +22,11 @@ export class UserService {
     if (!data?.password) {
       throw new AppError('Password is required', 400);
     }
+    // Item 1: phone is required at signup so a verification code has somewhere to go —
+    // matches the address-book phone rule used everywhere else in this codebase.
+    if (!data?.phone || !/^[6-9]\d{9}$/.test(String(data.phone).trim())) {
+      throw new AppError('phone must be a valid 10-digit Indian mobile number', 400);
+    }
 
     const existingUser = await this.userRepository.findByEmail(data.email);
     if (existingUser) {

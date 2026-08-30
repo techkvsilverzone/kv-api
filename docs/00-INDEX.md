@@ -19,6 +19,7 @@ Docs are numbered **oldest → newest** (01 = earliest, highest number = most re
 | 13 | [API_CHANGES_AND_FIXES](13-API_CHANGES_AND_FIXES.md) | Latest API changes & fixes (variants, pricing config, delivery config) |
 | 14 | [POSTGRES_SCHEMA](14-POSTGRES_SCHEMA.md) | PostgreSQL schema reference (tables, constraints, indexes) — regenerate after schema changes |
 | 15 | [POSTGRES_MIGRATION](15-POSTGRES_MIGRATION.md) | MongoDB → PostgreSQL runtime migration: architecture, query translation, transactions, testing, limitations |
+| 16 | [pending-schema-changes](16-pending-schema-changes.md) | DDL for the 2026-08-30 business requirements (mobile OTP, ID proof, KV Smart Purchase Plan) — written but not yet applied to the live DB |
 
 > Not moved (kept in place by request): `README.md`, `CLAUDE.md`, `.claude/`, `.wolf/`.
 > Also left in place: `.github/copilot-instructions.md` and `database/sqlserver/README.md` (tooling / folder-specific files).
