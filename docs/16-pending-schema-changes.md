@@ -1,30 +1,33 @@
-# Pending schema changes (2026-08-30 business requirements)
+# Schema changes for the 2026-08-30 business requirements
 
-This repo doesn't check in the live schema — `docs/14-POSTGRES_SCHEMA.md` is a checked-in
-**snapshot**, and past schema changes were applied directly against the database (the dev
-machine's SSH tunnel to `localhost:15432` was live at the time). This session's
-`migration:test-postgres` came back `PostgreSQL connection failed` — no tunnel was reachable from
-here (checked from both the sandboxed shell and native PowerShell) — so the changes are written
-but **NOT applied**.
+## Status: schema + data APPLIED to production; application code NOT yet deployed
 
-**The executable migration lives in [`16-pending-schema-changes.sql`](16-pending-schema-changes.sql)
-in this same folder.** Run it from a machine with DB access:
+Applied directly against the live production database (`kvs_ecommerce` in the `kvs-postgres`
+docker container on `200.141.6.59`, via `ssh deploy@200.141.6.59` +
+`docker exec -i kvs-postgres psql ...`) on 2026-08-30:
 
-```bash
-psql "$POSTGRES_URL" -f docs/16-pending-schema-changes.sql
-```
+1. `16-pending-schema-changes.sql` — schema (columns/table/constraint widening). Applied.
+2. `16-pending-schema-changes-data.sql` — data (plan renames + the new SILVER_SMART row). Applied.
 
-Then seed/rename the scheme-plan catalog rows (needs the columns the `.sql` file just added):
+**What this means right now:** the database already has everything the NEW application code
+needs. The currently-DEPLOYED API code (on `/opt/kvs/api/kv-api`) is still the OLD code and knows
+nothing about `phone_verified`, `user_id_proofs`, or `payment_mode` — it simply doesn't read those
+columns, so it keeps working exactly as before. The one deliberate exception: the new
+**"KV Smart Purchase Plan" row was seeded with `is_active = false`**, specifically so the old
+deployed code (which doesn't understand `FLEXIBLE` mode) never shows it on the live storefront —
+flip it to `true` (`UPDATE scheme_plans SET is_active = true WHERE type = 'SILVER_SMART';`, or via
+Admin > Scheme Plans) only once the new API code is actually deployed and live.
 
-```bash
-cd kv-api
-npm run seed:scheme-plans -- --apply
-```
+**Still to do, and NOT done as part of this migration:** deploying the actual TypeScript changes
+(OTP/KYC/flexible-plan logic — this session's git commits) to `/opt/kvs/api/kv-api` and
+`/opt/kvs/web/kv-ui`, and restarting/rebuilding those services. That's a separate action from a
+database migration and needs its own explicit go-ahead.
 
-Every statement in the `.sql` file is idempotent (`IF NOT EXISTS` / guarded), wrapped in one
-transaction, and safe to re-run. After both steps succeed, regenerate `docs/14-POSTGRES_SCHEMA.md`
-per its own instructions and delete both this file and `16-pending-schema-changes.sql`, since
-they'll no longer be "pending" at that point.
+Every statement in both `.sql` files is idempotent (`IF NOT EXISTS` / guarded) and wrapped in a
+transaction — safe to re-run against production or any other environment (e.g. local dev) without
+side effects. Once the code above is deployed and `SILVER_SMART` is flipped active, regenerate
+`docs/14-POSTGRES_SCHEMA.md` per its own instructions and delete both `.sql` files plus this doc,
+since they'll no longer be "pending" at that point.
 
 ## Item 1 — Mobile OTP verification at signup
 
@@ -49,11 +52,12 @@ the database.
 Adds two new columns on the existing `scheme_plans` table — no new table needed, since this
 reuses the same catalog as Gold/Silver 11+1/Diwali, just with a different payment mode.
 
-`scheme_type`/`type` and `scheme_plans.type` are plain `varchar`, NOT a Postgres `ENUM` or a
-`CHECK`-constrained column (confirmed against `docs/14-POSTGRES_SCHEMA.md` — no such constraint
-is listed for either table), so the new `SILVER_SMART` scheme type needs no DDL of its own —
-it's accepted the moment the seed script (`npm run seed:scheme-plans -- --apply`) inserts a row
-with that value.
+`scheme_plans.type` DOES have a CHECK constraint (`ck_scheme_plans_type`) restricting it to the
+5 pre-existing scheme types — discovered live on 2026-08-30 when first applying this migration
+against production; the `docs/14-POSTGRES_SCHEMA.md` snapshot this doc originally relied on
+didn't list it (that snapshot is stale/incomplete on this point). The `.sql` file widens it to
+admit `SILVER_SMART`. `savings_accounts.scheme_type` has no equivalent constraint (confirmed live
+via `pg_constraint`), so nothing there needed changing.
 
 No `savings_accounts`/`savings_payments` schema change: a FLEXIBLE scheme's `payments` rows use
 the exact same columns as every other scheme (amount/materialRate/materialWeight/paidAt/etc) —

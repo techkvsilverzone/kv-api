@@ -64,15 +64,23 @@ CREATE INDEX IF NOT EXISTS idx_user_id_proofs_status
 
 -- ── Item 4: KV Smart Purchase Plan (flexible pay-anytime scheme) ──────────
 -- No new table — reuses the existing scheme_plans catalog, just with a different
--- payment mode. `type`/`scheme_type` are plain varchar (no ENUM/CHECK constraint
--- exists on either table), so the new SILVER_SMART scheme type itself needs no
--- DDL — only these two columns do. Columns match
--- src/repositories/schemePlan.repository.ts exactly.
+-- payment mode. Columns match src/repositories/schemePlan.repository.ts exactly.
 ALTER TABLE scheme_plans
   ADD COLUMN IF NOT EXISTS payment_mode varchar(20) NOT NULL DEFAULT 'FIXED';
 
 ALTER TABLE scheme_plans
   ADD COLUMN IF NOT EXISTS min_payment_amount numeric(14,2);
+
+-- CORRECTION (found live 2026-08-30 when first applying this against production):
+-- `scheme_plans.type` DOES have a CHECK constraint (`ck_scheme_plans_type`,
+-- restricted to the 5 pre-existing scheme types) even though it wasn't listed in
+-- the `docs/14-POSTGRES_SCHEMA.md` snapshot this file's comments originally
+-- relied on — that snapshot is stale/incomplete on this point. Widen it to admit
+-- SILVER_SMART. `savings_accounts.scheme_type` has NO such constraint (confirmed
+-- live via pg_constraint), so no equivalent change is needed there.
+ALTER TABLE scheme_plans DROP CONSTRAINT IF EXISTS ck_scheme_plans_type;
+ALTER TABLE scheme_plans ADD CONSTRAINT ck_scheme_plans_type
+  CHECK (type::text = ANY (ARRAY['GOLD_11_1','SILVER_11_1','DIWALI','GOLD_INCOME','SILVER_DEPOSIT','SILVER_SMART']::text[]));
 
 COMMIT;
 
