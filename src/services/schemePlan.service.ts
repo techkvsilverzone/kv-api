@@ -2,9 +2,10 @@ import { SchemePlanRepository } from '../repositories/schemePlan.repository';
 import { ISchemeHamper, SchemeType } from '../domain/savings';
 import { AppError } from '../utils/appError';
 
-const SCHEME_TYPES: SchemeType[] = ['GOLD_11_1', 'SILVER_11_1', 'DIWALI', 'GOLD_INCOME', 'SILVER_DEPOSIT'];
+const SCHEME_TYPES: SchemeType[] = ['GOLD_11_1', 'SILVER_11_1', 'DIWALI', 'GOLD_INCOME', 'SILVER_DEPOSIT', 'SILVER_SMART'];
 const METALS = ['GOLD', 'SILVER'];
 const REDEMPTION_MODES = ['GOODS_ONLY', 'CASH_ALLOWED'];
+const PAYMENT_MODES = ['FIXED', 'FLEXIBLE'];
 
 function parseHamper(input: any): ISchemeHamper | undefined {
   if (input === undefined) return undefined;
@@ -94,8 +95,12 @@ export class SchemePlanService {
       update.bonusMonths = bonusMonths;
     }
 
+    // Item 4: FLEXIBLE plans (KV Smart Purchase Plan) have no fixed denominations at all — the
+    // customer picks an amount per payment instead — so an empty array is valid for them, unlike
+    // every FIXED plan which must publish at least one.
+    const isFlexiblePayload = data.paymentMode === 'FLEXIBLE';
     if (data.monthlyAmounts !== undefined) {
-      if (!Array.isArray(data.monthlyAmounts) || data.monthlyAmounts.length === 0) {
+      if (!Array.isArray(data.monthlyAmounts) || (!isFlexiblePayload && data.monthlyAmounts.length === 0)) {
         throw new AppError('monthlyAmounts must be a non-empty array', 400);
       }
       const amounts = data.monthlyAmounts.map((a: unknown) => Number(a));
@@ -103,6 +108,26 @@ export class SchemePlanService {
         throw new AppError('monthlyAmounts must be whole numbers of at least 1000', 400);
       }
       update.monthlyAmounts = amounts;
+    }
+
+    if (isCreate || data.paymentMode !== undefined) {
+      const paymentMode = String(data.paymentMode || 'FIXED');
+      if (!PAYMENT_MODES.includes(paymentMode)) {
+        throw new AppError(`paymentMode must be one of ${PAYMENT_MODES.join(', ')}`, 400);
+      }
+      update.paymentMode = paymentMode;
+    }
+
+    if (data.minPaymentAmount !== undefined) {
+      if (data.minPaymentAmount === null) {
+        update.minPaymentAmount = null;
+      } else {
+        const minPaymentAmount = Number(data.minPaymentAmount);
+        if (!Number.isFinite(minPaymentAmount) || minPaymentAmount <= 0) {
+          throw new AppError('minPaymentAmount must be a positive number', 400);
+        }
+        update.minPaymentAmount = minPaymentAmount;
+      }
     }
 
     if (isCreate || data.passbookPrefix !== undefined) {

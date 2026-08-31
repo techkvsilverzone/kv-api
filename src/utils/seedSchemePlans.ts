@@ -16,7 +16,7 @@ import Logger from './logger';
 const PLAN_SEEDS: Array<Partial<ISchemePlan> & { type: SchemeType }> = [
   {
     type: 'GOLD_11_1',
-    name: 'Gold 11+1',
+    name: 'Gold Purchase Plan',
     description: 'Pay a fixed amount monthly for 11 months, converted to gold grams at each day\'s rate. Redeem for gold/silver jewellery in month 12 at that day\'s market rate.',
     isActive: true,
     metal: 'GOLD',
@@ -31,7 +31,7 @@ const PLAN_SEEDS: Array<Partial<ISchemePlan> & { type: SchemeType }> = [
   },
   {
     type: 'SILVER_11_1',
-    name: 'Silver 11+1',
+    name: 'Silver Purchase Plan',
     description: 'Pay a fixed amount monthly for 11 months, converted to silver grams at each day\'s rate. Redeem for silver jewellery/articles in month 12 at that day\'s market rate.',
     isActive: true,
     metal: 'SILVER',
@@ -69,30 +69,74 @@ const PLAN_SEEDS: Array<Partial<ISchemePlan> & { type: SchemeType }> = [
     },
     sortOrder: 3,
   },
+  {
+    // Item 4 (2026-08-30 business requirement): "Anytime payable" — pay any amount, any number
+    // of times, any time within 11 months, unlike the fixed-denomination/one-per-month schemes
+    // above. No bonus. Confirmed with the owner: minimum floor starts at ₹100 and is admin-
+    // configurable via `minPaymentAmount` on the Scheme Plans panel; redeemable for silver
+    // articles/bars only.
+    type: 'SILVER_SMART',
+    name: 'KV Smart Purchase Plan',
+    description: 'Pay any amount, any time, as often as you like — for 11 months from enrollment. Every payment converts to silver grams at that day\'s rate. Redeemable for silver articles or bars only.',
+    isActive: true,
+    metal: 'SILVER',
+    durationMonths: 11,
+    bonusMonths: 0,
+    paymentMode: 'FLEXIBLE',
+    monthlyAmounts: [],
+    minPaymentAmount: 100,
+    passbookPrefix: 'SMT',
+    paymentDueDayOfMonth: 10,
+    earlyExitPenaltyPercent: 10,
+    redemptionMode: 'GOODS_ONLY',
+    sortOrder: 4,
+  },
 ];
+
+/**
+ * Display-name renames applied to a plan that ALREADY EXISTS in the DB, keyed by type. Only
+ * fires when the stored name still exactly matches `from` — if an admin has since edited the
+ * name to something else, that edit is left alone. Add an entry here (and update the matching
+ * `PLAN_SEEDS` entry above, for fresh installs) whenever a plan's default display name changes.
+ */
+const LEGACY_NAME_RENAMES: Partial<Record<SchemeType, { from: string; to: string }>> = {
+  GOLD_11_1: { from: 'Gold 11+1', to: 'Gold Purchase Plan' },
+  SILVER_11_1: { from: 'Silver 11+1', to: 'Silver Purchase Plan' },
+};
 
 interface SeedReport {
   plansCreated: string[];
   plansAlreadyPresent: string[];
+  plansRenamed: string[];
   savingsBackfilled: number;
 }
 
 /**
  * Idempotent: only creates a plan when its `type` doesn't already exist (never overwrites an
- * admin's edits to a plan already in the DB) and only backfills `Savings` docs that are
- * completely missing `schemeType` (pre-rework enrollments) — anything already stamped is left
- * untouched. Safe to re-run.
+ * admin's edits to a plan already in the DB), only renames a plan whose name still matches its
+ * OLD default exactly (see `LEGACY_NAME_RENAMES`), and only backfills `Savings` docs that are
+ * completely missing `schemeType` (pre-rework enrollments) — anything already stamped/renamed is
+ * left untouched. Safe to re-run.
  */
 export async function seedSchemePlans(options: { apply: boolean }): Promise<SeedReport> {
   const repository = new SchemePlanRepository();
   const plansCreated: string[] = [];
   const plansAlreadyPresent: string[] = [];
+  const plansRenamed: string[] = [];
 
   for (const seed of PLAN_SEEDS) {
     // eslint-disable-next-line no-await-in-loop
     const existing = await repository.findByType(seed.type);
     if (existing) {
       plansAlreadyPresent.push(seed.type);
+      const rename = LEGACY_NAME_RENAMES[seed.type];
+      if (rename && existing.name === rename.from) {
+        plansRenamed.push(`${seed.type}: "${rename.from}" -> "${rename.to}"`);
+        if (options.apply) {
+          // eslint-disable-next-line no-await-in-loop
+          await repository.update(existing._id, { name: rename.to });
+        }
+      }
       continue;
     }
     plansCreated.push(seed.type);
@@ -124,7 +168,7 @@ export async function seedSchemePlans(options: { apply: boolean }): Promise<Seed
     );
   }
 
-  return { plansCreated, plansAlreadyPresent, savingsBackfilled };
+  return { plansCreated, plansAlreadyPresent, plansRenamed, savingsBackfilled };
 }
 
 // `npm run seed:scheme-plans` (dry run) or `npm run seed:scheme-plans -- --apply`
@@ -136,6 +180,7 @@ if (require.main === module) {
       const report = await seedSchemePlans({ apply });
       Logger.info(`[${apply ? 'APPLY' : 'DRY RUN'}] plans created: ${report.plansCreated.join(', ') || '(none)'}`);
       Logger.info(`[${apply ? 'APPLY' : 'DRY RUN'}] plans already present: ${report.plansAlreadyPresent.join(', ') || '(none)'}`);
+      Logger.info(`[${apply ? 'APPLY' : 'DRY RUN'}] plans renamed: ${report.plansRenamed.join(', ') || '(none)'}`);
       Logger.info(`[${apply ? 'APPLY' : 'DRY RUN'}] legacy savings rows to backfill onto SILVER_11_1: ${report.savingsBackfilled}`);
       if (!apply) {
         Logger.info('Dry run only — re-run with `-- --apply` to write these changes.');

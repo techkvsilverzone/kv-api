@@ -4,8 +4,8 @@ import { UserRepository } from '../repositories/user.repository';
 import { OtpCodeRepository } from '../repositories/otpCode.repository';
 import { config } from '../config';
 import { AppError } from '../utils/appError';
-import { sendOtpEmail, sendPasswordResetEmail } from '../utils/emailNotifications';
-import { sendOtpWhatsApp } from '../utils/whatsapp';
+import { sendOtpEmail, sendPasswordResetEmail, sendPhoneVerificationEmail } from '../utils/emailNotifications';
+import { sendOtpWhatsApp, sendPhoneVerificationWhatsApp } from '../utils/whatsapp';
 import { generateToken } from '../utils/jwt';
 import { toUserResponse } from '../utils/userResponse';
 import Logger from '../utils/logger';
@@ -15,6 +15,9 @@ const PURPOSE = 'login';
 // Reset codes are scoped to their own purpose so a code issued for one flow can
 // never be redeemed in the other (a login code must not reset a password).
 const RESET_PURPOSE = 'password_reset';
+// Item 1 (mobile OTP): scoped to its own purpose, same reasoning as RESET_PURPOSE — a code
+// issued to verify a phone must not be redeemable as a login/reset code and vice versa.
+const PHONE_VERIFY_PURPOSE = 'phone_verify';
 const MIN_PASSWORD_LENGTH = 6;
 
 /** Generates a 6-digit numeric code using a CSPRNG (not Math.random). */
@@ -176,5 +179,77 @@ export class OtpService {
     await this.otpCodeRepository.markConsumed(otp._id.toString());
 
     return { message: 'Password updated successfully. Please sign in with your new password.' };
+  }
+
+  /**
+   * Item 1: issue a mobile-verification code for the CALLING user's own phone number (the
+   * identifier is the phone number itself, not the user id, so the code is scoped to the exact
+   * number being proven — matches how login/reset codes are scoped to an email). Prefers
+   * WhatsApp (reuses the login-OTP channel/config); falls back to email while WhatsApp OTP is
+   * disabled/pending Meta's Authentication-template approval, so phone verification isn't
+   * blocked on that external approval.
+   */
+  public async requestPhoneVerification(userId: string): Promise<{ message: string; channel: 'whatsapp' | 'email' }> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new AppError('Account not found', 404);
+    }
+    const phone = String(user.phone || '').trim();
+    if (!phone) {
+      throw new AppError('Add a phone number to your account before verifying it', 400);
+    }
+    if (user.phoneVerified) {
+      throw new AppError('This phone number is already verified', 400);
+    }
+
+    const code = generateCode();
+    const codeHash = await bcrypt.hash(code, 10);
+    const expiresAt = new Date(Date.now() + config.otpExpiryMinutes * 60_000);
+    await this.otpCodeRepository.create(phone, PHONE_VERIFY_PURPOSE, codeHash, expiresAt);
+
+    if (config.whatsappOtpEnabled) {
+      await sendPhoneVerificationWhatsApp(phone, code, config.otpExpiryMinutes);
+      return { message: 'A verification code has been sent to your WhatsApp.', channel: 'whatsapp' };
+    }
+
+    try {
+      await sendPhoneVerificationEmail({
+        email: user.email,
+        name: user.name,
+        code,
+        expiryMinutes: config.otpExpiryMinutes,
+      });
+    } catch (error) {
+      Logger.error(`Phone verification email dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new AppError('Failed to send verification code. Please try again.', 500);
+    }
+    return { message: 'WhatsApp verification is not yet active, so we emailed your code instead.', channel: 'email' };
+  }
+
+  /** Verify the code issued by `requestPhoneVerification` and mark the phone verified. */
+  public async verifyPhoneOtp(userId: string, code: string): Promise<{ user: unknown }> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new AppError('Account not found', 404);
+    }
+    const phone = String(user.phone || '').trim();
+    if (!phone || !code) {
+      throw new AppError('phone and code are required', 400);
+    }
+
+    const otp = await this.otpCodeRepository.findActive(phone, PHONE_VERIFY_PURPOSE);
+    if (!otp) {
+      throw new AppError('Invalid or expired code. Please request a new one.', 400);
+    }
+
+    const matches = await bcrypt.compare(String(code).trim(), otp.codeHash);
+    if (!matches) {
+      await this.otpCodeRepository.incrementAttempts(otp._id.toString());
+      throw new AppError('Incorrect code.', 400);
+    }
+
+    await this.otpCodeRepository.markConsumed(otp._id.toString());
+    const updated = await this.userRepository.update(userId, { phoneVerified: true });
+    return { user: toUserResponse(updated) };
   }
 }

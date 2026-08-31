@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import { UserController } from '../controllers/user.controller';
+import { IdProofController } from '../controllers/idProof.controller';
 import { protect } from '../middlewares/auth.middleware';
 
 const router = Router();
 const userController = new UserController();
+const idProofController = new IdProofController();
 
 /**
  * @openapi
@@ -215,5 +217,124 @@ router.delete('/me/addresses/:id', protect, userController.deleteAddress);
  *         $ref: '#/components/responses/NotFound'
  */
 router.put('/:userId/password', protect, userController.changePassword);
+
+/**
+ * @openapi
+ * /users/me/phone/request-otp:
+ *   post:
+ *     summary: Request a WhatsApp/email code to verify the current user's phone number
+ *     description: Item 1 — first-time mobile verification. Sends via WhatsApp when WHATSAPP_OTP_ENABLED is on, otherwise falls back to email so verification isn't blocked on Meta's Authentication-template approval.
+ *     tags: [Users]
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Code sent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 channel:
+ *                   type: string
+ *                   enum: [whatsapp, email]
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ */
+router.post('/me/phone/request-otp', protect, userController.requestPhoneVerification);
+
+/**
+ * @openapi
+ * /users/me/phone/verify-otp:
+ *   post:
+ *     summary: Verify the current user's phone number with the code from request-otp
+ *     tags: [Users]
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [code]
+ *             properties:
+ *               code:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Phone verified — returns the updated user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ */
+router.post('/me/phone/verify-otp', protect, userController.verifyPhoneOtp);
+
+/**
+ * @openapi
+ * /users/me/id-proof:
+ *   get:
+ *     summary: Get the current user's KYC ID proof submission (item 2), or null if none yet
+ *     tags: [Users]
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: The submission, or null
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ */
+router.get('/me/id-proof', protect, idProofController.getMine);
+
+/**
+ * @openapi
+ * /users/me/id-proof:
+ *   post:
+ *     summary: Submit (or resubmit) the current user's ID proof — required once before the first savings-scheme enrollment
+ *     description: Verification is asynchronous — this call succeeds (status Pending) without waiting for admin/staff review, per business decision (non-blocking enrollment).
+ *     tags: [Users]
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [idProofType, idProofNumber, image]
+ *             properties:
+ *               idProofType:
+ *                 type: string
+ *                 enum: [AADHAAR, PAN, VOTER_ID, DRIVING_LICENSE]
+ *               idProofNumber:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 description: Base64 data URI of a photo of the document
+ *     responses:
+ *       201:
+ *         description: Submission recorded, status Pending
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ */
+router.post('/me/id-proof', protect, idProofController.submitMine);
 
 export default router;

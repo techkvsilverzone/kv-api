@@ -2,6 +2,7 @@ import { SavingsService } from '../services/savings.service';
 import { SavingsRepository } from '../repositories/savings.repository';
 import { SchemePlanRepository } from '../repositories/schemePlan.repository';
 import { UserRepository } from '../repositories/user.repository';
+import { IdProofRepository } from '../repositories/idProof.repository';
 import { PricingService } from '../services/pricing.service';
 import * as timeUtils from '../utils/time';
 import * as whatsapp from '../utils/whatsapp';
@@ -191,6 +192,9 @@ describe('Savings — full lifecycle (enroll → pay every installment → compl
     });
 
     jest.spyOn(UserRepository.prototype, 'findById').mockResolvedValue({ phone: '9999999999' } as never);
+    // Item 2: enroll() now requires an on-file ID proof (any status) — these lifecycle tests
+    // aren't exercising that gate, so treat every customer as already having submitted one.
+    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue({ verificationStatus: 'Pending' } as never);
 
     jest.spyOn(PricingService.prototype, 'getCurrentRatePerGram').mockImplementation(async (metal: unknown) => {
       if (metal === 'GOLD') return 8000;

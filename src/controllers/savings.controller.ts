@@ -31,9 +31,13 @@ export class SavingsController {
 
   public createInstallmentOrder = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
+      // Item 4: only meaningful for FLEXIBLE plans (KV Smart Purchase Plan) — FIXED plans
+      // ignore this and always use the scheme's own monthly amount.
+      const amount = req.body?.amount !== undefined ? Number(req.body.amount) : undefined;
       const order = await this.savingsService.createInstallmentOrder(
         req.user!._id.toString(),
         req.params.schemeId as string,
+        amount,
       );
       res.status(201).json(order);
     } catch (error) {

@@ -440,7 +440,7 @@ describe('SavingsService — applyPayment (via recordPaymentAsAdmin)', () => {
     jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue(baseScheme() as never);
 
     await expect(new SavingsService().recordPaymentAsAdmin('s1', 500, undefined, 'admin1')).rejects.toThrow(
-      "Payment must be at least the scheme's monthly amount",
+      'Payment must be at least ₹',
     );
   });
 
@@ -618,5 +618,170 @@ describe('SavingsService — admin ledger row edit/delete', () => {
     await new SavingsService().adminDeletePaymentRow('s1', 0);
 
     expect(deleteSpy).toHaveBeenCalledWith('s1', 0);
+  });
+});
+
+// Item 4 (2026-08-30 business requirement): "KV Smart Purchase Plan" — pay any amount, any
+// number of times, any time within the plan's duration window. These tests lock in the three
+// ways its behavior diverges from every FIXED-mode scheme (Gold/Silver 11+1, Diwali): no
+// one-installment-per-calendar-month limit, a time-window cap instead of a payment-count cap,
+// and no auto-completion on the Nth payment.
+const flexiblePlan = (overrides: Record<string, unknown> = {}) => ({
+  paymentMode: 'FLEXIBLE',
+  passbookPrefix: 'SMT',
+  bonusMonths: 0,
+  ...overrides,
+});
+// A start date that's always within an 11-month window of "now", regardless of when the test
+// suite actually runs — unlike the fixed `START_DATE` fixture (2025-01-15) most other tests use,
+// which is deliberately stale so its window IS closed by the time these tests run.
+const RECENT_START_DATE = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+describe('SavingsService — FLEXIBLE payment mode (item 4, KV Smart Purchase Plan)', () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  beforeEach(() => {
+    jest.spyOn(UserRepository.prototype, 'findById').mockResolvedValue(null);
+    jest.spyOn(SavingsRepository.prototype, 'getPayments').mockResolvedValue([]);
+  });
+
+  it('allows a second payment in the same calendar month (no one-per-month limit)', async () => {
+    jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue(
+      baseScheme({
+        schemeType: 'SILVER_SMART',
+        metal: 'SILVER',
+        monthlyAmount: 100,
+        planId: 'planF',
+        startDate: RECENT_START_DATE,
+        payments: [{ amount: 500, devidentAmount: 0, dueMonthKey: currentMonthKey() }],
+      }) as never,
+    );
+    jest.spyOn(SchemePlanRepository.prototype, 'findById').mockResolvedValue(flexiblePlan() as never);
+    jest.spyOn(PricingService.prototype, 'getCurrentRatePerGram').mockResolvedValue(100);
+    const recordSpy = jest.spyOn(SavingsRepository.prototype, 'recordPayment').mockResolvedValue({
+      userId: { toString: () => 'u1' },
+      duration: 11,
+      bonusAmount: 0,
+      payments: [{ amount: 500, devidentAmount: 0 }, { amount: 300, devidentAmount: 0 }],
+    } as never);
+
+    await new SavingsService().recordPaymentAsAdmin('s1', 300, undefined, 'admin1');
+
+    expect(recordSpy).toHaveBeenCalledWith(
+      's1',
+      expect.objectContaining({ month: 2, amount: 300, dueMonthKey: currentMonthKey() }),
+      false,
+      'SMT',
+    );
+  });
+
+  it("rejects a payment once the scheme's 11-month window has closed, even with few payments made", async () => {
+    jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue(
+      baseScheme({
+        schemeType: 'SILVER_SMART',
+        metal: 'SILVER',
+        monthlyAmount: 100,
+        planId: 'planF',
+        startDate: START_DATE, // 2025-01-15 — its +11-month window is long past "now" in tests
+        payments: [{ amount: 500, devidentAmount: 0, dueMonthKey: PAST_MONTH_KEY }],
+      }) as never,
+    );
+    jest.spyOn(SchemePlanRepository.prototype, 'findById').mockResolvedValue(flexiblePlan() as never);
+
+    await expect(new SavingsService().recordPaymentAsAdmin('s1', 300, undefined, 'admin1')).rejects.toThrow(
+      /payment window has closed/i,
+    );
+  });
+
+  it('does not auto-complete or credit a bonus row after `duration` payments land', async () => {
+    const priorPayments = Array.from({ length: 10 }, (_, i) => ({ amount: 200, devidentAmount: 0, dueMonthKey: `2026-0${(i % 8) + 1}` }));
+    jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue(
+      baseScheme({
+        schemeType: 'SILVER_SMART',
+        metal: 'SILVER',
+        monthlyAmount: 100,
+        planId: 'planF',
+        startDate: RECENT_START_DATE,
+        payments: priorPayments,
+      }) as never,
+    );
+    jest.spyOn(SchemePlanRepository.prototype, 'findById').mockResolvedValue(flexiblePlan() as never);
+    jest.spyOn(PricingService.prototype, 'getCurrentRatePerGram').mockResolvedValue(100);
+    jest.spyOn(SavingsRepository.prototype, 'recordPayment').mockResolvedValue({
+      status: 'Active',
+      userId: { toString: () => 'u1' },
+      duration: 11,
+      bonusAmount: 0,
+      payments: [...priorPayments, { amount: 200, devidentAmount: 0 }],
+    } as never);
+    const bonusSpy = jest.spyOn(SavingsRepository.prototype, 'creditBonusMonth');
+    const updateSpy = jest.spyOn(SavingsRepository.prototype, 'updateById');
+
+    const result = await new SavingsService().recordPaymentAsAdmin('s1', 200, undefined, 'admin1');
+
+    expect(bonusSpy).not.toHaveBeenCalled();
+    expect(updateSpy).not.toHaveBeenCalled();
+    expect(result.status).toBe('Active');
+  });
+
+  describe('createInstallmentOrder', () => {
+    it("requires and validates the customer's chosen amount against the plan floor", async () => {
+      jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue(
+        baseScheme({ schemeType: 'SILVER_SMART', metal: 'SILVER', monthlyAmount: 100, planId: 'planF', startDate: RECENT_START_DATE }) as never,
+      );
+      jest.spyOn(SchemePlanRepository.prototype, 'findById').mockResolvedValue(flexiblePlan() as never);
+
+      await expect(new SavingsService().createInstallmentOrder('u1', 's1')).rejects.toThrow('amount must be at least');
+      await expect(new SavingsService().createInstallmentOrder('u1', 's1', 50)).rejects.toThrow('amount must be at least');
+    });
+
+    it("creates a Razorpay order for the customer's chosen amount, not a fixed scheme amount", async () => {
+      jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue(
+        baseScheme({ schemeType: 'SILVER_SMART', metal: 'SILVER', monthlyAmount: 100, planId: 'planF', startDate: RECENT_START_DATE }) as never,
+      );
+      jest.spyOn(SchemePlanRepository.prototype, 'findById').mockResolvedValue(flexiblePlan() as never);
+      const createSpy = jest
+        .spyOn(razorpay, 'createRazorpayOrder')
+        .mockResolvedValue({ id: 'order_1', amount: 75000, currency: 'INR' } as never);
+
+      const order = await new SavingsService().createInstallmentOrder('u1', 's1', 750);
+
+      expect(createSpy).toHaveBeenCalledWith(75000, 'INR', expect.stringContaining('savings_s1_'));
+      expect(order).toEqual({ id: 'order_1', amount: 75000, currency: 'INR' });
+    });
+  });
+
+  describe('verifyAndRecordInstallment', () => {
+    it('records the CAPTURED Razorpay amount, not a fixed scheme amount', async () => {
+      jest.spyOn(razorpay, 'verifyRazorpaySignature').mockReturnValue(true);
+      jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue(
+        baseScheme({ schemeType: 'SILVER_SMART', metal: 'SILVER', monthlyAmount: 100, planId: 'planF', startDate: RECENT_START_DATE }) as never,
+      );
+      jest.spyOn(SchemePlanRepository.prototype, 'findById').mockResolvedValue(flexiblePlan() as never);
+      jest.spyOn(razorpay, 'fetchRazorpayOrder').mockResolvedValue({ id: 'order_1', amount: 75000, currency: 'INR' } as never);
+      jest.spyOn(PricingService.prototype, 'getCurrentRatePerGram').mockResolvedValue(100);
+      jest.spyOn(UserRepository.prototype, 'findById').mockResolvedValue(null);
+      jest.spyOn(SavingsRepository.prototype, 'getPayments').mockResolvedValue([]);
+      const recordSpy = jest.spyOn(SavingsRepository.prototype, 'recordPayment').mockResolvedValue({
+        userId: { toString: () => 'u1' },
+        duration: 11,
+        bonusAmount: 0,
+        totalPaid: 750,
+        payments: [{ amount: 750, devidentAmount: 0 }],
+      } as never);
+
+      await new SavingsService().verifyAndRecordInstallment('u1', 's1', {
+        orderId: 'order_1',
+        paymentId: 'pay_1',
+        signature: 'good',
+      });
+
+      expect(recordSpy).toHaveBeenCalledWith(
+        's1',
+        expect.objectContaining({ amount: 750, materialRate: 100, materialWeight: 7.5, method: 'ONLINE' }),
+        true,
+        'SMT',
+      );
+    });
   });
 });

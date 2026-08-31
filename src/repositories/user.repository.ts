@@ -65,7 +65,7 @@ const ADDRESS_JSON = `
 
 const USER_SELECT = `
   SELECT
-    u.id, u.name, u.email, u.password_hash, u.phone, u.is_admin, u.is_active,
+    u.id, u.name, u.email, u.password_hash, u.phone, u.phone_verified, u.is_admin, u.is_active,
     u.role, u.is_stall_registration, u.date_of_birth, u.anniversary_date,
     u.created_at, u.updated_at,
     ${ADDRESS_JSON}
@@ -77,6 +77,7 @@ interface UserRow {
   email: string;
   password_hash: string;
   phone: string | null;
+  phone_verified: boolean;
   is_admin: boolean;
   is_active: boolean;
   role: string | null;
@@ -107,6 +108,7 @@ const mapUser = (row: UserRow): IUser => ({
   email: row.email,
   passwordHash: row.password_hash,
   phone: row.phone,
+  phoneVerified: toBool(row.phone_verified),
   isAdmin: toBool(row.is_admin),
   isActive: toBool(row.is_active, true),
   role: (row.role as IUser['role']) ?? null,
@@ -132,6 +134,7 @@ const UPDATABLE_COLUMNS: Record<string, string> = {
   name: 'name',
   email: 'email',
   phone: 'phone',
+  phoneVerified: 'phone_verified',
   isAdmin: 'is_admin',
   isActive: 'is_active',
   role: 'role',

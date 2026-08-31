@@ -335,6 +335,7 @@ const options: swaggerJsdoc.Options = {
             name: { type: 'string' },
             email: { type: 'string', format: 'email' },
             phone: { type: 'string' },
+            phoneVerified: { type: 'boolean' },
             isAdmin: { type: 'boolean' },
             role: { type: 'string', enum: ['customer', 'staff', 'admin'] },
             createdAt: { type: 'string', format: 'date-time' },
@@ -350,12 +351,12 @@ const options: swaggerJsdoc.Options = {
         },
         SignupInput: {
           type: 'object',
-          required: ['name', 'email', 'password'],
+          required: ['name', 'email', 'password', 'phone'],
           properties: {
             name: { type: 'string' },
             email: { type: 'string', format: 'email' },
             password: { type: 'string', format: 'password' },
-            phone: { type: 'string' },
+            phone: { type: 'string', description: 'Required 10-digit Indian mobile number — a verification code (WhatsApp, or email while WhatsApp OTP is disabled) is sent to it on signup.' },
             stallEvent: { type: 'boolean', description: 'Issues a 10% single-use promo coupon' },
           },
         },

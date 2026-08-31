@@ -20,6 +20,7 @@ import { sendBroadcast } from '../utils/whatsapp';
 import { InventoryController } from '../controllers/inventory.controller';
 import { GiftVoucherController } from '../controllers/giftVoucher.controller';
 import { SchemePlanController } from '../controllers/schemePlan.controller';
+import { IdProofController } from '../controllers/idProof.controller';
 import { protect, admin, adminOrStaff } from '../middlewares/auth.middleware';
 
 const filterConfigRepository = new FilterConfigRepository();
@@ -32,6 +33,7 @@ const userRepositoryForBroadcast = new UserRepository();
 const inventoryController = new InventoryController();
 const giftVoucherController = new GiftVoucherController();
 const schemePlanController = new SchemePlanController();
+const idProofController = new IdProofController();
 
 const router = Router();
 const productController = new ProductController();
@@ -892,6 +894,57 @@ router.post('/savings/:id/cancel', admin, savingsController.adminCancelScheme);
  *         $ref: '#/components/responses/NotFound'
  */
 router.post('/savings/:id/redemption/compute', admin, savingsController.adminComputeRedemption);
+
+/**
+ * @openapi
+ * /admin/id-proofs:
+ *   get:
+ *     summary: Item 2 — list customer KYC ID proof submissions for review (admin + staff, mirrors the return-video reconciliation queue)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema: { type: string, enum: [Pending, Verified, Rejected] }
+ *     responses:
+ *       200:
+ *         description: Submissions, newest first
+ */
+router.get('/id-proofs', idProofController.listForAdmin);
+
+/**
+ * @openapi
+ * /admin/id-proofs/{id}/verify:
+ *   put:
+ *     summary: Approve or reject a customer's ID proof submission
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status: { type: string, enum: [Verified, Rejected] }
+ *               rejectionReason: { type: string, description: Required when status is Rejected }
+ *     responses:
+ *       200:
+ *         description: Updated submission
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+router.put('/id-proofs/:id/verify', idProofController.verify);
 
 /**
  * @openapi
