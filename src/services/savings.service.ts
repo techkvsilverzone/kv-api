@@ -90,13 +90,22 @@ export class SavingsService {
       }
     }
 
-    // Item 2: KYC is required once per customer (not per scheme) — any prior submission
-    // unblocks enrollment regardless of its verification status, since review is async and
-    // happens in the background (business decision: non-blocking). Checked last, after the
-    // request itself is validated, so a bad request reports its own error first.
+    // Item 2 (updated): KYC is checked once per customer (not per scheme — one submission
+    // covers every scheme), but every enrollment attempt re-checks it and requires an admin-
+    // approved status, so a customer can never end up enrolled — even by mistake — without a
+    // verified ID on file. Checked last, after the request itself is validated, so a bad
+    // request reports its own error first.
     const idProof = await this.idProofRepository.findByUserId(userId);
     if (!idProof) {
       throw new AppError('Submit your ID proof before enrolling in a savings scheme', 400);
+    }
+    if (idProof.verificationStatus !== 'Verified') {
+      throw new AppError(
+        idProof.verificationStatus === 'Rejected'
+          ? 'Your ID proof was rejected — resubmit it before enrolling in a savings scheme'
+          : 'Your ID proof is still under review — you can enroll once it is verified',
+        400,
+      );
     }
 
     const bonusAmount = plan.bonusMonths > 0 ? monthlyAmount * plan.bonusMonths : 0;

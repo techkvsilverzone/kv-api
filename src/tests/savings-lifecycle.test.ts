@@ -192,9 +192,9 @@ describe('Savings — full lifecycle (enroll → pay every installment → compl
     });
 
     jest.spyOn(UserRepository.prototype, 'findById').mockResolvedValue({ phone: '9999999999' } as never);
-    // Item 2: enroll() now requires an on-file ID proof (any status) — these lifecycle tests
-    // aren't exercising that gate, so treat every customer as already having submitted one.
-    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue({ verificationStatus: 'Pending' } as never);
+    // Item 2: enroll() now requires a Verified ID proof on file — these lifecycle tests aren't
+    // exercising that gate, so treat every customer as already verified.
+    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue({ verificationStatus: 'Verified' } as never);
 
     jest.spyOn(PricingService.prototype, 'getCurrentRatePerGram').mockImplementation(async (metal: unknown) => {
       if (metal === 'GOLD') return 8000;

@@ -63,6 +63,18 @@ describe('SavingsService — enroll (plan-driven)', () => {
     );
   });
 
+  it('rejects enrollment when the ID proof on file is not yet verified (item 2, tightened)', async () => {
+    jest.spyOn(SchemePlanRepository.prototype, 'findByType').mockResolvedValue({
+      isActive: true,
+      monthlyAmounts: [5000],
+    } as never);
+    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue({ verificationStatus: 'Pending' } as never);
+
+    await expect(new SavingsService().enroll('u1', { schemeType: 'GOLD_11_1', monthlyAmount: 5000 })).rejects.toThrow(
+      /still under review/,
+    );
+  });
+
   it('creates the scheme stamped from the plan (type, metal, duration, bonus, planId)', async () => {
     const planId = newPlanId();
     jest.spyOn(SchemePlanRepository.prototype, 'findByType').mockResolvedValue({
@@ -77,7 +89,7 @@ describe('SavingsService — enroll (plan-driven)', () => {
       hamper: undefined,
     } as never);
     const createSpy = jest.spyOn(SavingsRepository.prototype, 'create').mockResolvedValue({} as never);
-    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue({ verificationStatus: 'Pending' } as never);
+    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue({ verificationStatus: 'Verified' } as never);
 
     await new SavingsService().enroll('u1', { schemeType: 'GOLD_11_1', monthlyAmount: 5000 });
 
@@ -107,7 +119,7 @@ describe('SavingsService — enroll (plan-driven)', () => {
       hamper: { goldCoinPurity: '916', silverCoinGrams: 30, giftsValue: 2500, gifts: ['Crackers Box', 'Sweets and Snacks'] },
     } as never);
     const createSpy = jest.spyOn(SavingsRepository.prototype, 'create').mockResolvedValue({} as never);
-    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue({ verificationStatus: 'Pending' } as never);
+    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue({ verificationStatus: 'Verified' } as never);
 
     await new SavingsService().enroll('u1', { schemeType: 'DIWALI', monthlyAmount: 3000 });
 
