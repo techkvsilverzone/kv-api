@@ -7,6 +7,18 @@
 >
 > Regenerate after any schema change so repository authors have an accurate
 > reference, then run `npm run migration:verify` to confirm the code still matches.
+>
+> **2026-09-14:** `users.phone_verified`, the `user_id_proofs` table, and
+> `scheme_plans.payment_mode`/`min_payment_amount` were added by hand from the
+> migration that used to live in `docs/16-pending-schema-changes.sql` (deleted —
+> it shipped and is confirmed live in production) rather than a fresh live
+> introspection, since DB access wasn't available in that session. Row counts for
+> those entries are carried over unchanged; re-run the full introspection next
+> time DB access is available to refresh counts and catch anything else drifted.
+> Also note: this doc's generator does not capture CHECK constraints (discovered
+> when `scheme_plans` turned out to have `ck_scheme_plans_type` restricting
+> `type` to a fixed list, undocumented here) — don't treat an absent CHECK
+> constraint below as proof one doesn't exist on the server.
 
 ## Conventions
 
@@ -421,6 +433,8 @@
   sort_order  integer NOT NULL DEFAULT 0
   created_at  timestamp with time zone NOT NULL DEFAULT now()
   updated_at  timestamp with time zone NOT NULL DEFAULT now()
+  payment_mode  character varying(20) NOT NULL DEFAULT 'FIXED'::character varying
+  min_payment_amount  numeric(14,2)
 
 ### silver_rates  (rows: 0)
   id  bigint NOT NULL
@@ -479,6 +493,19 @@
   created_at  timestamp with time zone NOT NULL DEFAULT now()
   updated_at  timestamp with time zone NOT NULL DEFAULT now()
 
+### user_id_proofs  (rows: unknown — added 2026-09-14, not re-introspected)
+  id  bigint NOT NULL
+  user_id  bigint NOT NULL
+  id_proof_type  character varying(30) NOT NULL
+  id_proof_number  character varying(100) NOT NULL
+  image_url  text NOT NULL
+  verification_status  character varying(20) NOT NULL DEFAULT 'Pending'::character varying
+  verified_by  bigint
+  verified_at  timestamp with time zone
+  rejection_reason  text
+  created_at  timestamp with time zone NOT NULL DEFAULT now()
+  updated_at  timestamp with time zone NOT NULL DEFAULT now()
+
 ### users  (rows: 3)
   id  bigint NOT NULL
   legacy_mongo_id  character varying(24)
@@ -494,6 +521,7 @@
   anniversary_date  date
   created_at  timestamp with time zone NOT NULL DEFAULT now()
   updated_at  timestamp with time zone NOT NULL DEFAULT now()
+  phone_verified  boolean NOT NULL DEFAULT false
 
 ### wishlist_items  (rows: 0)
   id  bigint NOT NULL
@@ -625,6 +653,10 @@ unmatched_return_videos: UNIQUE (legacy_mongo_id)  [uq_unmatched_return_videos_l
 user_addresses: FOREIGN KEY (user_id) -> users.id  [user_addresses_user_id_fkey]
 user_addresses: PRIMARY KEY (id)  [user_addresses_pkey]
 user_addresses: UNIQUE (legacy_mongo_id)  [uq_user_addresses_legacy_mongo_id]
+user_id_proofs: FOREIGN KEY (user_id) -> users.id  [user_id_proofs_user_id_fkey]
+user_id_proofs: FOREIGN KEY (verified_by) -> users.id  [user_id_proofs_verified_by_fkey]
+user_id_proofs: PRIMARY KEY (id)  [user_id_proofs_pkey]
+user_id_proofs: UNIQUE (user_id)  [user_id_proofs_user_id_key]
 users: PRIMARY KEY (id)  [users_pkey]
 users: UNIQUE (email)  [uq_users_email]
 users: UNIQUE (legacy_mongo_id)  [uq_users_legacy_mongo_id]
