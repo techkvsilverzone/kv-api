@@ -146,7 +146,7 @@ router.post('/reset-password', userController.resetPassword);
  * @openapi
  * /auth/otp/request:
  *   post:
- *     summary: Request a one-time login code (emailed; also sent via WhatsApp once that channel is approved)
+ *     summary: Request a one-time login code by mobile number (primary login method; WhatsApp-first, emails the code as a fallback while WhatsApp OTP is disabled/pending Meta approval)
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -154,14 +154,14 @@ router.post('/reset-password', userController.resetPassword);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [email]
+ *             required: [phone]
  *             properties:
- *               email:
+ *               phone:
  *                 type: string
- *                 format: email
+ *                 example: '9876543210'
  *     responses:
  *       200:
- *         description: Generic confirmation — does not reveal whether the email is registered
+ *         description: Generic confirmation — does not reveal whether the phone number is registered
  *         content:
  *           application/json:
  *             schema:
@@ -175,7 +175,7 @@ router.post('/otp/request', userController.requestLoginOtp);
  * @openapi
  * /auth/otp/verify:
  *   post:
- *     summary: Verify a login OTP and start a session
+ *     summary: Verify a login OTP (by mobile number) and start a session
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -183,11 +183,11 @@ router.post('/otp/request', userController.requestLoginOtp);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [email, code]
+ *             required: [phone, code]
  *             properties:
- *               email:
+ *               phone:
  *                 type: string
- *                 format: email
+ *                 example: '9876543210'
  *               code:
  *                 type: string
  *                 example: '123456'

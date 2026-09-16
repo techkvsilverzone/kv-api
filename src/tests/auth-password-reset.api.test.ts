@@ -175,13 +175,26 @@ describe('Password reset flow (POST /auth/forgot-password + /auth/reset-password
     });
   });
 
-  it('still issues login OTPs under the login purpose', async () => {
-    jest.spyOn(UserRepository.prototype, 'findByEmail').mockResolvedValue(user as never);
+  it('still issues login OTPs (by mobile number) under the login purpose', async () => {
+    jest.spyOn(UserRepository.prototype, 'findByPhone').mockResolvedValue(user as never);
     const create = jest.spyOn(OtpCodeRepository.prototype, 'create').mockResolvedValue({} as never);
     jest.spyOn(emailNotifications, 'sendOtpEmail').mockResolvedValue(undefined);
 
-    await new OtpService().requestLoginOtp('asha@example.com');
+    await new OtpService().requestLoginOtp('9876543210');
 
     expect(create.mock.calls[0][1]).toBe('login');
+  });
+
+  it('does not send anything or leak that a mobile number is unregistered (login OTP)', async () => {
+    jest.spyOn(UserRepository.prototype, 'findByPhone').mockResolvedValue(null as never);
+    const sendMail = jest.spyOn(emailNotifications, 'sendOtpEmail').mockResolvedValue(undefined);
+    const create = jest.spyOn(OtpCodeRepository.prototype, 'create').mockResolvedValue({} as never);
+
+    const res = await request(app).post('/api/v1/auth/otp/request').send({ phone: '9999999999' });
+
+    expect(res.status).toBe(200);
+    expect(sendMail).not.toHaveBeenCalled();
+    expect(create).not.toHaveBeenCalled();
+    expect(res.body.message).toBe('If that mobile number is registered, a login code has been sent.');
   });
 });

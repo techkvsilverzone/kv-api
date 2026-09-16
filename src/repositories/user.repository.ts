@@ -184,6 +184,16 @@ export class UserRepository {
     return row ? mapUser(row) : null;
   }
 
+  /** Mobile-number login (item: OTP login primary channel, 2026-09-16) — phone is stored as a
+   * plain 10-digit string (see UserService.signup's validation), no normalization needed here. */
+  public async findByPhone(phone: string): Promise<IUser | null> {
+    const row = await queryOne<UserRow>(
+      `${USER_SELECT} WHERE u.phone = $1 AND u.is_active = TRUE`,
+      [String(phone ?? '').trim()],
+    );
+    return row ? mapUser(row) : null;
+  }
+
   public async findById(id: string): Promise<IUser | null> {
     const userId = toBigIntParam(id);
     if (!userId) return null;

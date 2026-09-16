@@ -50,7 +50,7 @@ export class UserController {
 
   public requestLoginOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const result = await this.otpService.requestLoginOtp(req.body?.email);
+      const result = await this.otpService.requestLoginOtp(req.body?.phone);
       res.status(200).json(result);
     } catch (error) {
       next(error);
@@ -59,7 +59,7 @@ export class UserController {
 
   public verifyLoginOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const result = await this.otpService.verifyLoginOtp(req.body?.email, req.body?.code);
+      const result = await this.otpService.verifyLoginOtp(req.body?.phone, req.body?.code);
       setAuthCookie(res, result.token);
       res.status(200).json(result);
     } catch (error) {

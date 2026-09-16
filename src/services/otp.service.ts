@@ -40,19 +40,25 @@ export class OtpService {
   }
 
   /**
-   * Issue a login OTP for the given email. Always returns a generic success
-   * message — whether or not the email is registered — so this endpoint can't
-   * be used to enumerate accounts. The code itself is only ever sent if a
-   * matching, active account exists.
+   * Issue a login OTP for the given MOBILE NUMBER (primary login method, replacing
+   * email-based OTP login 2026-09-16 — password+email login is still available as the
+   * secondary method). Always returns a generic success message — whether or not the
+   * phone is registered — so this endpoint can't be used to enumerate accounts; the
+   * code itself is only ever sent if a matching, active account exists, and the
+   * response never reveals which channel it went out on (that alone would leak
+   * registration status). WhatsApp-first with an email fallback while WhatsApp OTP is
+   * disabled/pending Meta's Authentication-template approval — same channel pattern as
+   * `requestPhoneVerification`/`requestEnrollmentOtp`, since the customer proved a
+   * phone number here, not an email.
    */
-  public async requestLoginOtp(email: string): Promise<{ message: string }> {
-    const normalized = String(email || '').toLowerCase().trim();
+  public async requestLoginOtp(phone: string): Promise<{ message: string }> {
+    const normalized = String(phone || '').trim();
     if (!normalized) {
-      throw new AppError('email is required', 400);
+      throw new AppError('phone is required', 400);
     }
 
-    const user = await this.userRepository.findByEmail(normalized);
-    const generic = { message: 'If that email is registered, a login code has been sent.' };
+    const user = await this.userRepository.findByPhone(normalized);
+    const generic = { message: 'If that mobile number is registered, a login code has been sent.' };
     if (!user) return generic;
 
     const code = generateCode();
@@ -60,29 +66,30 @@ export class OtpService {
     const expiresAt = new Date(Date.now() + config.otpExpiryMinutes * 60_000);
     await this.otpCodeRepository.create(normalized, PURPOSE, codeHash, expiresAt);
 
+    if (config.whatsappOtpEnabled) {
+      try {
+        await sendOtpWhatsApp(normalized, code, config.otpExpiryMinutes);
+      } catch (error) {
+        Logger.error(`Login OTP WhatsApp dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
+        throw new AppError('Failed to send login code. Please try again.', 500);
+      }
+      return generic;
+    }
+
     try {
-      await sendOtpEmail({ email: normalized, name: user.name, code, expiryMinutes: config.otpExpiryMinutes });
+      await sendOtpEmail({ email: user.email, name: user.name, code, expiryMinutes: config.otpExpiryMinutes });
     } catch (error) {
-      Logger.error(`OTP email dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
+      Logger.error(`Login OTP email dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
       throw new AppError('Failed to send login code. Please try again.', 500);
     }
-
-    // WhatsApp is an additional channel, gated behind approval — never lets a
-    // delivery failure there block the (working) email channel above.
-    if (config.whatsappOtpEnabled && user.phone) {
-      sendOtpWhatsApp(user.phone, code, config.otpExpiryMinutes).catch((error: unknown) =>
-        Logger.error(`OTP WhatsApp dispatch failed: ${String(error)}`),
-      );
-    }
-
     return generic;
   }
 
-  /** Verify a login OTP and issue a session, exactly like password login. */
-  public async verifyLoginOtp(email: string, code: string): Promise<{ user: unknown; token: string }> {
-    const normalized = String(email || '').toLowerCase().trim();
+  /** Verify a login OTP (by mobile number) and issue a session, exactly like password login. */
+  public async verifyLoginOtp(phone: string, code: string): Promise<{ user: unknown; token: string }> {
+    const normalized = String(phone || '').trim();
     if (!normalized || !code) {
-      throw new AppError('email and code are required', 400);
+      throw new AppError('phone and code are required', 400);
     }
 
     const otp = await this.otpCodeRepository.findActive(normalized, PURPOSE);
@@ -98,7 +105,7 @@ export class OtpService {
 
     await this.otpCodeRepository.markConsumed(otp._id.toString());
 
-    const user = await this.userRepository.findByEmail(normalized);
+    const user = await this.userRepository.findByPhone(normalized);
     if (!user) {
       throw new AppError('Account no longer exists.', 404);
     }
