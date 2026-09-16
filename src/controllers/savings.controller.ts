@@ -1,15 +1,28 @@
 import { Request, Response, NextFunction } from 'express';
 // Request is used for admin endpoints that don't need user context
 import { SavingsService } from '../services/savings.service';
+import { OtpService } from '../services/otp.service';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import { AppError } from '../utils/appError';
 
 export class SavingsController {
   private savingsService: SavingsService;
+  private otpService: OtpService;
 
   constructor() {
     this.savingsService = new SavingsService();
+    this.otpService = new OtpService();
   }
+
+  /** Item 2 (replaced 2026-09-16): request the confirmation code enroll() now requires. */
+  public requestEnrollOtp = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await this.otpService.requestEnrollmentOtp(req.user!._id.toString());
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
 
   public enroll = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {

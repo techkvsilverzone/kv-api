@@ -1,7 +1,7 @@
 import { SavingsService } from '../services/savings.service';
 import { SavingsRepository } from '../repositories/savings.repository';
 import { SchemePlanRepository } from '../repositories/schemePlan.repository';
-import { IdProofRepository } from '../repositories/idProof.repository';
+import { OtpService } from '../services/otp.service';
 import { SavingsReminderService } from '../services/savingsReminder.service';
 import { PricingService } from '../services/pricing.service';
 import * as whatsapp from '../utils/whatsapp';
@@ -51,28 +51,16 @@ describe('SavingsService — enroll (plan-driven)', () => {
     );
   });
 
-  it('rejects enrollment when the customer has no ID proof on file (item 2)', async () => {
+  it('rejects enrollment when the OTP confirmation is missing/wrong (item 2, replaced)', async () => {
     jest.spyOn(SchemePlanRepository.prototype, 'findByType').mockResolvedValue({
       isActive: true,
       monthlyAmounts: [5000],
     } as never);
-    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue(null);
+    jest.spyOn(OtpService.prototype, 'verifyEnrollmentOtp').mockRejectedValue(new AppError('Incorrect confirmation code.', 400));
 
-    await expect(new SavingsService().enroll('u1', { schemeType: 'GOLD_11_1', monthlyAmount: 5000 })).rejects.toThrow(
-      /Submit your ID proof/,
-    );
-  });
-
-  it('rejects enrollment when the ID proof on file is not yet verified (item 2, tightened)', async () => {
-    jest.spyOn(SchemePlanRepository.prototype, 'findByType').mockResolvedValue({
-      isActive: true,
-      monthlyAmounts: [5000],
-    } as never);
-    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue({ verificationStatus: 'Pending' } as never);
-
-    await expect(new SavingsService().enroll('u1', { schemeType: 'GOLD_11_1', monthlyAmount: 5000 })).rejects.toThrow(
-      /still under review/,
-    );
+    await expect(
+      new SavingsService().enroll('u1', { schemeType: 'GOLD_11_1', monthlyAmount: 5000, otp: 'wrong' }),
+    ).rejects.toThrow(/Incorrect confirmation code/);
   });
 
   it('creates the scheme stamped from the plan (type, metal, duration, bonus, planId)', async () => {
@@ -89,7 +77,7 @@ describe('SavingsService — enroll (plan-driven)', () => {
       hamper: undefined,
     } as never);
     const createSpy = jest.spyOn(SavingsRepository.prototype, 'create').mockResolvedValue({} as never);
-    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue({ verificationStatus: 'Verified' } as never);
+    jest.spyOn(OtpService.prototype, 'verifyEnrollmentOtp').mockResolvedValue(undefined);
 
     await new SavingsService().enroll('u1', { schemeType: 'GOLD_11_1', monthlyAmount: 5000 });
 
@@ -119,7 +107,7 @@ describe('SavingsService — enroll (plan-driven)', () => {
       hamper: { goldCoinPurity: '916', silverCoinGrams: 30, giftsValue: 2500, gifts: ['Crackers Box', 'Sweets and Snacks'] },
     } as never);
     const createSpy = jest.spyOn(SavingsRepository.prototype, 'create').mockResolvedValue({} as never);
-    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue({ verificationStatus: 'Verified' } as never);
+    jest.spyOn(OtpService.prototype, 'verifyEnrollmentOtp').mockResolvedValue(undefined);
 
     await new SavingsService().enroll('u1', { schemeType: 'DIWALI', monthlyAmount: 3000 });
 

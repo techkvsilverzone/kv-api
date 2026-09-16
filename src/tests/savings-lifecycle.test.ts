@@ -2,7 +2,7 @@ import { SavingsService } from '../services/savings.service';
 import { SavingsRepository } from '../repositories/savings.repository';
 import { SchemePlanRepository } from '../repositories/schemePlan.repository';
 import { UserRepository } from '../repositories/user.repository';
-import { IdProofRepository } from '../repositories/idProof.repository';
+import { OtpService } from '../services/otp.service';
 import { PricingService } from '../services/pricing.service';
 import * as timeUtils from '../utils/time';
 import * as whatsapp from '../utils/whatsapp';
@@ -192,9 +192,10 @@ describe('Savings — full lifecycle (enroll → pay every installment → compl
     });
 
     jest.spyOn(UserRepository.prototype, 'findById').mockResolvedValue({ phone: '9999999999' } as never);
-    // Item 2: enroll() now requires a Verified ID proof on file — these lifecycle tests aren't
-    // exercising that gate, so treat every customer as already verified.
-    jest.spyOn(IdProofRepository.prototype, 'findByUserId').mockResolvedValue({ verificationStatus: 'Verified' } as never);
+    // Item 2 (replaced 2026-09-16): enroll() now requires an OTP confirmation, not a verified
+    // ID proof — these lifecycle tests aren't exercising that gate, so treat every enroll()
+    // call as already confirmed.
+    jest.spyOn(OtpService.prototype, 'verifyEnrollmentOtp').mockResolvedValue(undefined);
 
     jest.spyOn(PricingService.prototype, 'getCurrentRatePerGram').mockImplementation(async (metal: unknown) => {
       if (metal === 'GOLD') return 8000;

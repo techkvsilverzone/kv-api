@@ -7,6 +7,34 @@ const savingsController = new SavingsController();
 
 /**
  * @openapi
+ * /savings/enroll/request-otp:
+ *   post:
+ *     summary: Request the confirmation code required to enroll (item 2, replaces KYC gating)
+ *     tags: [Savings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Code sent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 channel:
+ *                   type: string
+ *                   enum: [whatsapp, email]
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ */
+router.post('/enroll/request-otp', protect, savingsController.requestEnrollOtp);
+
+/**
+ * @openapi
  * /savings/enroll:
  *   post:
  *     summary: Enroll in a savings scheme
@@ -19,7 +47,7 @@ const savingsController = new SavingsController();
  *         application/json:
  *           schema:
  *             type: object
- *             required: [schemeType, monthlyAmount]
+ *             required: [schemeType, monthlyAmount, otp]
  *             properties:
  *               schemeType:
  *                 type: string
@@ -29,6 +57,10 @@ const savingsController = new SavingsController();
  *                 type: integer
  *                 description: Must be one of the chosen plan's monthlyAmounts.
  *                 example: 5000
+ *               otp:
+ *                 type: string
+ *                 description: Confirmation code from POST /savings/enroll/request-otp.
+ *                 example: "123456"
  *     responses:
  *       201:
  *         description: Enrollment created

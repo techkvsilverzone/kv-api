@@ -1,8 +1,8 @@
 import { SavingsRepository } from '../repositories/savings.repository';
 import { SchemePlanRepository } from '../repositories/schemePlan.repository';
 import { UserRepository } from '../repositories/user.repository';
-import { IdProofRepository } from '../repositories/idProof.repository';
 import { PricingService } from './pricing.service';
+import { OtpService } from './otp.service';
 import { ISavings, ISchemePlan, SchemeType } from '../domain/savings';
 import { sendSavingsPaymentSuccess, sendDiwaliSchemeCompleted, sendDiwaliRedemptionReady } from '../utils/whatsapp';
 import { createRazorpayOrder, fetchRazorpayOrder, verifyRazorpaySignature } from '../utils/razorpay';
@@ -23,15 +23,15 @@ export class SavingsService {
   private savingsRepository: SavingsRepository;
   private schemePlanRepository: SchemePlanRepository;
   private userRepository: UserRepository;
-  private idProofRepository: IdProofRepository;
   private pricingService: PricingService;
+  private otpService: OtpService;
 
   constructor() {
     this.savingsRepository = new SavingsRepository();
     this.schemePlanRepository = new SchemePlanRepository();
     this.userRepository = new UserRepository();
-    this.idProofRepository = new IdProofRepository();
     this.pricingService = new PricingService();
+    this.otpService = new OtpService();
   }
 
   private async getPlanForScheme(scheme: ISavings): Promise<ISchemePlan | null> {
@@ -90,23 +90,12 @@ export class SavingsService {
       }
     }
 
-    // Item 2 (updated): KYC is checked once per customer (not per scheme — one submission
-    // covers every scheme), but every enrollment attempt re-checks it and requires an admin-
-    // approved status, so a customer can never end up enrolled — even by mistake — without a
-    // verified ID on file. Checked last, after the request itself is validated, so a bad
-    // request reports its own error first.
-    const idProof = await this.idProofRepository.findByUserId(userId);
-    if (!idProof) {
-      throw new AppError('Submit your ID proof before enrolling in a savings scheme', 400);
-    }
-    if (idProof.verificationStatus !== 'Verified') {
-      throw new AppError(
-        idProof.verificationStatus === 'Rejected'
-          ? 'Your ID proof was rejected — resubmit it before enrolling in a savings scheme'
-          : 'Your ID proof is still under review — you can enroll once it is verified',
-        400,
-      );
-    }
+    // Item 2 (replaced 2026-09-16, was KYC-gated): every enrollment attempt requires a fresh
+    // OTP confirmation (see OtpService.requestEnrollmentOtp/verifyEnrollmentOtp) rather than an
+    // admin-approved ID proof — so a customer can never end up enrolled by mistake, but the
+    // check is instant/self-serve instead of waiting on async admin review. Checked last, after
+    // the request itself is validated, so a bad request reports its own error first.
+    await this.otpService.verifyEnrollmentOtp(userId, data.otp);
 
     const bonusAmount = plan.bonusMonths > 0 ? monthlyAmount * plan.bonusMonths : 0;
     // Diwali's gold portion is a VALUE, not a fixed weight — it's only known once

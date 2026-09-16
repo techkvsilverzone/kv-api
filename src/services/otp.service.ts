@@ -4,8 +4,8 @@ import { UserRepository } from '../repositories/user.repository';
 import { OtpCodeRepository } from '../repositories/otpCode.repository';
 import { config } from '../config';
 import { AppError } from '../utils/appError';
-import { sendOtpEmail, sendPasswordResetEmail, sendPhoneVerificationEmail } from '../utils/emailNotifications';
-import { sendOtpWhatsApp, sendPhoneVerificationWhatsApp } from '../utils/whatsapp';
+import { sendOtpEmail, sendPasswordResetEmail, sendPhoneVerificationEmail, sendEnrollmentConfirmationEmail } from '../utils/emailNotifications';
+import { sendOtpWhatsApp, sendPhoneVerificationWhatsApp, sendEnrollmentConfirmationWhatsApp } from '../utils/whatsapp';
 import { generateToken } from '../utils/jwt';
 import { toUserResponse } from '../utils/userResponse';
 import Logger from '../utils/logger';
@@ -18,6 +18,11 @@ const RESET_PURPOSE = 'password_reset';
 // Item 1 (mobile OTP): scoped to its own purpose, same reasoning as RESET_PURPOSE — a code
 // issued to verify a phone must not be redeemable as a login/reset code and vice versa.
 const PHONE_VERIFY_PURPOSE = 'phone_verify';
+// Item 2 (replaced 2026-09-16, was KYC-gated): scoped to its own purpose too — a code issued to
+// confirm one enrollment attempt must not be redeemable for login/reset/phone-verify or vice
+// versa. Unlike PHONE_VERIFY_PURPOSE this is never "already done" — a fresh code is sent (and
+// must be confirmed) on every enrollment attempt, not just once per customer.
+const ENROLL_CONFIRM_PURPOSE = 'enroll_confirm';
 const MIN_PASSWORD_LENGTH = 6;
 
 /** Generates a 6-digit numeric code using a CSPRNG (not Math.random). */
@@ -251,5 +256,71 @@ export class OtpService {
     await this.otpCodeRepository.markConsumed(otp._id.toString());
     const updated = await this.userRepository.update(userId, { phoneVerified: true });
     return { user: toUserResponse(updated) };
+  }
+
+  /**
+   * Item 2 (replaced 2026-09-16, was KYC-gated): issue a fresh confirmation code for the
+   * calling user's own phone, to be entered right before a savings-scheme enrollment goes
+   * through (see `SavingsService.enroll`). Same WhatsApp-first/email-fallback channel as
+   * `requestPhoneVerification`, but never "already done" — sent again on every attempt.
+   */
+  public async requestEnrollmentOtp(userId: string): Promise<{ message: string; channel: 'whatsapp' | 'email' }> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new AppError('Account not found', 404);
+    }
+    const phone = String(user.phone || '').trim();
+    if (!phone) {
+      throw new AppError('Add a phone number to your account before enrolling in a savings scheme', 400);
+    }
+
+    const code = generateCode();
+    const codeHash = await bcrypt.hash(code, 10);
+    const expiresAt = new Date(Date.now() + config.otpExpiryMinutes * 60_000);
+    await this.otpCodeRepository.create(phone, ENROLL_CONFIRM_PURPOSE, codeHash, expiresAt);
+
+    if (config.whatsappOtpEnabled) {
+      await sendEnrollmentConfirmationWhatsApp(phone, code, config.otpExpiryMinutes);
+      return { message: 'A confirmation code has been sent to your WhatsApp.', channel: 'whatsapp' };
+    }
+
+    try {
+      await sendEnrollmentConfirmationEmail({
+        email: user.email,
+        name: user.name,
+        code,
+        expiryMinutes: config.otpExpiryMinutes,
+      });
+    } catch (error) {
+      Logger.error(`Enrollment confirmation email dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new AppError('Failed to send confirmation code. Please try again.', 500);
+    }
+    return { message: 'WhatsApp confirmation is not yet active, so we emailed your code instead.', channel: 'email' };
+  }
+
+  /** Verify (and consume) the code from `requestEnrollmentOtp`. Called from inside
+   * `SavingsService.enroll` — a thrown AppError here becomes the enrollment's own error. */
+  public async verifyEnrollmentOtp(userId: string, code: string): Promise<void> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new AppError('Account not found', 404);
+    }
+    const phone = String(user.phone || '').trim();
+    if (!phone || !code) {
+      throw new AppError('Enter the confirmation code sent to your phone before enrolling', 400);
+    }
+
+    const otp = await this.otpCodeRepository.findActive(phone, ENROLL_CONFIRM_PURPOSE);
+    if (!otp) {
+      throw new AppError('Invalid or expired confirmation code. Please request a new one.', 400);
+    }
+
+    const matches = await bcrypt.compare(String(code).trim(), otp.codeHash);
+    if (!matches) {
+      await this.otpCodeRepository.incrementAttempts(otp._id.toString());
+      throw new AppError('Incorrect confirmation code.', 400);
+    }
+
+    await this.otpCodeRepository.markConsumed(otp._id.toString());
   }
 }

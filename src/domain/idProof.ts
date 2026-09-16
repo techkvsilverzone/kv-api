@@ -1,10 +1,11 @@
 /**
- * Item 2 (business requirement, 2026-08-30; tightened 2026-09-14): KYC identity verification,
- * required once per customer (not per scheme — the same submission covers every scheme a
- * customer joins), but re-checked on every enrollment attempt (see `SavingsService.enroll`).
- * A customer must have an admin-approved (`Verified`) submission on file before enrolling in
- * ANY plan — a merely-submitted or rejected one blocks enrollment, so no one can end up signed
- * up, even by mistake, without a verified ID on file.
+ * Item 2 (business requirement, 2026-08-30; tightened 2026-09-14, then REPLACED 2026-09-16):
+ * KYC identity document, submitted once per customer (not per scheme) and reviewed by an
+ * admin/staff (see `IdProofController`/the admin Savings KYC queue). This document is no
+ * longer wired into `SavingsService.enroll()` — enrollment is gated by a fresh OTP
+ * confirmation instead (`OtpService.requestEnrollmentOtp`/`verifyEnrollmentOtp`), which is
+ * instant/self-serve rather than waiting on async admin review. Submission/review still exist
+ * here for record-keeping; nothing currently blocks on `verificationStatus`.
  */
 
 export type IdProofType = 'AADHAAR' | 'PAN' | 'VOTER_ID' | 'DRIVING_LICENSE';

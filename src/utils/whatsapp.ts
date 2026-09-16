@@ -192,6 +192,14 @@ export async function sendPhoneVerificationWhatsApp(phone: string, code: string,
   return sendWhatsAppText(phone, body);
 }
 
+/** Item 2 (replaced 2026-09-16, was KYC-gated): sent fresh on every savings-scheme enrollment
+ * attempt so the customer confirms it's really them, rather than a one-time verified flag. Same
+ * Authentication-template channel as the codes above, distinguished only by copy. */
+export async function sendEnrollmentConfirmationWhatsApp(phone: string, code: string, expiryMinutes: number): Promise<WhatsAppSendResult> {
+  const body = `Your KV Silver Zone savings enrollment confirmation code is ${code}. It expires in ${expiryMinutes} minutes. Do not share this code.`;
+  return sendWhatsAppText(phone, body);
+}
+
 /** A Diwali scheme has collected all its installments and is ready for the redemption payout
  * to be computed — sent to the ops number, since that's a manual admin action (unlike
  * Gold/Silver 11+1, whose bonus grams are credited automatically with no further step). */
