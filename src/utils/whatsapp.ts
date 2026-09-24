@@ -33,7 +33,9 @@ export async function sendWhatsAppText(to: string, body: string): Promise<WhatsA
   }
 
   // Meta expects the recipient in international format without a leading "+".
-  const recipient = to.replace(/[^\d]/g, '');
+  // Customer phones are stored as bare 10-digit Indian mobiles, so prefix 91.
+  const digits = to.replace(/[^\d]/g, '');
+  const recipient = digits.length === 10 ? `91${digits}` : digits;
   const payload = JSON.stringify({
     messaging_product: 'whatsapp',
     to: recipient,
