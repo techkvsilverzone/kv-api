@@ -90,7 +90,7 @@ export async function downloadAndStoreWhatsAppMedia(
   filenameHint: string,
 ): Promise<{ filePath: string; mimeType: string }> {
   if (!config.whatsappToken) {
-    throw new Error('WHATSAPP_TOKEN not configured — cannot download media');
+    throw new Error('WHATSAPP_ACCESS_TOKEN not configured — cannot download media');
   }
 
   const meta = await fetchMediaMeta(mediaId);

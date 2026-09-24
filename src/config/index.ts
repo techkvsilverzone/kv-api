@@ -55,10 +55,13 @@ export const config = {
   // Daily price-update guard (#25). The metal rate becomes mandatory at this
   // hour (IST). Before it, nothing is blocked (morning grace period).
   rateUpdateCutoffHour: Number(process.env.RATE_UPDATE_CUTOFF_HOUR || 10),
-  // WhatsApp rate-reminder (Meta WhatsApp Cloud API). Best-effort, like email.
+  // WhatsApp rate-reminder + OTP delivery (Meta WhatsApp Cloud API). Best-effort, like email.
   whatsappProvider: process.env.WHATSAPP_PROVIDER || 'meta',
-  whatsappToken: process.env.WHATSAPP_TOKEN || '',
-  whatsappPhoneId: process.env.WHATSAPP_PHONE_ID || '',
+  whatsappToken: process.env.WHATSAPP_ACCESS_TOKEN || '',
+  whatsappPhoneId: process.env.WHATSAPP_PHONE_NUMBER_ID || '',
+  // Not used for sending messages (only phone_number_id + token are) — kept for
+  // future template/business-profile management calls against the Graph API.
+  whatsappBusinessAccountId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID || '',
   whatsappApiVersion: process.env.WHATSAPP_API_VERSION || 'v21.0',
   rateAlertRecipient: process.env.RATE_ALERT_RECIPIENT || '+918825649680',
   // OTP login: email delivery (via Brevo, above) always works. WhatsApp delivery

@@ -27,7 +27,7 @@ export async function sendWhatsAppText(to: string, body: string): Promise<WhatsA
   }
 
   if (!config.whatsappToken || !config.whatsappPhoneId) {
-    const reason = 'WHATSAPP_TOKEN / WHATSAPP_PHONE_ID not configured';
+    const reason = 'WHATSAPP_ACCESS_TOKEN / WHATSAPP_PHONE_NUMBER_ID not configured';
     Logger.warn(`[whatsapp] ${reason} — skipping send`);
     return { sent: false, skippedReason: reason };
   }
