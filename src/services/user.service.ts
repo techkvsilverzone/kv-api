@@ -5,6 +5,7 @@ import { StallConfigRepository } from '../repositories/stallConfig.repository';
 import { AppError } from '../utils/appError';
 import { generateToken } from '../utils/jwt';
 import { toUserResponse, toAddressResponse } from '../utils/userResponse';
+import { toIndianMobile, isIndianMobile } from '../utils/phone';
 import bcrypt from 'bcryptjs';
 
 export class UserService {
@@ -24,7 +25,8 @@ export class UserService {
     }
     // Item 1: phone is required at signup so a verification code has somewhere to go —
     // matches the address-book phone rule used everywhere else in this codebase.
-    if (!data?.phone || !/^[6-9]\d{9}$/.test(String(data.phone).trim())) {
+    data.phone = toIndianMobile(data?.phone);
+    if (!isIndianMobile(data.phone)) {
       throw new AppError('phone must be a valid 10-digit Indian mobile number', 400);
     }
 
@@ -86,6 +88,12 @@ export class UserService {
   }
 
   public async updateProfile(userId: string, data: any) {
+    if (data?.phone) {
+      data.phone = toIndianMobile(data.phone);
+      if (!isIndianMobile(data.phone)) {
+        throw new AppError('phone must be a valid 10-digit Indian mobile number', 400);
+      }
+    }
     const user = await this.userRepository.update(userId, data);
     if (!user) throw new AppError('User not found', 404);
     return toUserResponse(user);

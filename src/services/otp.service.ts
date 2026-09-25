@@ -9,6 +9,8 @@ import { sendOtpWhatsApp, WhatsAppSendResult } from '../utils/whatsapp';
 import { generateToken } from '../utils/jwt';
 import { toUserResponse } from '../utils/userResponse';
 import Logger from '../utils/logger';
+import { toIndianMobile } from '../utils/phone';
+import { recordMessage } from '../utils/messageLog';
 
 const PURPOSE = 'login';
 
@@ -39,6 +41,17 @@ function logWhatsAppOtpResult(purpose: string, phone: string, result: WhatsAppSe
   }
 }
 
+/** Sends an OTP email and records the outcome in message_log (the code itself is never stored). */
+async function sendLoggedOtpEmail(purpose: string, email: string, send: () => Promise<unknown>): Promise<void> {
+  try {
+    await send();
+  } catch (error) {
+    await recordMessage({ channel: 'email', kind: `otp_${purpose}`, recipient: email, status: 'failed', error: String(error) });
+    throw error;
+  }
+  await recordMessage({ channel: 'email', kind: `otp_${purpose}`, recipient: email, status: 'sent' });
+}
+
 export class OtpService {
   private userRepository: UserRepository;
   private otpCodeRepository: OtpCodeRepository;
@@ -61,7 +74,7 @@ export class OtpService {
    * phone number here, not an email.
    */
   public async requestLoginOtp(phone: string): Promise<{ message: string }> {
-    const normalized = String(phone || '').trim();
+    const normalized = toIndianMobile(phone);
     if (!normalized) {
       throw new AppError('phone is required', 400);
     }
@@ -81,7 +94,7 @@ export class OtpService {
 
     if (config.whatsappOtpEnabled) {
       try {
-        const result = await sendOtpWhatsApp(normalized, code);
+        const result = await sendOtpWhatsApp(normalized, code, PURPOSE);
         logWhatsAppOtpResult('login', normalized, result);
       } catch (error) {
         Logger.error(`Login OTP WhatsApp dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -91,7 +104,9 @@ export class OtpService {
     }
 
     try {
-      await sendOtpEmail({ email: user.email, name: user.name, code, expiryMinutes: config.otpExpiryMinutes });
+      await sendLoggedOtpEmail(PURPOSE, user.email, () =>
+        sendOtpEmail({ email: user.email, name: user.name, code, expiryMinutes: config.otpExpiryMinutes }),
+      );
     } catch (error) {
       Logger.error(`Login OTP email dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
       throw new AppError('Failed to send login code. Please try again.', 500);
@@ -101,7 +116,7 @@ export class OtpService {
 
   /** Verify a login OTP (by mobile number) and issue a session, exactly like password login. */
   public async verifyLoginOtp(phone: string, code: string): Promise<{ user: unknown; token: string }> {
-    const normalized = String(phone || '').trim();
+    const normalized = toIndianMobile(phone);
     if (!normalized || !code) {
       throw new AppError('phone and code are required', 400);
     }
@@ -149,12 +164,9 @@ export class OtpService {
     await this.otpCodeRepository.create(normalized, RESET_PURPOSE, codeHash, expiresAt);
 
     try {
-      await sendPasswordResetEmail({
-        email: normalized,
-        name: user.name,
-        code,
-        expiryMinutes: config.otpExpiryMinutes,
-      });
+      await sendLoggedOtpEmail(RESET_PURPOSE, normalized, () =>
+        sendPasswordResetEmail({ email: normalized, name: user.name, code, expiryMinutes: config.otpExpiryMinutes }),
+      );
     } catch (error) {
       Logger.error(
         `Password reset email dispatch failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -234,17 +246,14 @@ export class OtpService {
     await this.otpCodeRepository.create(phone, PHONE_VERIFY_PURPOSE, codeHash, expiresAt);
 
     if (config.whatsappOtpEnabled) {
-      logWhatsAppOtpResult('phone_verify', phone, await sendOtpWhatsApp(phone, code));
+      logWhatsAppOtpResult('phone_verify', phone, await sendOtpWhatsApp(phone, code, PHONE_VERIFY_PURPOSE));
       return { message: 'A verification code has been sent to your WhatsApp.', channel: 'whatsapp' };
     }
 
     try {
-      await sendPhoneVerificationEmail({
-        email: user.email,
-        name: user.name,
-        code,
-        expiryMinutes: config.otpExpiryMinutes,
-      });
+      await sendLoggedOtpEmail(PHONE_VERIFY_PURPOSE, user.email, () =>
+        sendPhoneVerificationEmail({ email: user.email, name: user.name, code, expiryMinutes: config.otpExpiryMinutes }),
+      );
     } catch (error) {
       Logger.error(`Phone verification email dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
       throw new AppError('Failed to send verification code. Please try again.', 500);
@@ -301,17 +310,14 @@ export class OtpService {
     await this.otpCodeRepository.create(phone, ENROLL_CONFIRM_PURPOSE, codeHash, expiresAt);
 
     if (config.whatsappOtpEnabled) {
-      logWhatsAppOtpResult('enroll_confirm', phone, await sendOtpWhatsApp(phone, code));
+      logWhatsAppOtpResult('enroll_confirm', phone, await sendOtpWhatsApp(phone, code, ENROLL_CONFIRM_PURPOSE));
       return { message: 'A confirmation code has been sent to your WhatsApp.', channel: 'whatsapp' };
     }
 
     try {
-      await sendEnrollmentConfirmationEmail({
-        email: user.email,
-        name: user.name,
-        code,
-        expiryMinutes: config.otpExpiryMinutes,
-      });
+      await sendLoggedOtpEmail(ENROLL_CONFIRM_PURPOSE, user.email, () =>
+        sendEnrollmentConfirmationEmail({ email: user.email, name: user.name, code, expiryMinutes: config.otpExpiryMinutes }),
+      );
     } catch (error) {
       Logger.error(`Enrollment confirmation email dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
       throw new AppError('Failed to send confirmation code. Please try again.', 500);

@@ -1,6 +1,8 @@
 import https from 'https';
 import { config } from '../config';
 import Logger from './logger';
+import { toIndianMobile } from './phone';
+import { recordMessage } from './messageLog';
 
 export interface WhatsAppSendResult {
   sent: boolean;
@@ -19,8 +21,8 @@ export interface WhatsAppSendResult {
  * NOTE: outside the 24-hour customer-care window WhatsApp requires an approved
  * message template; free-form text only delivers inside that window.
  */
-export async function sendWhatsAppText(to: string, body: string): Promise<WhatsAppSendResult> {
-  return sendWhatsAppMessage(to, { type: 'text', text: { preview_url: false, body } });
+export async function sendWhatsAppText(to: string, body: string, kind: string): Promise<WhatsAppSendResult> {
+  return sendWhatsAppMessage(to, { type: 'text', text: { preview_url: false, body } }, kind, body);
 }
 
 /**
@@ -28,8 +30,8 @@ export async function sendWhatsAppText(to: string, body: string): Promise<WhatsA
  * text this delivers outside the 24h window. Meta fixes the body copy ("<code> is your
  * verification code…"), so one template serves login, phone-verify and enrollment codes alike.
  */
-async function sendOtpTemplate(to: string, code: string): Promise<WhatsAppSendResult> {
-  return sendWhatsAppMessage(to, {
+async function sendOtpTemplate(to: string, code: string, kind: string): Promise<WhatsAppSendResult> {
+  const message = {
     type: 'template',
     template: {
       name: config.whatsappOtpTemplate,
@@ -39,10 +41,35 @@ async function sendOtpTemplate(to: string, code: string): Promise<WhatsAppSendRe
         { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: code }] },
       ],
     },
-  });
+  };
+  // The code itself is deliberately kept out of the message log.
+  return sendWhatsAppMessage(to, message, kind, `template:${config.whatsappOtpTemplate}`);
 }
 
-async function sendWhatsAppMessage(to: string, message: Record<string, unknown>): Promise<WhatsAppSendResult> {
+/** Every outbound WhatsApp message goes through here, so every one lands in `message_log`. */
+async function sendWhatsAppMessage(
+  to: string,
+  message: Record<string, unknown>,
+  kind: string,
+  logBody: string,
+): Promise<WhatsAppSendResult> {
+  // Meta expects international format without "+"; customers type bare 10-digit Indian mobiles.
+  const local = toIndianMobile(to);
+  const recipient = local.length === 10 ? `91${local}` : local;
+  const result = await postToMeta(recipient, message);
+  await recordMessage({
+    channel: 'whatsapp',
+    kind,
+    recipient,
+    status: result.sent ? 'sent' : 'failed',
+    providerMessageId: result.messageId,
+    body: logBody,
+    error: result.skippedReason,
+  });
+  return result;
+}
+
+async function postToMeta(recipient: string, message: Record<string, unknown>): Promise<WhatsAppSendResult> {
   if (config.whatsappProvider !== 'meta') {
     const reason = `unsupported WHATSAPP_PROVIDER "${config.whatsappProvider}" (only "meta" implemented)`;
     Logger.warn(`[whatsapp] ${reason}`);
@@ -55,10 +82,6 @@ async function sendWhatsAppMessage(to: string, message: Record<string, unknown>)
     return { sent: false, skippedReason: reason };
   }
 
-  // Meta expects the recipient in international format without a leading "+".
-  // Customer phones are stored as bare 10-digit Indian mobiles, so prefix 91.
-  const digits = to.replace(/[^\d]/g, '');
-  const recipient = digits.length === 10 ? `91${digits}` : digits;
   const payload = JSON.stringify({
     messaging_product: 'whatsapp',
     to: recipient,
@@ -124,7 +147,7 @@ export async function sendRateUpdateReminder(staleMetals: string[]): Promise<Wha
   const body =
     `⚠️ KV Silver Zone: Today's ${metals} rate has not been updated. ` +
     `The admin panel is locked for admin/staff until it is recorded. Please update it now.`;
-  return sendWhatsAppText(config.rateAlertRecipient, body);
+  return sendWhatsAppText(config.rateAlertRecipient, body, 'rate_update_reminder');
 }
 
 /**
@@ -137,7 +160,7 @@ export async function sendRateUpdateSuccessNotice(rates: { metal: string; ratePe
     .map((r) => `• ${r.metal.charAt(0).toUpperCase() + r.metal.slice(1).toLowerCase()}: ₹${r.ratePerGram}/g`)
     .join('\n');
   const body = `✅ KV Silver Zone: Today's rates are live —\n${lines}`;
-  return sendWhatsAppText(config.rateAlertRecipient, body);
+  return sendWhatsAppText(config.rateAlertRecipient, body, 'rate_update_success');
 }
 
 /** Order payment confirmed — sent to the customer's phone from their shipping address. */
@@ -148,7 +171,7 @@ export async function sendPaymentSuccessMessage(
   const body =
     `✅ KV Silver Zone: Payment received for Invoice #${input.invoiceNumber} — ₹${input.amount.toLocaleString('en-IN')} ` +
     `(${input.paymentMethod.toUpperCase()}). Thank you for shopping with us!`;
-  return sendWhatsAppText(phone, body);
+  return sendWhatsAppText(phone, body, 'payment_success');
 }
 
 /** A savings installment was recorded — sent to the customer's phone. */
@@ -159,7 +182,7 @@ export async function sendSavingsPaymentSuccess(
   const body =
     `✅ KV Silver Zone: ₹${input.amount.toLocaleString('en-IN')} received for Passbook #${input.passbookNumber}. ` +
     `Total saved so far: ₹${input.totalPaid.toLocaleString('en-IN')}.`;
-  return sendWhatsAppText(phone, body);
+  return sendWhatsAppText(phone, body, 'savings_payment_success');
 }
 
 export type SavingsReminderKind = 'day1' | 'day5' | 'day10' | 'missed';
@@ -185,24 +208,24 @@ export async function sendSavingsReminder(
   const body =
     `🔔 KV Silver Zone — ${label}: ${SAVINGS_REMINDER_COPY[kind]} ` +
     `Amount due: ₹${input.monthlyAmount.toLocaleString('en-IN')}.`;
-  return sendWhatsAppText(phone, body);
+  return sendWhatsAppText(phone, body, `savings_reminder_${kind}`);
 }
 
 /** Birthday wish, sent on the customer's date of birth. */
 export async function sendBirthdayWish(phone: string, name: string): Promise<WhatsAppSendResult> {
   const body = `🎉 Happy Birthday, ${name}! Wishing you a wonderful year ahead, from all of us at KV Silver Zone.`;
-  return sendWhatsAppText(phone, body);
+  return sendWhatsAppText(phone, body, 'birthday_wish');
 }
 
 /** Wedding-anniversary wish, sent on the customer's anniversary date. */
 export async function sendAnniversaryWish(phone: string, name: string): Promise<WhatsAppSendResult> {
   const body = `💍 Happy Anniversary, ${name}! Wishing you many more years of happiness, from KV Silver Zone.`;
-  return sendWhatsAppText(phone, body);
+  return sendWhatsAppText(phone, body, 'anniversary_wish');
 }
 
 /** Login, phone-verification and enrollment OTPs. Gated by `config.whatsappOtpEnabled` at the call site. */
-export async function sendOtpWhatsApp(phone: string, code: string): Promise<WhatsAppSendResult> {
-  return sendOtpTemplate(phone, code);
+export async function sendOtpWhatsApp(phone: string, code: string, purpose: string): Promise<WhatsAppSendResult> {
+  return sendOtpTemplate(phone, code, `otp_${purpose}`);
 }
 
 /** A Diwali scheme has collected all its installments and is ready for the redemption payout
@@ -215,7 +238,7 @@ export async function sendDiwaliSchemeCompleted(
   const body =
     `🪔 KV Silver Zone: Diwali scheme ${passbookNumber ? `#${passbookNumber}` : '(no passbook yet)'} has collected all ` +
     `installments — ₹${totalPaid.toLocaleString('en-IN')} total. Compute the redemption payout in the admin panel when ready.`;
-  return sendWhatsAppText(config.rateAlertRecipient, body);
+  return sendWhatsAppText(config.rateAlertRecipient, body, 'diwali_scheme_completed');
 }
 
 /** The Diwali redemption payout has been computed — sent to the customer. */
@@ -227,7 +250,7 @@ export async function sendDiwaliRedemptionReady(
     `🪔 KV Silver Zone: Your Diwali scheme (Passbook #${input.passbookNumber}) redemption is ready — ` +
     `${input.goldGrams}g gold (₹${input.goldCoinValue.toLocaleString('en-IN')}), ${input.silverGrams}g silver, and a ` +
     `₹${input.giftsValue.toLocaleString('en-IN')} gift hamper. Visit the store to collect it.`;
-  return sendWhatsAppText(phone, body);
+  return sendWhatsAppText(phone, body, 'diwali_redemption_ready');
 }
 
 /** Admin-authored festival/promotional broadcast to a list of customer phone numbers. */
@@ -237,7 +260,7 @@ export async function sendBroadcast(phones: string[], message: string): Promise<
     // Sequential, not Promise.all — a burst of parallel sends is more likely to
     // hit the WhatsApp Cloud API's per-second rate limit for a broadcast-sized list.
     // eslint-disable-next-line no-await-in-loop
-    const result = await sendWhatsAppText(phone, message);
+    const result = await sendWhatsAppText(phone, message, 'broadcast');
     results.push({ to: phone, result });
   }
   return results;

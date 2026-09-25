@@ -116,6 +116,7 @@ export class SavingsReminderService {
         await sendWhatsAppText(
           user.phone,
           `Your KV Silver Zone Diwali Scheme${scheme.passbookNumber ? ` (${scheme.passbookNumber})` : ''} has been discontinued due to missed monthly payments. The amount already paid is redeemable as goods in-store — please contact us to arrange this.`,
+          'diwali_scheme_dropped',
         );
       }
     } catch (error) {

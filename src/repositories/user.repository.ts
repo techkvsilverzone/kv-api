@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { PoolClient } from 'pg';
 import { IUser, IAddress } from '../domain/user';
 import { query, queryOne, queryRows, withTransaction } from '../infrastructure/postgres/pool';
+import { toIndianMobile } from '../utils/phone';
 import {
   dateOnlyToDate,
   toBigIntParam,
@@ -187,9 +188,12 @@ export class UserRepository {
   /** Mobile-number login (item: OTP login primary channel, 2026-09-16) — phone is stored as a
    * plain 10-digit string (see UserService.signup's validation), no normalization needed here. */
   public async findByPhone(phone: string): Promise<IUser | null> {
+    // Compares the last 10 digits so legacy rows saved as "+91 81908 58375" etc. still match.
+    // ponytail: full scan of users; add an expression index on this if the table grows large.
     const row = await queryOne<UserRow>(
-      `${USER_SELECT} WHERE u.phone = $1 AND u.is_active = TRUE`,
-      [String(phone ?? '').trim()],
+      `${USER_SELECT} WHERE RIGHT(REGEXP_REPLACE(u.phone, '\\D', '', 'g'), 10) = $1 AND u.is_active = TRUE
+       ORDER BY u.id LIMIT 1`,
+      [toIndianMobile(phone)],
     );
     return row ? mapUser(row) : null;
   }
