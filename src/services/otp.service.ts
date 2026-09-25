@@ -5,7 +5,7 @@ import { OtpCodeRepository } from '../repositories/otpCode.repository';
 import { config } from '../config';
 import { AppError } from '../utils/appError';
 import { sendOtpEmail, sendPasswordResetEmail, sendPhoneVerificationEmail, sendEnrollmentConfirmationEmail } from '../utils/emailNotifications';
-import { sendOtpWhatsApp, sendPhoneVerificationWhatsApp, sendEnrollmentConfirmationWhatsApp } from '../utils/whatsapp';
+import { sendOtpWhatsApp, WhatsAppSendResult } from '../utils/whatsapp';
 import { generateToken } from '../utils/jwt';
 import { toUserResponse } from '../utils/userResponse';
 import Logger from '../utils/logger';
@@ -28,6 +28,15 @@ const MIN_PASSWORD_LENGTH = 6;
 /** Generates a 6-digit numeric code using a CSPRNG (not Math.random). */
 function generateCode(): string {
   return crypto.randomInt(0, 1_000_000).toString().padStart(6, '0');
+}
+
+// sendWhatsAppText never throws — a failed send comes back as `{ sent: false }`, so it must be logged here.
+function logWhatsAppOtpResult(purpose: string, phone: string, result: WhatsAppSendResult): void {
+  if (result.sent) {
+    Logger.info(`[otp] ${purpose} OTP accepted by WhatsApp for ${phone} — message id ${result.messageId ?? 'n/a'}`);
+  } else {
+    Logger.error(`[otp] ${purpose} OTP NOT sent via WhatsApp to ${phone}: ${result.skippedReason}`);
+  }
 }
 
 export class OtpService {
@@ -59,16 +68,21 @@ export class OtpService {
 
     const user = await this.userRepository.findByPhone(normalized);
     const generic = { message: 'If that mobile number is registered, a login code has been sent.' };
-    if (!user) return generic;
+    if (!user) {
+      Logger.warn(`[otp] login OTP requested for unregistered phone ${normalized} — nothing sent`);
+      return generic;
+    }
 
     const code = generateCode();
     const codeHash = await bcrypt.hash(code, 10);
     const expiresAt = new Date(Date.now() + config.otpExpiryMinutes * 60_000);
     await this.otpCodeRepository.create(normalized, PURPOSE, codeHash, expiresAt);
+    Logger.info(`[otp] login OTP issued for user ${user._id} via ${config.whatsappOtpEnabled ? 'whatsapp' : 'email'}`);
 
     if (config.whatsappOtpEnabled) {
       try {
-        await sendOtpWhatsApp(normalized, code, config.otpExpiryMinutes);
+        const result = await sendOtpWhatsApp(normalized, code);
+        logWhatsAppOtpResult('login', normalized, result);
       } catch (error) {
         Logger.error(`Login OTP WhatsApp dispatch failed: ${error instanceof Error ? error.message : String(error)}`);
         throw new AppError('Failed to send login code. Please try again.', 500);
@@ -220,7 +234,7 @@ export class OtpService {
     await this.otpCodeRepository.create(phone, PHONE_VERIFY_PURPOSE, codeHash, expiresAt);
 
     if (config.whatsappOtpEnabled) {
-      await sendPhoneVerificationWhatsApp(phone, code, config.otpExpiryMinutes);
+      logWhatsAppOtpResult('phone_verify', phone, await sendOtpWhatsApp(phone, code));
       return { message: 'A verification code has been sent to your WhatsApp.', channel: 'whatsapp' };
     }
 
@@ -287,7 +301,7 @@ export class OtpService {
     await this.otpCodeRepository.create(phone, ENROLL_CONFIRM_PURPOSE, codeHash, expiresAt);
 
     if (config.whatsappOtpEnabled) {
-      await sendEnrollmentConfirmationWhatsApp(phone, code, config.otpExpiryMinutes);
+      logWhatsAppOtpResult('enroll_confirm', phone, await sendOtpWhatsApp(phone, code));
       return { message: 'A confirmation code has been sent to your WhatsApp.', channel: 'whatsapp' };
     }
 

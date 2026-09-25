@@ -20,6 +20,29 @@ export interface WhatsAppSendResult {
  * message template; free-form text only delivers inside that window.
  */
 export async function sendWhatsAppText(to: string, body: string): Promise<WhatsAppSendResult> {
+  return sendWhatsAppMessage(to, { type: 'text', text: { preview_url: false, body } });
+}
+
+/**
+ * OTP via the approved AUTHENTICATION template (`config.whatsappOtpTemplate`). Unlike free-form
+ * text this delivers outside the 24h window. Meta fixes the body copy ("<code> is your
+ * verification code…"), so one template serves login, phone-verify and enrollment codes alike.
+ */
+async function sendOtpTemplate(to: string, code: string): Promise<WhatsAppSendResult> {
+  return sendWhatsAppMessage(to, {
+    type: 'template',
+    template: {
+      name: config.whatsappOtpTemplate,
+      language: { code: config.whatsappOtpTemplateLanguage },
+      components: [
+        { type: 'body', parameters: [{ type: 'text', text: code }] },
+        { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: code }] },
+      ],
+    },
+  });
+}
+
+async function sendWhatsAppMessage(to: string, message: Record<string, unknown>): Promise<WhatsAppSendResult> {
   if (config.whatsappProvider !== 'meta') {
     const reason = `unsupported WHATSAPP_PROVIDER "${config.whatsappProvider}" (only "meta" implemented)`;
     Logger.warn(`[whatsapp] ${reason}`);
@@ -39,11 +62,11 @@ export async function sendWhatsAppText(to: string, body: string): Promise<WhatsA
   const payload = JSON.stringify({
     messaging_product: 'whatsapp',
     to: recipient,
-    type: 'text',
-    text: { preview_url: false, body },
+    ...message,
   });
 
   const path = `/${config.whatsappApiVersion}/${config.whatsappPhoneId}/messages`;
+  Logger.debug(`[whatsapp] POST graph.facebook.com${path} to ${recipient}`);
 
   try {
     const result = await new Promise<WhatsAppSendResult>((resolve, reject) => {
@@ -63,6 +86,7 @@ export async function sendWhatsAppText(to: string, body: string): Promise<WhatsA
           res.on('data', (chunk) => (data += chunk));
           res.on('end', () => {
             const status = res.statusCode ?? 0;
+            Logger.debug(`[whatsapp] Meta responded ${status}: ${data}`);
             if (status >= 200 && status < 300) {
               let messageId: string | undefined;
               try {
@@ -176,30 +200,9 @@ export async function sendAnniversaryWish(phone: string, name: string): Promise<
   return sendWhatsAppText(phone, body);
 }
 
-/**
- * OTP login code via WhatsApp. Gated by `config.whatsappOtpEnabled` at the call
- * site — Meta requires an approved "Authentication" template to deliver an
- * unsolicited code outside the 24h customer-care window; free-form text (what
- * `sendWhatsAppText` sends) will only actually land once that's approved.
- */
-export async function sendOtpWhatsApp(phone: string, code: string, expiryMinutes: number): Promise<WhatsAppSendResult> {
-  const body = `Your KV Silver Zone login code is ${code}. It expires in ${expiryMinutes} minutes. Do not share this code.`;
-  return sendWhatsAppText(phone, body);
-}
-
-/** First-time customer mobile verification (item 1) — same Authentication-template channel as
- * the login OTP above, distinguished only by copy. */
-export async function sendPhoneVerificationWhatsApp(phone: string, code: string, expiryMinutes: number): Promise<WhatsAppSendResult> {
-  const body = `Your KV Silver Zone phone verification code is ${code}. It expires in ${expiryMinutes} minutes. Do not share this code.`;
-  return sendWhatsAppText(phone, body);
-}
-
-/** Item 2 (replaced 2026-09-16, was KYC-gated): sent fresh on every savings-scheme enrollment
- * attempt so the customer confirms it's really them, rather than a one-time verified flag. Same
- * Authentication-template channel as the codes above, distinguished only by copy. */
-export async function sendEnrollmentConfirmationWhatsApp(phone: string, code: string, expiryMinutes: number): Promise<WhatsAppSendResult> {
-  const body = `Your KV Silver Zone savings enrollment confirmation code is ${code}. It expires in ${expiryMinutes} minutes. Do not share this code.`;
-  return sendWhatsAppText(phone, body);
+/** Login, phone-verification and enrollment OTPs. Gated by `config.whatsappOtpEnabled` at the call site. */
+export async function sendOtpWhatsApp(phone: string, code: string): Promise<WhatsAppSendResult> {
+  return sendOtpTemplate(phone, code);
 }
 
 /** A Diwali scheme has collected all its installments and is ready for the redemption payout

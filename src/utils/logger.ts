@@ -10,6 +10,7 @@ const levels = {
 };
 
 const level = () => {
+  if (config.logLevel) return config.logLevel;
   const env = config.nodeEnv || 'development';
   const isDevelopment = env === 'development';
   return isDevelopment ? 'debug' : 'warn';

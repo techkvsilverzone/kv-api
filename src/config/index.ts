@@ -10,6 +10,8 @@ export const config = {
   // `nodeEnv` default above, so a prod box that forgot to set the var fails
   // closed (no stack) rather than leaking internals.
   exposeErrorStack: process.env.NODE_ENV === 'development',
+  // Overrides the logger's env-based default (debug in development, warn otherwise).
+  logLevel: process.env.LOG_LEVEL || '',
   // Public storefront URL, used to build order links in transactional emails.
   frontendUrl: process.env.FRONTEND_URL || '',
   corsOrigins: process.env.CORS_ORIGINS || '*',
@@ -69,6 +71,9 @@ export const config = {
   // 24h customer-care window — flip this on once that approval lands; until then
   // it stays off and OTP login works via email only.
   whatsappOtpEnabled: process.env.WHATSAPP_OTP_ENABLED === 'true',
+  // Name/language of the approved AUTHENTICATION template OTPs are sent through.
+  whatsappOtpTemplate: process.env.WHATSAPP_OTP_TEMPLATE || 'kv_otp',
+  whatsappOtpTemplateLanguage: process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE || 'en_US',
   otpExpiryMinutes: Number(process.env.OTP_EXPIRY_MINUTES || 5),
   // Returns policy: KV-fault claims require an unboxing video sent to this
   // WhatsApp number (shown to the customer after they file a fault-based return),
