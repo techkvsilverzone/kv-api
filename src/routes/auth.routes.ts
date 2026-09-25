@@ -161,13 +161,15 @@ router.post('/reset-password', userController.resetPassword);
  *                 example: '9876543210'
  *     responses:
  *       200:
- *         description: Generic confirmation — does not reveal whether the phone number is registered
+ *         description: Code sent to the registered mobile number
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/MessageResponse'
  *       400:
  *         $ref: '#/components/responses/BadRequest'
+ *       404:
+ *         description: "Mobile number is not registered — message: 'This mobile number is not registered. Please sign up first.'"
  */
 router.post('/otp/request', userController.requestLoginOtp);
 

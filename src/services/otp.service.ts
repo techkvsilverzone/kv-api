@@ -64,11 +64,8 @@ export class OtpService {
   /**
    * Issue a login OTP for the given MOBILE NUMBER (primary login method, replacing
    * email-based OTP login 2026-09-16 — password+email login is still available as the
-   * secondary method). Always returns a generic success message — whether or not the
-   * phone is registered — so this endpoint can't be used to enumerate accounts; the
-   * code itself is only ever sent if a matching, active account exists, and the
-   * response never reveals which channel it went out on (that alone would leak
-   * registration status). WhatsApp-first with an email fallback while WhatsApp OTP is
+   * secondary method). An unregistered number gets a 404 telling the customer to sign up.
+   * WhatsApp-first with an email fallback while WhatsApp OTP is
    * disabled/pending Meta's Authentication-template approval — same channel pattern as
    * `requestPhoneVerification`/`requestEnrollmentOtp`, since the customer proved a
    * phone number here, not an email.
@@ -80,11 +77,13 @@ export class OtpService {
     }
 
     const user = await this.userRepository.findByPhone(normalized);
-    const generic = { message: 'If that mobile number is registered, a login code has been sent.' };
+    // Business decision (2026-09-25): tell the customer the number isn't registered so they know to
+    // sign up, accepting that this reveals whether a number has an account.
     if (!user) {
       Logger.warn(`[otp] login OTP requested for unregistered phone ${normalized} — nothing sent`);
-      return generic;
+      throw new AppError('This mobile number is not registered. Please sign up first.', 404);
     }
+    const generic = { message: 'A login code has been sent to your registered mobile number.' };
 
     const code = generateCode();
     const codeHash = await bcrypt.hash(code, 10);
@@ -144,9 +143,8 @@ export class OtpService {
   }
 
   /**
-   * Issue a password-reset code. Like `requestLoginOtp`, the response is generic
-   * regardless of whether the email is registered, so this can't be used to
-   * enumerate accounts.
+   * Issue a password-reset code. The response is generic regardless of whether the
+   * email is registered, so this can't be used to enumerate accounts.
    */
   public async requestPasswordReset(email: string): Promise<{ message: string }> {
     const normalized = String(email || '').toLowerCase().trim();
