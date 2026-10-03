@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from '../utils/appError';
+import { AppError, EMAIL_IN_USE_MESSAGE } from '../utils/appError';
 import Logger from '../utils/logger';
 import { config } from '../config';
 
@@ -16,9 +16,13 @@ export const errorMiddleware = (
   if (err instanceof AppError) {
     statusCode = err.statusCode;
     message = err.message;
-  } else if (unknownError?.code === 11000) {
+  } else if (unknownError?.code === '23505') {
+    // PostgreSQL unique_violation — a request that slipped past a service-level duplicate check.
     statusCode = 409;
-    message = 'Duplicate value violates unique constraint';
+    message =
+      unknownError.constraint === 'uq_users_email'
+        ? EMAIL_IN_USE_MESSAGE
+        : 'Duplicate value violates unique constraint';
   } else if (unknownError?.name === 'ValidationError') {
     statusCode = 400;
     const details = unknownError?.errors

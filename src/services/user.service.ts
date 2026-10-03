@@ -2,7 +2,7 @@ import { UserRepository, AddressData } from '../repositories/user.repository';
 import { IAddress } from '../domain/user';
 import { CouponRepository } from '../repositories/coupon.repository';
 import { StallConfigRepository } from '../repositories/stallConfig.repository';
-import { AppError } from '../utils/appError';
+import { AppError, EMAIL_IN_USE_MESSAGE } from '../utils/appError';
 import { generateToken } from '../utils/jwt';
 import { toUserResponse, toAddressResponse } from '../utils/userResponse';
 import { toIndianMobile, isIndianMobile } from '../utils/phone';
@@ -32,7 +32,7 @@ export class UserService {
 
     const existingUser = await this.userRepository.findByEmail(data.email);
     if (existingUser) {
-      throw new AppError('Email already in use', 400);
+      throw new AppError(EMAIL_IN_USE_MESSAGE, 409);
     }
 
     // Offline-stall registration is server-gated: even if a client claims

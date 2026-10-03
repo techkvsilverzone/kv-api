@@ -10,3 +10,5 @@ export class AppError extends Error {
     Error.captureStackTrace(this, this.constructor);
   }
 }
+
+export const EMAIL_IN_USE_MESSAGE = 'An account with this email already exists. Please log in instead.';

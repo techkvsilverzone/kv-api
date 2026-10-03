@@ -3,6 +3,7 @@ import { PoolClient } from 'pg';
 import { IUser, IAddress } from '../domain/user';
 import { query, queryOne, queryRows, withTransaction } from '../infrastructure/postgres/pool';
 import { toIndianMobile } from '../utils/phone';
+import { AppError, EMAIL_IN_USE_MESSAGE } from '../utils/appError';
 import {
   dateOnlyToDate,
   toBigIntParam,
@@ -218,7 +219,7 @@ export class UserRepository {
         'SELECT id FROM users WHERE email = $1 AND id <> $2',
         [String(data.email).toLowerCase().trim(), userId],
       );
-      if (clash) throw new Error('Email already in use');
+      if (clash) throw new AppError(EMAIL_IN_USE_MESSAGE, 409);
     }
 
     const assignments: string[] = [];

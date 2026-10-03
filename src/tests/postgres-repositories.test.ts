@@ -313,9 +313,10 @@ describe('PostgreSQL repositories', () => {
     it('rejects an email already used by another account', async () => {
       stub([{ id: '99' }]);
 
-      await expect(new UserRepository().update('4', { email: 'taken@example.com' })).rejects.toThrow(
-        'Email already in use',
-      );
+      await expect(new UserRepository().update('4', { email: 'taken@example.com' })).rejects.toMatchObject({
+        statusCode: 409,
+        message: 'An account with this email already exists. Please log in instead.',
+      });
     });
   });
 
