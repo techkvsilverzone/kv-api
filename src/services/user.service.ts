@@ -99,6 +99,27 @@ export class UserService {
     return toUserResponse(user);
   }
 
+  /**
+   * A customer editing their own account (`PUT /users/me`). Only these fields are theirs to
+   * set — `isAdmin`, `role`, `isActive`, `phoneVerified` and `passwordHash` must never pass
+   * through. A changed number must be verified again.
+   */
+  public async updateOwnProfile(userId: string, data: any) {
+    const SELF_EDITABLE = ['name', 'email', 'phone', 'dateOfBirth', 'anniversaryDate'] as const;
+    const changes: Record<string, unknown> = {};
+    for (const key of SELF_EDITABLE) {
+      if (data?.[key] !== undefined) changes[key] = data[key];
+    }
+
+    if (changes.phone !== undefined) {
+      const current = await this.userRepository.findById(userId);
+      if (current && toIndianMobile(changes.phone) !== toIndianMobile(current.phone)) {
+        changes.phoneVerified = false;
+      }
+    }
+    return this.updateProfile(userId, changes);
+  }
+
   public async getAllUsers() {
     const users = await this.userRepository.findAll();
     return users.map(toUserResponse);

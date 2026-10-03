@@ -107,7 +107,7 @@ export class UserController {
 
   public updateMe = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const user = await this.userService.updateProfile(req.user!._id.toString(), req.body);
+      const user = await this.userService.updateOwnProfile(req.user!._id.toString(), req.body);
       res.status(200).json(user);
     } catch (error) {
       next(error);
