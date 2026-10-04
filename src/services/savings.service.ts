@@ -695,7 +695,8 @@ export class SavingsService {
   public async getByPassbookNumber(requesterUserId: string, isStaffOrAdmin: boolean, passbookNumber: string) {
     const scheme = await this.savingsRepository.findByPassbookNumber(passbookNumber);
     if (!scheme) throw new AppError('No savings scheme found for that passbook number', 404);
-    if (!isStaffOrAdmin && scheme.userId.toString() !== requesterUserId) {
+    const ownerId = typeof scheme.userId === 'string' ? scheme.userId : scheme.userId._id;
+    if (!isStaffOrAdmin && ownerId !== requesterUserId) {
       throw new AppError('Not authorized', 403);
     }
     return this.withMaturityDate(scheme);

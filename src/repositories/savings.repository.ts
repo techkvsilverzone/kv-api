@@ -353,7 +353,8 @@ export class SavingsRepository {
   }
 
   public async findByPassbookNumber(passbookNumber: string): Promise<ISavings | null> {
-    const row = await queryOne<SavingsRow>(`${SAVINGS_SELECT} WHERE s.passbook_number = $1`, [
+    // With the owner joined, so a staff lookup shows the customer's name/mobile, not the viewer's.
+    const row = await queryOne<SavingsRow>(`${SAVINGS_SELECT_WITH_USER} WHERE s.passbook_number = $1`, [
       String(passbookNumber ?? '').trim().toUpperCase(),
     ]);
     return row ? mapSavings(row) : null;
