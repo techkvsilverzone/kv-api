@@ -19,6 +19,8 @@ export type SchemePaymentMode = 'FIXED' | 'FLEXIBLE';
 export type SchemeMetal = 'GOLD' | 'SILVER';
 
 export interface ISavingsPayment {
+  /** `savings_payments.id` — shown to customers as the receipt number. Absent on rows not yet saved. */
+  id?: string;
   month: number;
   /** Cash actually collected this row. 0 on the auto-credited bonus/devident row. */
   amount: number;

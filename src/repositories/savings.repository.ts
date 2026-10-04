@@ -64,6 +64,7 @@ const PAYMENTS_JSON = `
     (
       SELECT json_agg(
         json_build_object(
+          'id', sp.id::text,
           'month', sp.month,
           'amount', sp.amount::float8,
           'paidAt', sp.paid_at,
@@ -139,6 +140,7 @@ const SAVINGS_SELECT_WITH_USER = `
   LEFT JOIN users u ON u.id = s.user_id`;
 
 const mapPayment = (raw: Record<string, any>): ISavingsPayment => ({
+  ...(raw.id != null && { id: String(raw.id) }),
   month: toNum(raw.month),
   amount: toNum(raw.amount),
   paidAt: toDate(raw.paidAt) ?? new Date(0),
