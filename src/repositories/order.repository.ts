@@ -7,7 +7,7 @@ export { IOrder, IOrderItem, IShippingAddress };
 
 interface OrderRow {
   id: string;
-  user_id: string;
+  user_id: string | null;
   user_name: string | null;
   user_email: string | null;
   invoice_number: string | null;
@@ -37,6 +37,10 @@ interface OrderRow {
   shipping_pincode: string;
   shipping_country: string;
   delivered_at: Date | null;
+  channel: string | null;
+  sold_by: string | null;
+  sold_by_name: string | null;
+  sale_location: string | null;
   created_at: Date | null;
   updated_at: Date | null;
   items: unknown;
@@ -72,26 +76,35 @@ const ORDER_COLUMNS = `
   o.total_with_tax, o.delivery_fee, o.grand_total, o.total_amount, o.tax,
   o.shipping_name, o.shipping_phone, o.shipping_line1, o.shipping_line2,
   o.shipping_city, o.shipping_state, o.shipping_pincode, o.shipping_country,
-  o.delivered_at, o.created_at, o.updated_at`;
+  o.delivered_at, o.channel, o.sold_by, o.sale_location, o.created_at, o.updated_at`;
 
 /** Without the customer join — used where `populate` was not applied. */
 const ORDER_SELECT = `
-  SELECT ${ORDER_COLUMNS}, NULL::text AS user_name, NULL::text AS user_email, ${ITEMS_JSON}
-  FROM orders o`;
+  SELECT ${ORDER_COLUMNS}, NULL::text AS user_name, NULL::text AS user_email,
+         sb.name AS sold_by_name, ${ITEMS_JSON}
+  FROM orders o
+  LEFT JOIN users sb ON sb.id = o.sold_by`;
 
 /** With the customer join — the SQL equivalent of `populate('userId', 'name email')`. */
 const ORDER_SELECT_WITH_USER = `
-  SELECT ${ORDER_COLUMNS}, u.name AS user_name, u.email AS user_email, ${ITEMS_JSON}
+  SELECT ${ORDER_COLUMNS}, u.name AS user_name, u.email AS user_email,
+         sb.name AS sold_by_name, ${ITEMS_JSON}
   FROM orders o
-  LEFT JOIN users u ON u.id = o.user_id`;
+  LEFT JOIN users u ON u.id = o.user_id
+  LEFT JOIN users sb ON sb.id = o.sold_by`;
 
 const mapOrder = (row: OrderRow): IOrder => ({
   _id: String(row.id),
   // Mirrors populate: an object when the customer was joined, a bare id otherwise.
   userId:
-    row.user_name !== null || row.user_email !== null
-      ? { _id: String(row.user_id), name: row.user_name ?? '', email: row.user_email ?? '' }
-      : String(row.user_id),
+    row.user_id === null
+      ? null
+      : row.user_name !== null || row.user_email !== null
+        ? { _id: String(row.user_id), name: row.user_name ?? '', email: row.user_email ?? '' }
+        : String(row.user_id),
+  channel: row.channel === 'OFFLINE' ? 'OFFLINE' : 'ONLINE',
+  soldBy: row.sold_by ? { _id: String(row.sold_by), name: row.sold_by_name ?? '' } : null,
+  saleLocation: row.sale_location ?? null,
   invoiceNumber: row.invoice_number ?? '',
   status: row.status,
   paymentMethod: row.payment_method,
@@ -171,8 +184,11 @@ export class OrderRepository {
 
   public async create(data: any): Promise<IOrder> {
     const shippingAddress = data.shippingAddress || {};
+    const channel = data.channel === 'OFFLINE' ? 'OFFLINE' : 'ONLINE';
     const userId = toBigIntParam(data.user);
-    if (!userId) throw new Error(`Invalid user id: ${data.user}`);
+    // Only an in-store sale may have no customer account (walk-in customer).
+    if (!userId && (channel !== 'OFFLINE' || data.user)) throw new Error(`Invalid user id: ${data.user}`);
+    const status = data.status || 'Pending';
 
     const items = (data.items || []).map((item: any) => {
       const rawId = item?.product?._id ?? item?.product?.id ?? item?.productId ?? item?.product;
@@ -205,17 +221,19 @@ export class OrderRepository {
            gift_wrap_fee, subtotal, tax_amount, total_with_tax, delivery_fee,
            grand_total, total_amount, tax,
            shipping_name, shipping_phone, shipping_line1, shipping_line2,
-           shipping_city, shipping_state, shipping_pincode, shipping_country
+           shipping_city, shipping_state, shipping_pincode, shipping_country,
+           channel, sold_by, sale_location, delivered_at
          )
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,
-                 $19,$20,$21,$22,$23,$24,$25,$26)
+                 $19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,
+                 CASE WHEN $3 = 'Delivered' THEN NOW() END)
          RETURNING id`,
         [
           userId,
           invoiceNumber,
-          data.status || 'Pending',
+          status,
           String(data.paymentMethod || 'cod').toLowerCase(),
-          data.razorpayPaymentId ? 'Paid' : 'Pending',
+          data.paymentStatus || (data.razorpayPaymentId ? 'Paid' : 'Pending'),
           data.razorpayPaymentId || null,
           data.couponCode || null,
           Number(data.couponDiscount || 0),
@@ -240,6 +258,9 @@ export class OrderRepository {
           String(shippingAddress.state || ''),
           String(shippingAddress.pincode || ''),
           String(shippingAddress.country || 'India'),
+          channel,
+          toBigIntParam(data.soldBy),
+          data.saleLocation ? String(data.saleLocation).trim().slice(0, 200) : null,
         ],
       );
 

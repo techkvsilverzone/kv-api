@@ -38,9 +38,17 @@ export interface IOrderUserRef {
   email: string;
 }
 
+export type OrderChannel = 'ONLINE' | 'OFFLINE';
+
 export interface IOrder {
   _id: string;
-  userId: string | IOrderUserRef;
+  /** Null for an in-store sale to a walk-in customer with no account. */
+  userId: string | IOrderUserRef | null;
+  channel: OrderChannel;
+  /** The admin/staff member who rang up an in-store sale. */
+  soldBy?: { _id: string; name: string } | null;
+  /** Where an in-store sale happened, e.g. "Anna Nagar stall". */
+  saleLocation?: string | null;
   /** Sequential per-calendar-year tax invoice number, e.g. "INV-2026-000123". */
   invoiceNumber: string;
   status: string;

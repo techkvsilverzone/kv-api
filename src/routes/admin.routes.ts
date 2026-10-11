@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { ProductController } from '../controllers/product.controller';
 import { OrderController } from '../controllers/order.controller';
+import { OfflineSaleController } from '../controllers/offlineSale.controller';
 import { UserController } from '../controllers/user.controller';
 import { CouponController } from '../controllers/coupon.controller';
 import { SilverRateController } from '../controllers/silverrate.controller';
@@ -38,6 +39,7 @@ const idProofController = new IdProofController();
 const router = Router();
 const productController = new ProductController();
 const orderController = new OrderController();
+const offlineSaleController = new OfflineSaleController();
 const userController = new UserController();
 const couponController = new CouponController();
 const silverRateController = new SilverRateController();
@@ -335,6 +337,91 @@ router.get('/stats', orderController.getStats);
  *         $ref: '#/components/responses/Forbidden'
  */
 router.get('/orders', orderController.getAllOrders);
+
+/**
+ * @openapi
+ * /admin/offline-sales/quote:
+ *   post:
+ *     summary: Price an in-store sale before confirming it (admin or staff)
+ *     description: Same server-side pricing as online checkout (live rate, coupon, GST), with no delivery fee. Nothing is saved.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [items]
+ *             properties:
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     product: { type: string }
+ *                     quantity: { type: integer }
+ *                     variantWeight: { type: string }
+ *               couponCode: { type: string }
+ *     responses:
+ *       200:
+ *         description: Line prices, subtotal, discount, GST and grand total
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ */
+router.post('/offline-sales/quote', offlineSaleController.quote);
+
+/**
+ * @openapi
+ * /admin/offline-sales:
+ *   post:
+ *     summary: Record an in-store / stall sale and generate its invoice (admin or staff)
+ *     description: >
+ *       Creates an order with channel OFFLINE (already Paid and Delivered), reduces stock and writes an
+ *       inventory OUT entry. Customer details are optional; a mobile number that matches an account links
+ *       the sale to that customer.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [items, paymentMethod]
+ *             properties:
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     product: { type: string }
+ *                     quantity: { type: integer }
+ *                     variantWeight: { type: string }
+ *               paymentMethod: { type: string, enum: [cash, upi, card] }
+ *               couponCode: { type: string }
+ *               saleLocation: { type: string, example: 'Anna Nagar stall' }
+ *               customer:
+ *                 type: object
+ *                 properties:
+ *                   name: { type: string }
+ *                   phone: { type: string, example: '9876543210' }
+ *                   address: { type: string }
+ *     responses:
+ *       201:
+ *         description: The created order, including its invoice number
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       409:
+ *         description: A product is out of stock or the quantity is unavailable
+ */
+router.post('/offline-sales', offlineSaleController.create);
 
 /**
  * @openapi
