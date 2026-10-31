@@ -75,6 +75,10 @@ export const config = {
   whatsappOtpTemplate: process.env.WHATSAPP_OTP_TEMPLATE || 'kv_otp',
   whatsappOtpTemplateLanguage: process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE || 'en_US',
   otpExpiryMinutes: Number(process.env.OTP_EXPIRY_MINUTES || 5),
+  // Push notifications (FCM HTTP v1). A Firebase service-account key, as a file path or inline
+  // JSON. Unset = push is skipped; the in-app notification inbox still works.
+  fcmServiceAccountFile: process.env.FCM_SERVICE_ACCOUNT_FILE || '',
+  fcmServiceAccountJson: process.env.FCM_SERVICE_ACCOUNT_JSON || '',
   // Returns policy: KV-fault claims require an unboxing video sent to this
   // WhatsApp number (shown to the customer after they file a fault-based return),
   // received via the inbound webhook below and matched to the return by

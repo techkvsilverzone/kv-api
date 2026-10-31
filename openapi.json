@@ -854,6 +854,9 @@
           "phone": {
             "type": "string"
           },
+          "phoneVerified": {
+            "type": "boolean"
+          },
           "isAdmin": {
             "type": "boolean"
           },
@@ -892,7 +895,8 @@
         "required": [
           "name",
           "email",
-          "password"
+          "password",
+          "phone"
         ],
         "properties": {
           "name": {
@@ -907,7 +911,8 @@
             "format": "password"
           },
           "phone": {
-            "type": "string"
+            "type": "string",
+            "description": "Required 10-digit Indian mobile number — a verification code (WhatsApp, or email while WhatsApp OTP is disabled) is sent to it on signup."
           },
           "stallEvent": {
             "type": "boolean",
@@ -1797,6 +1802,158 @@
         }
       }
     },
+    "/admin/offline-sales/quote": {
+      "post": {
+        "summary": "Price an in-store sale before confirming it (admin or staff)",
+        "description": "Same server-side pricing as online checkout (live rate, coupon, GST), with no delivery fee. Nothing is saved.",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "items"
+                ],
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "product": {
+                          "type": "string"
+                        },
+                        "quantity": {
+                          "type": "integer"
+                        },
+                        "variantWeight": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "couponCode": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Line prices, subtotal, discount, GST and grand total"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/admin/offline-sales": {
+      "post": {
+        "summary": "Record an in-store / stall sale and generate its invoice (admin or staff)",
+        "description": "Creates an order with channel OFFLINE (already Paid and Delivered), reduces stock and writes an inventory OUT entry. Customer details are optional; a mobile number that matches an account links the sale to that customer.\n",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "items",
+                  "paymentMethod"
+                ],
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "product": {
+                          "type": "string"
+                        },
+                        "quantity": {
+                          "type": "integer"
+                        },
+                        "variantWeight": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "paymentMethod": {
+                    "type": "string",
+                    "enum": [
+                      "cash",
+                      "upi",
+                      "card"
+                    ]
+                  },
+                  "couponCode": {
+                    "type": "string"
+                  },
+                  "saleLocation": {
+                    "type": "string",
+                    "example": "Anna Nagar stall"
+                  },
+                  "customer": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "9876543210"
+                      },
+                      "address": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created order, including its invoice number",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "description": "A product is out of stock or the quantity is unavailable"
+          }
+        }
+      }
+    },
     "/admin/users": {
       "get": {
         "summary": "Get all users",
@@ -2466,7 +2623,7 @@
     "/admin/savings/{id}/pay": {
       "post": {
         "summary": "Manually record a collection on a passbook (admin only)",
-        "description": "For cash/offline collections or corrections — not exposed to staff. `materialRate` defaults to the live silver rate; pass it to override (e.g. a backdated entry).\n",
+        "description": "For cash/offline collections or corrections — staff and admin can both record a collection; editing/deleting a ledger row afterward stays admin-only. `materialRate` defaults to the live rate for the scheme's metal; pass it to override (e.g. a backdated entry).\n",
         "tags": [
           "Admin"
         ],
@@ -2641,6 +2798,197 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/admin/savings/{id}/cancel": {
+      "post": {
+        "summary": "Cancel a scheme early and compute its forfeit/redeemable split (admin only)",
+        "description": "Card rule 6: forfeits the plan's earlyExitPenaltyPercent (default 10%) of the amount paid, minus the ₹ value of any gifts already handed over (pass `giftsValueDeducted`). The remainder is redeemable as goods only — no cash refund path exists.\n",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "giftsValueDeducted": {
+                    "type": "number"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cancelled scheme with the computed forfeit split"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/admin/savings/{id}/redemption/compute": {
+      "post": {
+        "summary": "Compute a Diwali scheme's redemption payout (admin only)",
+        "description": "Requires the scheme to have completed all its installments. Computes totalValue = totalPaid + 1 bonus month, then splits it into a fixed gifts value, the plan's silver coin (fixed weight, valued at today's silver rate), and gold — a fixed ₹ VALUE (the remainder), converted to however many grams that buys at today's gold rate. Result is stored on the scheme's maturityBenefits.\n",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scheme with the computed redemption payout on maturityBenefits"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/admin/id-proofs": {
+      "get": {
+        "summary": "Item 2 — list customer KYC ID proof submissions for review (admin + staff, mirrors the return-video reconciliation queue)",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Pending",
+                "Verified",
+                "Rejected"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Submissions, newest first"
+          }
+        }
+      }
+    },
+    "/admin/id-proofs/{id}/verify": {
+      "put": {
+        "summary": "Approve or reject a customer's ID proof submission",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Verified",
+                      "Rejected"
+                    ]
+                  },
+                  "rejectionReason": {
+                    "type": "string",
+                    "description": "Required when status is Rejected"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated submission"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
@@ -4491,6 +4839,150 @@
         }
       }
     },
+    "/admin/scheme-plans": {
+      "get": {
+        "summary": "List all savings scheme plans (incl. inactive)",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of scheme plans"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a savings scheme plan",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchemePlanInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Scheme plan created"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/admin/scheme-plans/{id}": {
+      "put": {
+        "summary": "Update a savings scheme plan",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchemePlanInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Scheme plan updated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a savings scheme plan",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Scheme plan deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
     "/auth/signup": {
       "post": {
         "summary": "Create a new user account",
@@ -4683,7 +5175,7 @@
     },
     "/auth/otp/request": {
       "post": {
-        "summary": "Request a one-time login code (emailed; also sent via WhatsApp once that channel is approved)",
+        "summary": "Request a one-time login code by mobile number (primary login method; WhatsApp-first, emails the code as a fallback while WhatsApp OTP is disabled/pending Meta approval)",
         "tags": [
           "Auth"
         ],
@@ -4694,12 +5186,12 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "email"
+                  "phone"
                 ],
                 "properties": {
-                  "email": {
+                  "phone": {
                     "type": "string",
-                    "format": "email"
+                    "example": "9876543210"
                   }
                 }
               }
@@ -4708,7 +5200,7 @@
         },
         "responses": {
           "200": {
-            "description": "Generic confirmation — does not reveal whether the email is registered",
+            "description": "Code sent to the registered mobile number",
             "content": {
               "application/json": {
                 "schema": {
@@ -4719,13 +5211,16 @@
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "description": "Mobile number is not registered — message: 'This mobile number is not registered. Please sign up first.'"
           }
         }
       }
     },
     "/auth/otp/verify": {
       "post": {
-        "summary": "Verify a login OTP and start a session",
+        "summary": "Verify a login OTP (by mobile number) and start a session",
         "tags": [
           "Auth"
         ],
@@ -4736,13 +5231,13 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "email",
+                  "phone",
                   "code"
                 ],
                 "properties": {
-                  "email": {
+                  "phone": {
                     "type": "string",
-                    "format": "email"
+                    "example": "9876543210"
                   },
                   "code": {
                     "type": "string",
@@ -4931,6 +5426,7 @@
     "/delivery/check": {
       "get": {
         "summary": "Check pincode delivery serviceability",
+        "description": "Confirms the pincode exists in India Post's directory, resolves its district/state to a delivery zone and returns that zone's charge from delivery-config. Remote areas (Andaman & Nicobar, Lakshadweep) are not serviceable. If the directory is unreachable the result is `available: true, verified: false` so a sale is never blocked by the outage.\n",
         "tags": [
           "Delivery"
         ],
@@ -4953,29 +5449,48 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "pincode": {
+                      "type": "string",
+                      "example": "600040"
+                    },
                     "available": {
                       "type": "boolean",
                       "example": true
                     },
-                    "reason": {
+                    "verified": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "city": {
                       "type": "string",
-                      "description": "Present when not serviceable to a standard courier",
-                      "example": "Remote area — serviceable via manual arrangement"
+                      "example": "Chennai"
+                    },
+                    "state": {
+                      "type": "string",
+                      "example": "Tamil Nadu"
+                    },
+                    "deliveryZone": {
+                      "type": "string",
+                      "enum": [
+                        "chennai",
+                        "otherDistrict",
+                        "otherState"
+                      ],
+                      "nullable": true
+                    },
+                    "deliveryFee": {
+                      "type": "number",
+                      "nullable": true,
+                      "example": 150
                     },
                     "estimatedDays": {
                       "type": "string",
-                      "description": "Present when serviceable",
                       "example": "5-7"
                     },
-                    "courierPartner": {
+                    "reason": {
                       "type": "string",
-                      "description": "Present when serviceable",
-                      "example": "BlueDart"
-                    },
-                    "cod": {
-                      "type": "boolean",
-                      "description": "Cash-on-delivery availability (present when serviceable)",
-                      "example": true
+                      "description": "Present when not serviceable",
+                      "example": "This pincode does not exist"
                     }
                   }
                 }
@@ -6234,6 +6749,49 @@
         }
       }
     },
+    "/savings/enroll/request-otp": {
+      "post": {
+        "summary": "Request the confirmation code required to enroll (item 2, replaces KYC gating)",
+        "tags": [
+          "Savings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Code sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "channel": {
+                      "type": "string",
+                      "enum": [
+                        "whatsapp",
+                        "email"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
     "/savings/enroll": {
       "post": {
         "summary": "Enroll in a savings scheme",
@@ -6252,30 +6810,29 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "planName",
+                  "schemeType",
                   "monthlyAmount",
-                  "duration"
+                  "otp"
                 ],
                 "properties": {
-                  "planName": {
+                  "schemeType": {
                     "type": "string",
-                    "example": "Silver Saver"
+                    "enum": [
+                      "GOLD_11_1",
+                      "SILVER_11_1",
+                      "DIWALI"
+                    ],
+                    "description": "Which catalog plan (see GET /scheme-plans) to enroll under."
                   },
                   "monthlyAmount": {
                     "type": "integer",
-                    "minimum": 1000,
-                    "description": "Whole number, at least 1000",
-                    "example": 2000
+                    "description": "Must be one of the chosen plan's monthlyAmounts.",
+                    "example": 5000
                   },
-                  "duration": {
-                    "type": "integer",
-                    "enum": [
-                      6,
-                      11,
-                      12
-                    ],
-                    "description": "Scheme duration in months",
-                    "example": 11
+                  "otp": {
+                    "type": "string",
+                    "description": "Confirmation code from POST /savings/enroll/request-otp.",
+                    "example": "123456"
                   }
                 }
               }
@@ -6497,8 +7054,8 @@
     },
     "/savings/{schemeId}/pay/create-order": {
       "post": {
-        "summary": "Create a Razorpay order for this scheme's next monthly installment",
-        "description": "The amount is always the scheme's own `monthlyAmount` — server-computed, never client input. Step 1 of the customer self-pay flow; step 2 is `/pay/verify`.\n",
+        "summary": "Create a Razorpay order for this scheme's next installment",
+        "description": "For a FIXED-mode scheme (Gold/Silver 11+1, Diwali) the amount is always the scheme's own `monthlyAmount` — server-computed, request body ignored. For a FLEXIBLE-mode scheme (item 4, KV Smart Purchase Plan) `amount` is REQUIRED and must be >= the plan's minimum. Step 1 of the customer self-pay flow; step 2 is `/pay/verify`.\n",
         "tags": [
           "Savings"
         ],
@@ -6517,6 +7074,22 @@
             }
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "description": "Required for FLEXIBLE-mode schemes only; ignored for FIXED-mode schemes."
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": "Razorpay order",
@@ -6618,6 +7191,38 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/scheme-plans": {
+      "get": {
+        "summary": "List active savings scheme plans (Gold 11+1, Silver 11+1, Diwali, etc.)",
+        "tags": [
+          "Savings"
+        ],
+        "responses": {
+          "200": {
+            "description": "Active scheme plans",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SchemePlan"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -7258,6 +7863,400 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/users/me/phone/request-otp": {
+      "post": {
+        "summary": "Request a WhatsApp/email code to verify the current user's phone number",
+        "description": "Item 1 — first-time mobile verification. Sends via WhatsApp when WHATSAPP_OTP_ENABLED is on, otherwise falls back to email so verification isn't blocked on Meta's Authentication-template approval.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Code sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "channel": {
+                      "type": "string",
+                      "enum": [
+                        "whatsapp",
+                        "email"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/users/me/phone/verify-otp": {
+      "post": {
+        "summary": "Verify the current user's phone number with the code from request-otp",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Phone verified — returns the updated user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/users/me/id-proof": {
+      "get": {
+        "summary": "Get the current user's KYC ID proof submission (item 2), or null if none yet",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The submission, or null"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "summary": "Submit (or resubmit) the current user's ID proof — required once before the first savings-scheme enrollment",
+        "description": "Verification is asynchronous — this call succeeds (status Pending) without waiting for admin/staff review, per business decision (non-blocking enrollment).",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "idProofType",
+                  "idProofNumber",
+                  "image"
+                ],
+                "properties": {
+                  "idProofType": {
+                    "type": "string",
+                    "enum": [
+                      "AADHAAR",
+                      "PAN",
+                      "VOTER_ID",
+                      "DRIVING_LICENSE"
+                    ]
+                  },
+                  "idProofNumber": {
+                    "type": "string"
+                  },
+                  "image": {
+                    "type": "string",
+                    "description": "Base64 data URI of a photo of the document"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Submission recorded, status Pending"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/users/me/notifications": {
+      "get": {
+        "summary": "The caller's notification inbox (newest 50) and unread count",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inbox",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "unreadCount": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "notifications": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "order",
+                              "payment",
+                              "savings",
+                              "return",
+                              "general"
+                            ]
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "Order shipped"
+                          },
+                          "body": {
+                            "type": "string",
+                            "example": "Your order #000123 is on its way."
+                          },
+                          "route": {
+                            "type": "string",
+                            "nullable": true,
+                            "example": "/orders/123"
+                          },
+                          "read": {
+                            "type": "boolean"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/users/me/notifications/read-all": {
+      "post": {
+        "summary": "Mark every notification read",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Done"
+          }
+        }
+      }
+    },
+    "/users/me/notifications/{id}/read": {
+      "post": {
+        "summary": "Mark one of the caller's notifications read",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Done"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/users/me/push-tokens": {
+      "post": {
+        "summary": "Register this device's FCM token for push notifications",
+        "description": "Upserts by token; a token re-registered by another account moves to it.",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token",
+                  "platform"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "platform": {
+                    "type": "string",
+                    "enum": [
+                      "android",
+                      "ios",
+                      "web"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Registered"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove one of the caller's device tokens (e.g. on sign-out)",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Removed"
           }
         }
       }

@@ -6,6 +6,7 @@ import { StockService } from './stock.service';
 import { AppError } from '../utils/appError';
 import { sendOrderConfirmationEmail, buildOrderConfirmationInput } from '../utils/emailNotifications';
 import { sendPaymentSuccessMessage } from '../utils/whatsapp';
+import { notifyOrderPlaced } from './customerNotifications';
 import { createRazorpayOrder, fetchRazorpayOrder, verifyRazorpaySignature } from '../utils/razorpay';
 import Logger from '../utils/logger';
 
@@ -15,6 +16,7 @@ export interface CreateOrderInput {
   // Shipping address drives the zone delivery charge; pincode kept for back-compat.
   shippingAddress?: CheckoutAddress | null;
   pincode?: string | null;
+  giftWrap?: boolean;
   currency?: string;
 }
 
@@ -44,6 +46,7 @@ export class PaymentService {
       couponCode: input.couponCode,
       address: input.shippingAddress,
       pincode: input.pincode,
+      giftWrap: input.giftWrap === true,
     });
 
     if (breakdown.amountInPaise <= 0) {
@@ -94,6 +97,7 @@ export class PaymentService {
       couponCode: orderData.couponCode,
       address: orderData.shippingAddress,
       pincode: orderData.shippingAddress?.pincode,
+      giftWrap: orderData.giftWrap === true,
     });
 
     // For online payments, confirm the amount Razorpay actually captured equals
@@ -124,9 +128,9 @@ export class PaymentService {
         razorpayOrderId: razorpayOrderId || null,
         couponCode: breakdown.couponCode,
         couponDiscount: breakdown.discount,
-        giftWrap: orderData.giftWrap || false,
-        giftMessage: orderData.giftMessage || null,
-        giftWrapFee: orderData.giftWrapFee || 0,
+        giftWrap: breakdown.giftWrap,
+        giftMessage: breakdown.giftWrap ? String(orderData.giftMessage ?? '').slice(0, 200) || null : null,
+        giftWrapFee: breakdown.giftWrapFee,
         subtotal: breakdown.subtotal,
         taxAmount: breakdown.taxAmount,
         totalWithTax: Math.round((breakdown.subtotal + breakdown.taxAmount) * 100) / 100,
@@ -148,6 +152,8 @@ export class PaymentService {
         await this.couponRepository.incrementUsedCount(coupon._id);
       }
     }
+
+    await notifyOrderPlaced({ ...order, userId: order.userId ?? userId });
 
     // Send the order confirmation email for BOTH razorpay and COD (best-effort).
     try {
@@ -198,6 +204,8 @@ export class PaymentService {
       taxAmount: breakdown.taxAmount,
       deliveryZone: breakdown.deliveryZone,
       deliveryFee: breakdown.deliveryFee,
+      giftWrap: breakdown.giftWrap,
+      giftWrapFee: breakdown.giftWrapFee,
       grandTotal: breakdown.grandTotal,
     };
   }

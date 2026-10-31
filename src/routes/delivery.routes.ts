@@ -9,6 +9,11 @@ const deliveryController = new DeliveryController();
  * /delivery/check:
  *   get:
  *     summary: Check pincode delivery serviceability
+ *     description: >
+ *       Confirms the pincode exists in India Post's directory, resolves its district/state to a
+ *       delivery zone and returns that zone's charge from delivery-config. Remote areas
+ *       (Andaman & Nicobar, Lakshadweep) are not serviceable. If the directory is unreachable the
+ *       result is `available: true, verified: false` so a sale is never blocked by the outage.
  *     tags: [Delivery]
  *     parameters:
  *       - in: query
@@ -25,25 +30,15 @@ const deliveryController = new DeliveryController();
  *             schema:
  *               type: object
  *               properties:
- *                 available:
- *                   type: boolean
- *                   example: true
- *                 reason:
- *                   type: string
- *                   description: Present when not serviceable to a standard courier
- *                   example: Remote area — serviceable via manual arrangement
- *                 estimatedDays:
- *                   type: string
- *                   description: Present when serviceable
- *                   example: 5-7
- *                 courierPartner:
- *                   type: string
- *                   description: Present when serviceable
- *                   example: BlueDart
- *                 cod:
- *                   type: boolean
- *                   description: Cash-on-delivery availability (present when serviceable)
- *                   example: true
+ *                 pincode: { type: string, example: '600040' }
+ *                 available: { type: boolean, example: true }
+ *                 verified: { type: boolean, example: true }
+ *                 city: { type: string, example: Chennai }
+ *                 state: { type: string, example: Tamil Nadu }
+ *                 deliveryZone: { type: string, enum: [chennai, otherDistrict, otherState], nullable: true }
+ *                 deliveryFee: { type: number, nullable: true, example: 150 }
+ *                 estimatedDays: { type: string, example: 5-7 }
+ *                 reason: { type: string, description: Present when not serviceable, example: This pincode does not exist }
  *       400:
  *         $ref: '#/components/responses/BadRequest'
  */

@@ -9,6 +9,7 @@ import { createRazorpayOrder, fetchRazorpayOrder, verifyRazorpaySignature } from
 import { AppError } from '../utils/appError';
 import { addMonths, istMonthKey } from '../utils/time';
 import Logger from '../utils/logger';
+import { notifySavingsPayment } from './customerNotifications';
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 const round3 = (n: number) => Math.round(n * 1000) / 1000;
@@ -271,6 +272,7 @@ export class SavingsService {
 
   /** WhatsApp payment-success confirmation — best-effort, never blocks the response. */
   private async notifyPaymentSuccess(userId: string, updated: ISavings, amount: number) {
+    await notifySavingsPayment(userId, updated, amount);
     try {
       const user = await this.userRepository.findById(userId);
       if (user?.phone && updated.passbookNumber) {

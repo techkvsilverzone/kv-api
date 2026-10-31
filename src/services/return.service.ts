@@ -6,6 +6,7 @@ import { downloadAndStoreWhatsAppMedia } from '../utils/whatsappMedia';
 import { config } from '../config';
 import { AppError } from '../utils/appError';
 import Logger from '../utils/logger';
+import { notifyReturnStatus } from './customerNotifications';
 
 export class ReturnService {
   private returnRepository: ReturnRepository;
@@ -73,6 +74,7 @@ export class ReturnService {
   public async updateReturnStatus(id: string, status: string, refundAmount: number) {
     const updated = await this.returnRepository.updateStatus(id, status, refundAmount);
     if (!updated) throw new AppError('Return request not found', 404);
+    await notifyReturnStatus(updated);
     return updated;
   }
 

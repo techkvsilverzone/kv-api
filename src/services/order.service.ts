@@ -6,6 +6,7 @@ import { StockService } from './stock.service';
 import { AppError } from '../utils/appError';
 import { sendOrderConfirmationEmail, buildOrderConfirmationInput } from '../utils/emailNotifications';
 import Logger from '../utils/logger';
+import { notifyOrderPlaced, notifyOrderStatus } from './customerNotifications';
 
 // Minimum seconds between confirmation-email resends for the same order.
 const RESEND_COOLDOWN_MS = 60_000;
@@ -38,6 +39,7 @@ export class OrderService {
       couponCode: data.couponCode,
       address: data.shippingAddress,
       pincode: data.shippingAddress?.pincode,
+      giftWrap: data.giftWrap === true,
     });
 
     // I9: reserve stock atomically before persisting.
@@ -53,9 +55,9 @@ export class OrderService {
         status: data.status || 'Pending',
         couponCode: breakdown.couponCode,
         couponDiscount: breakdown.discount,
-        giftWrap: data.giftWrap || false,
-        giftMessage: data.giftMessage || null,
-        giftWrapFee: data.giftWrapFee || 0,
+        giftWrap: breakdown.giftWrap,
+        giftMessage: breakdown.giftWrap ? String(data.giftMessage ?? '').slice(0, 200) || null : null,
+        giftWrapFee: breakdown.giftWrapFee,
         subtotal: breakdown.subtotal,
         taxAmount: breakdown.taxAmount,
         totalWithTax: Math.round((breakdown.subtotal + breakdown.taxAmount) * 100) / 100,
@@ -68,6 +70,8 @@ export class OrderService {
       await this.stockService.releaseForOrder(breakdown.items, userId);
       throw error;
     }
+
+    await notifyOrderPlaced({ ...order, userId: order.userId ?? userId });
 
     try {
       const user = await this.userRepository.findById(userId);
@@ -133,6 +137,7 @@ export class OrderService {
   public async updateOrderStatus(orderId: string, status: string) {
     const order = await this.orderRepository.updateStatus(orderId, status);
     if (!order) throw new AppError('Order not found', 404);
+    await notifyOrderStatus(order);
     return order;
   }
 

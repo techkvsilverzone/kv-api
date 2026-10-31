@@ -12,7 +12,7 @@ export class PaymentController {
 
   public createOrder = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { items, couponCode, pincode, shippingAddress, currency } = req.body;
+      const { items, couponCode, pincode, shippingAddress, currency, giftWrap } = req.body;
       if (!Array.isArray(items) || items.length === 0) {
         throw new AppError('items (array of { product, quantity }) is required', 400);
       }
@@ -22,6 +22,7 @@ export class PaymentController {
         couponCode,
         pincode,
         shippingAddress,
+        giftWrap: giftWrap === true,
         currency,
       });
       res.status(201).json(order);

@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { UserController } from '../controllers/user.controller';
 import { IdProofController } from '../controllers/idProof.controller';
+import { NotificationController } from '../controllers/notification.controller';
 import { protect } from '../middlewares/auth.middleware';
 
 const router = Router();
 const userController = new UserController();
 const idProofController = new IdProofController();
+const notificationController = new NotificationController();
 
 /**
  * @openapi
@@ -336,5 +338,97 @@ router.get('/me/id-proof', protect, idProofController.getMine);
  *         $ref: '#/components/responses/Unauthorized'
  */
 router.post('/me/id-proof', protect, idProofController.submitMine);
+
+/**
+ * @openapi
+ * /users/me/notifications:
+ *   get:
+ *     summary: The caller's notification inbox (newest 50) and unread count
+ *     tags: [Notifications]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Inbox
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 unreadCount: { type: integer, example: 2 }
+ *                 notifications:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id: { type: string }
+ *                       kind: { type: string, enum: [order, payment, savings, return, general] }
+ *                       title: { type: string, example: Order shipped }
+ *                       body: { type: string, example: 'Your order #000123 is on its way.' }
+ *                       route: { type: string, nullable: true, example: /orders/123 }
+ *                       read: { type: boolean }
+ *                       createdAt: { type: string, format: date-time }
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ */
+router.get('/me/notifications', protect, notificationController.list);
+
+/**
+ * @openapi
+ * /users/me/notifications/read-all:
+ *   post:
+ *     summary: Mark every notification read
+ *     tags: [Notifications]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       204: { description: Done }
+ * /users/me/notifications/{id}/read:
+ *   post:
+ *     summary: Mark one of the caller's notifications read
+ *     tags: [Notifications]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: id, required: true, schema: { type: string } }
+ *     responses:
+ *       204: { description: Done }
+ *       404: { $ref: '#/components/responses/NotFound' }
+ */
+router.post('/me/notifications/read-all', protect, notificationController.markAllRead);
+router.post('/me/notifications/:id/read', protect, notificationController.markRead);
+
+/**
+ * @openapi
+ * /users/me/push-tokens:
+ *   post:
+ *     summary: Register this device's FCM token for push notifications
+ *     description: Upserts by token; a token re-registered by another account moves to it.
+ *     tags: [Notifications]
+ *     security: [{ bearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [token, platform]
+ *             properties:
+ *               token: { type: string }
+ *               platform: { type: string, enum: [android, ios, web] }
+ *     responses:
+ *       204: { description: Registered }
+ *       400: { $ref: '#/components/responses/BadRequest' }
+ *   delete:
+ *     summary: Remove one of the caller's device tokens (e.g. on sign-out)
+ *     tags: [Notifications]
+ *     security: [{ bearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { type: object, required: [token], properties: { token: { type: string } } }
+ *     responses:
+ *       204: { description: Removed }
+ */
+router.post('/me/push-tokens', protect, notificationController.registerToken);
+router.delete('/me/push-tokens', protect, notificationController.unregisterToken);
 
 export default router;

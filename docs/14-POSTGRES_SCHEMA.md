@@ -209,6 +209,24 @@
   created_at  timestamp with time zone NOT NULL DEFAULT now()
   updated_at  timestamp with time zone NOT NULL DEFAULT now()
 
+### notifications  (added 2026-10-31 — database/postgres/2026-10-31_notifications.sql)
+  id  bigint NOT NULL (bigserial)
+  user_id  bigint NOT NULL → users(id) ON DELETE CASCADE
+  kind  character varying(40) NOT NULL  -- order | payment | savings | return | general
+  title  character varying(200) NOT NULL
+  body  character varying(1000) NOT NULL
+  route  character varying(300)  -- storefront path to open on tap
+  read_at  timestamp with time zone
+  created_at  timestamp with time zone NOT NULL DEFAULT now()
+
+### push_tokens  (added 2026-10-31 — same migration)
+  id  bigint NOT NULL (bigserial)
+  user_id  bigint NOT NULL → users(id) ON DELETE CASCADE
+  token  text NOT NULL UNIQUE  -- FCM registration token
+  platform  character varying(10) NOT NULL  -- android | ios | web
+  created_at  timestamp with time zone NOT NULL DEFAULT now()
+  updated_at  timestamp with time zone NOT NULL DEFAULT now()
+
 ### otp_codes  (rows: 0)
   id  bigint NOT NULL
   legacy_mongo_id  character varying(24)

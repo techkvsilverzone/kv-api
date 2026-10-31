@@ -67,9 +67,14 @@ export interface CheckoutBreakdown {
   taxAmount: number; // GST on the discounted taxable subtotal
   deliveryZone: DeliveryZone | null;
   deliveryFee: number;
+  giftWrap: boolean;
+  giftWrapFee: number; // flat, added after GST (not taxed), as the storefront shows it
   grandTotal: number;
   amountInPaise: number;
 }
+
+/** shortcut: flat gift-wrap fee matching the storefront's ₹99; move to pricing_config when admins need to change it. */
+export const GIFT_WRAP_FEE = 99;
 
 const round2 = (n: number): number => Math.round(n * 100) / 100;
 
@@ -309,6 +314,7 @@ export class PricingService {
     couponCode?: string | null;
     address?: CheckoutAddress | null;
     pincode?: string | null;
+    giftWrap?: boolean;
   }): Promise<CheckoutBreakdown> {
     const rawItems = Array.isArray(input.items) ? input.items : [];
     if (rawItems.length === 0) {
@@ -413,7 +419,11 @@ export class PricingService {
       deliveryFee = Number(deliveryConfig[deliveryZone]) || 0;
     }
 
-    const grandTotal = Math.max(0, round2(subtotal - discount + taxAmount + deliveryFee));
+    // 4. Optional gift wrap: a flat fee the server owns, never the client's figure.
+    const giftWrap = input.giftWrap === true;
+    const giftWrapFee = giftWrap ? GIFT_WRAP_FEE : 0;
+
+    const grandTotal = Math.max(0, round2(subtotal - discount + taxAmount + deliveryFee + giftWrapFee));
 
     return {
       items,
@@ -425,6 +435,8 @@ export class PricingService {
       taxAmount,
       deliveryZone,
       deliveryFee,
+      giftWrap,
+      giftWrapFee,
       grandTotal,
       amountInPaise: Math.round(grandTotal * 100),
     };

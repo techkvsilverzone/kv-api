@@ -1,4 +1,4 @@
-import { PricingService, resolvePurityFraction, resolveDeliveryZone } from '../services/pricing.service';
+import { PricingService, resolvePurityFraction, resolveDeliveryZone, GIFT_WRAP_FEE } from '../services/pricing.service';
 import { IProduct } from '../domain/catalog';
 import { ProductRepository } from '../repositories/product.repository';
 import { PricingConfigRepository } from '../repositories/pricingConfig.repository';
@@ -186,5 +186,34 @@ describe('PricingService.computeCheckout — variant weight passthrough', () => 
     expect(breakdown.items[1].weight).toBe(20);
     expect(breakdown.items[1].price).toBeCloseTo(2035);
     expect(breakdown.subtotal).toBeCloseTo(1017.5 + 2035);
+  });
+});
+
+describe('PricingService.computeCheckout — gift wrap', () => {
+  const service = new PricingService();
+  const product = makeProduct({
+    _id: { toString: () => 'p1' },
+    weight: 10,
+    purity: '925',
+    productGroupCode: 'GRP-1',
+    makingCharge: { type: 'percentage', value: 10 },
+  } as unknown as Partial<IProduct>);
+
+  afterEach(() => jest.restoreAllMocks());
+
+  it('adds the flat server-owned fee after GST, and nothing without gift wrap', async () => {
+    jest.spyOn(service, 'getCurrentSilverRatePerGram').mockResolvedValue(100);
+    jest.spyOn(ProductRepository.prototype, 'findById').mockResolvedValue(product as never);
+    jest.spyOn(PricingConfigRepository.prototype, 'getGstPercent').mockResolvedValue(3);
+
+    const plain = await service.computeCheckout({ items: [{ product: 'p1', quantity: 1 }] });
+    const wrapped = await service.computeCheckout({ items: [{ product: 'p1', quantity: 1 }], giftWrap: true });
+
+    expect(plain.giftWrapFee).toBe(0);
+    expect(wrapped.giftWrap).toBe(true);
+    expect(wrapped.giftWrapFee).toBe(GIFT_WRAP_FEE);
+    expect(wrapped.taxAmount).toBeCloseTo(plain.taxAmount); // the fee is not taxed
+    expect(wrapped.grandTotal).toBeCloseTo(plain.grandTotal + 99);
+    expect(wrapped.amountInPaise).toBe(Math.round(wrapped.grandTotal * 100));
   });
 });
