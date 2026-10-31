@@ -1,4 +1,4 @@
-import { PricingService, resolvePurityFraction, resolveDeliveryZone, GIFT_WRAP_FEE } from '../services/pricing.service';
+import { PricingService, resolvePurityFraction, resolveDeliveryZone, GIFT_WRAP_FEE, metalOf } from '../services/pricing.service';
 import { IProduct } from '../domain/catalog';
 import { ProductRepository } from '../repositories/product.repository';
 import { PricingConfigRepository } from '../repositories/pricingConfig.repository';
@@ -37,6 +37,25 @@ describe('resolvePurityFraction', () => {
 
 describe('PricingService.computeUnitPrice', () => {
   const service = new PricingService();
+
+  it('sells a charge-less product at its listed price, as the repository returns it (null legacy fields)', () => {
+    // Exactly what ProductRepository yields for "Wooden Aarathi": no charges, legacy columns null.
+    const product = makeProduct({
+      price: 650, weight: 4.2, purity: '999', isFixedPrice: false,
+      makingCharge: null, wastage: null, makingCharges: null, makingChargePercent: null, makingChargePerGram: null,
+    } as unknown as Partial<IProduct>);
+    const b = service.computeUnitPrice(product, 230);
+    expect(b.basis).toBe('static');
+    expect(b.unitPrice).toBe(650);
+  });
+
+  it('still prices live when a legacy charge is set, including an explicit 0', () => {
+    const zero = makeProduct({ price: 650, weight: 4.2, purity: '999', makingCharges: 0, makingChargePercent: null, makingChargePerGram: null } as unknown as Partial<IProduct>);
+    expect(service.computeUnitPrice(zero, 230).basis).toBe('live');
+    const perGram = makeProduct({ weight: 10, purity: '925', makingChargePercent: null, makingChargePerGram: 50, makingCharges: null } as unknown as Partial<IProduct>);
+    // metal 925 + making 50 x 10 = 1425: per-gram wins over a null percent.
+    expect(service.computeUnitPrice(perGram, 100).unitPrice).toBeCloseTo(1425);
+  });
 
   it('computes live price = weight x rate x purity + making% ', () => {
     const product = makeProduct({ weight: 10, purity: '925', makingChargePercent: 10 });
@@ -166,7 +185,7 @@ describe('PricingService.computeCheckout — variant weight passthrough', () => 
   afterEach(() => jest.restoreAllMocks());
 
   it('prices a checkout line at the selected variant weight, exactly as the frontend cart sends it', async () => {
-    jest.spyOn(service, 'getCurrentSilverRatePerGram').mockResolvedValue(100);
+    jest.spyOn(service, 'getCurrentRatePerGram').mockResolvedValue(100);
     jest.spyOn(ProductRepository.prototype, 'findById').mockResolvedValue(variantProduct as never);
     jest.spyOn(PricingConfigRepository.prototype, 'getGstPercent').mockResolvedValue(3);
 
@@ -202,7 +221,7 @@ describe('PricingService.computeCheckout — gift wrap', () => {
   afterEach(() => jest.restoreAllMocks());
 
   it('adds the flat server-owned fee after GST, and nothing without gift wrap', async () => {
-    jest.spyOn(service, 'getCurrentSilverRatePerGram').mockResolvedValue(100);
+    jest.spyOn(service, 'getCurrentRatePerGram').mockResolvedValue(100);
     jest.spyOn(ProductRepository.prototype, 'findById').mockResolvedValue(product as never);
     jest.spyOn(PricingConfigRepository.prototype, 'getGstPercent').mockResolvedValue(3);
 
@@ -215,5 +234,31 @@ describe('PricingService.computeCheckout — gift wrap', () => {
     expect(wrapped.taxAmount).toBeCloseTo(plain.taxAmount); // the fee is not taxed
     expect(wrapped.grandTotal).toBeCloseTo(plain.grandTotal + 99);
     expect(wrapped.amountInPaise).toBe(Math.round(wrapped.grandTotal * 100));
+  });
+});
+
+describe('gold pricing', () => {
+  const service = new PricingService();
+  afterEach(() => jest.restoreAllMocks());
+
+  it('reads karat purity out of 24 and picks the gold rate for gold materials', () => {
+    expect(resolvePurityFraction('22K', 'Gold')).toBeCloseTo(22 / 24);
+    expect(resolvePurityFraction('18 kt', 'Gold')).toBeCloseTo(0.75);
+    expect(resolvePurityFraction('916', 'Gold')).toBeCloseTo(0.916);
+    expect(metalOf({ material: 'Gold 22K' })).toBe('GOLD');
+    expect(metalOf({ material: 'Silver' })).toBe('SILVER');
+    expect(metalOf({ material: null })).toBe('SILVER');
+  });
+
+  it('prices a gold line at the gold rate in checkout', async () => {
+    const rate = jest.spyOn(service, 'getCurrentRatePerGram').mockImplementation(async (m) => (m === 'GOLD' ? 7000 : 100));
+    jest.spyOn(ProductRepository.prototype, 'findById').mockResolvedValue(
+      makeProduct({ _id: { toString: () => 'g1' }, material: 'Gold 22K', purity: '22K', weight: 2, makingChargePercent: 10 } as unknown as Partial<IProduct>) as never,
+    );
+    jest.spyOn(PricingConfigRepository.prototype, 'getGstPercent').mockResolvedValue(3);
+    const b = await service.computeCheckout({ items: [{ product: 'g1', quantity: 1 }] });
+    // 2 g × 7000 × 22/24 = 12833.33 + 10% = 14116.67
+    expect(b.items[0].price).toBeCloseTo(14116.67, 1);
+    expect(rate).toHaveBeenCalledWith('GOLD');
   });
 });

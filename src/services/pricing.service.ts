@@ -122,6 +122,12 @@ export const resolvePurityFraction = (
   purity: string | null | undefined,
   material: string | null | undefined,
 ): number => {
+  // Karat notation ("22K", "18 kt") is out of 24, not a percentage.
+  const karat = String(purity ?? '').match(/(\d{1,2}(?:\.\d+)?)\s*k(?:t|arat)?\b/i);
+  if (karat) {
+    const k = Number(karat[1]);
+    if (Number.isFinite(k) && k > 0 && k <= 24) return k / 24;
+  }
   const digits = String(purity ?? '').match(/[\d.]+/);
   if (digits) {
     const value = Number(digits[0]);
@@ -133,6 +139,10 @@ export const resolvePurityFraction = (
   }
   return /silver/i.test(String(material ?? '')) ? 0.925 : 1;
 };
+
+/** Which metal rate prices a product: gold when its material says gold, else silver. */
+export const metalOf = (product: { material?: string | null }): MetalType =>
+  /gold/i.test(String(product.material ?? '')) ? 'GOLD' : 'SILVER';
 
 export class PricingService {
   private productRepository: ProductRepository;
@@ -156,6 +166,15 @@ export class PricingService {
    * the most recent recorded rate. Returns null when no rate has ever been set
    * (callers then fall back to the product's static listed price).
    */
+  /** Current silver and gold rates, fetched once per listing / checkout. */
+  private async ratesByMetal(): Promise<Record<MetalType, number | null>> {
+    const [SILVER, GOLD] = await Promise.all([
+      this.getCurrentRatePerGram('SILVER'),
+      this.getCurrentRatePerGram('GOLD'),
+    ]);
+    return { SILVER, GOLD };
+  }
+
   public async getCurrentSilverRatePerGram(): Promise<number | null> {
     return this.getCurrentRatePerGram('SILVER');
   }
@@ -216,10 +235,13 @@ export class PricingService {
     }
 
     const hasNewCharge = !!product.makingCharge || !!product.wastage;
+    // `!= null`, not `!== undefined`: the repository returns null for unset legacy
+    // columns, and treating null as "set" priced every charge-less product live
+    // instead of at its listed price (the documented fallback below).
     const hasLegacyMaking =
-      product.makingChargePerGram !== undefined ||
-      product.makingChargePercent !== undefined ||
-      product.makingCharges !== undefined;
+      product.makingChargePerGram != null ||
+      product.makingChargePercent != null ||
+      product.makingCharges != null;
 
     const canComputeLive =
       silverRatePerGram !== null &&
@@ -244,9 +266,9 @@ export class PricingService {
     let makingCharge = 0;
     if (product.makingCharge) {
       makingCharge = resolveChargeAmount(product.makingCharge, metalValue);
-    } else if (product.makingChargePerGram !== undefined) {
+    } else if (product.makingChargePerGram != null) {
       makingCharge = (Number(product.makingChargePerGram) || 0) * weight;
-    } else if (product.makingChargePercent !== undefined) {
+    } else if (product.makingChargePercent != null) {
       makingCharge = metalValue * ((Number(product.makingChargePercent) || 0) / 100);
     } else {
       makingCharge = Number(product.makingCharges) || 0;
@@ -270,13 +292,13 @@ export class PricingService {
    * and the inputs the storefront needs to display the breakdown.
    */
   public async enrichForDisplay(product: IProduct): Promise<Record<string, unknown>> {
-    const ratePerGram = await this.getCurrentSilverRatePerGram();
+    const ratePerGram = await this.getCurrentRatePerGram(metalOf(product));
     return this.enrichWithRate(product, ratePerGram);
   }
 
   public async enrichManyForDisplay(products: IProduct[]): Promise<Record<string, unknown>[]> {
-    const ratePerGram = await this.getCurrentSilverRatePerGram();
-    return products.map((p) => this.enrichWithRate(p, ratePerGram));
+    const rates = await this.ratesByMetal();
+    return products.map((p) => this.enrichWithRate(p, rates[metalOf(p)]));
   }
 
   private enrichWithRate(product: IProduct, ratePerGram: number | null): Record<string, unknown> {
@@ -321,7 +343,7 @@ export class PricingService {
       throw new AppError('Cannot checkout with an empty cart', 400);
     }
 
-    const ratePerGram = await this.getCurrentSilverRatePerGram();
+    const rates = await this.ratesByMetal();
     const items: PricedLineItem[] = [];
 
     for (const raw of rawItems) {
@@ -366,6 +388,7 @@ export class PricingService {
 
       // Honour a selected size-variant weight carried on the line item.
       const weightOverride = parseWeight(raw.variantWeight ?? raw.weight);
+      const ratePerGram = rates[metalOf(product)];
       const breakdown = this.computeUnitPrice(product, ratePerGram, weightOverride);
       if (breakdown.basis === 'static' && ratePerGram === null) {
         Logger.warn(`Pricing fell back to static price for ${product.name} — no silver rate set`);
