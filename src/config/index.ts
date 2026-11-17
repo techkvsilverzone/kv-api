@@ -74,6 +74,9 @@ export const config = {
   // Name/language of the approved AUTHENTICATION template OTPs are sent through.
   whatsappOtpTemplate: process.env.WHATSAPP_OTP_TEMPLATE || 'kv_otp',
   whatsappOtpTemplateLanguage: process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE || 'en_US',
+  /** UTILITY template "KV Silver Zone admin alert: {{1}}. Open the admin panel for details." */
+  whatsappAdminTemplate: process.env.WHATSAPP_ADMIN_TEMPLATE || 'kv_admin_alert',
+  whatsappAdminTemplateLanguage: process.env.WHATSAPP_ADMIN_TEMPLATE_LANGUAGE || 'en',
   otpExpiryMinutes: Number(process.env.OTP_EXPIRY_MINUTES || 5),
   // Push notifications (FCM HTTP v1). A Firebase service-account key, as a file path or inline
   // JSON. Unset = push is skipped; the in-app notification inbox still works.

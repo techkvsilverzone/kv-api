@@ -435,6 +435,10 @@ export class SavingsRepository {
       amount: number;
       materialRate: number;
       materialWeight: number;
+      /** Interest/bonus credited on this row (FLEXIBLE plans); 0 when absent. */
+      devidentAmount?: number;
+      devidentMaterialRate?: number;
+      devidentMaterialWeight?: number;
       method: 'ONLINE' | 'CASH';
       razorpayOrderId?: string;
       razorpayPaymentId?: string;
@@ -459,7 +463,7 @@ export class SavingsRepository {
            (savings_account_id, month, amount, paid_at, material_rate, material_weight,
             devident_amount, devident_material_rate, devident_material_weight,
             method, razorpay_order_id, razorpay_payment_id, recorded_by, due_month_key)
-         VALUES ($1,$2,$3,NOW(),$4,$5,0,0,0,$6,$7,$8,$9,$10)`,
+         VALUES ($1,$2,$3,NOW(),$4,$5,$11,$12,$13,$6,$7,$8,$9,$10)`,
         [
           id,
           row.month,
@@ -471,6 +475,9 @@ export class SavingsRepository {
           row.razorpayPaymentId ?? null,
           toBigIntParam(row.recordedBy),
           row.dueMonthKey,
+          row.devidentAmount ?? 0,
+          row.devidentMaterialRate ?? 0,
+          row.devidentMaterialWeight ?? 0,
         ],
       );
 

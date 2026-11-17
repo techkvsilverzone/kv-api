@@ -5,7 +5,7 @@ import { PricingService, CheckoutBreakdown, CheckoutItemInput, CheckoutAddress }
 import { StockService } from './stock.service';
 import { AppError } from '../utils/appError';
 import { sendOrderConfirmationEmail, buildOrderConfirmationInput } from '../utils/emailNotifications';
-import { sendPaymentSuccessMessage } from '../utils/whatsapp';
+import { sendPaymentSuccessMessage, notifyAdmin } from '../utils/whatsapp';
 import { notifyOrderPlaced } from './customerNotifications';
 import { createRazorpayOrder, fetchRazorpayOrder, verifyRazorpaySignature } from '../utils/razorpay';
 import Logger from '../utils/logger';
@@ -154,6 +154,10 @@ export class PaymentService {
     }
 
     await notifyOrderPlaced({ ...order, userId: order.userId ?? userId });
+    notifyAdmin(
+      `New order ${order.invoiceNumber}: ₹${order.grandTotal ?? breakdown.grandTotal} paid online, ${breakdown.items.length} item(s), for ${orderData.shippingAddress?.name ?? 'a customer'}${orderData.shippingAddress?.phone ? ` (${orderData.shippingAddress.phone})` : ''}, ${orderData.shippingAddress?.city ?? ''}`.replace(/, $/, ''),
+      'admin_order_placed',
+    );
 
     // Send the order confirmation email for BOTH razorpay and COD (best-effort).
     try {

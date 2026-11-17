@@ -273,6 +273,9 @@ describe('SavingsService — applyPayment (via recordPaymentAsAdmin)', () => {
         amount: 2000,
         materialRate: 100,
         materialWeight: 20,
+        devidentAmount: 0, // fixed plans earn no per-payment interest
+        devidentMaterialRate: 0,
+        devidentMaterialWeight: 0,
         method: 'CASH',
         razorpayOrderId: undefined,
         razorpayPaymentId: undefined,
@@ -673,6 +676,27 @@ describe('SavingsService — FLEXIBLE payment mode (item 4, KV Smart Purchase Pl
       // (a month key here made every second payment in a month fail after Razorpay captured it).
       expect.objectContaining({ month: 2, amount: 300, dueMonthKey: null }),
       false,
+      'SMT',
+    );
+  });
+
+  it("credits the scheme month's interest % as extra grams (month 1 = 7%)", async () => {
+    jest.spyOn(SavingsRepository.prototype, 'findById').mockResolvedValue(
+      baseScheme({ schemeType: 'SILVER_SMART', metal: 'SILVER', monthlyAmount: 100, planId: 'planF', startDate: new Date(), payments: [] }) as never,
+    );
+    jest.spyOn(SchemePlanRepository.prototype, 'findById').mockResolvedValue(flexiblePlan() as never);
+    jest.spyOn(PricingService.prototype, 'getCurrentRatePerGram').mockResolvedValue(200);
+    const recordSpy = jest.spyOn(SavingsRepository.prototype, 'recordPayment').mockResolvedValue({
+      userId: { toString: () => 'u1' }, duration: 11, bonusAmount: 0, payments: [{ amount: 1000, devidentAmount: 70 }],
+    } as never);
+
+    await new SavingsService().recordPaymentAsAdmin('s1', 1000, undefined, 'admin1');
+
+    // ₹1,000 at ₹200/g = 5 g; 7% interest = ₹70 = 0.35 g extra.
+    expect(recordSpy).toHaveBeenCalledWith(
+      's1',
+      expect.objectContaining({ amount: 1000, materialWeight: 5, devidentAmount: 70, devidentMaterialRate: 200, devidentMaterialWeight: 0.35 }),
+      true,
       'SMT',
     );
   });

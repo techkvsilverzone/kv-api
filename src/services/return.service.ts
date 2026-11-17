@@ -3,6 +3,7 @@ import { ReturnRepository } from '../repositories/return.repository';
 import { OrderRepository } from '../repositories/order.repository';
 import { UnmatchedReturnVideoRepository } from '../repositories/unmatchedReturnVideo.repository';
 import { downloadAndStoreWhatsAppMedia } from '../utils/whatsappMedia';
+import { notifyAdmin } from '../utils/whatsapp';
 import { config } from '../config';
 import { AppError } from '../utils/appError';
 import Logger from '../utils/logger';
@@ -48,6 +49,7 @@ export class ReturnService {
     }
 
     const created = await this.returnRepository.create({ ...data, userId, faultType });
+    notifyAdmin(`Return requested on order ${order?.invoiceNumber ?? data.orderId} (${faultType === 'kv_fault' ? 'damaged / wrong item' : 'customer reason'}): ${String(data.reason ?? '').slice(0, 120)}`, 'admin_return_requested');
 
     return {
       ...created,

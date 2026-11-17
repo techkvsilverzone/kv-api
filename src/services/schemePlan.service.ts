@@ -1,5 +1,6 @@
+import { FLEXIBLE_INTEREST_PERCENT } from '../utils/flexibleInterest';
 import { SchemePlanRepository } from '../repositories/schemePlan.repository';
-import { ISchemeHamper, SchemeType } from '../domain/savings';
+import { ISchemeHamper, ISchemePlan, SchemeType } from '../domain/savings';
 import { AppError } from '../utils/appError';
 
 const SCHEME_TYPES: SchemeType[] = ['GOLD_11_1', 'SILVER_11_1', 'DIWALI', 'GOLD_INCOME', 'SILVER_DEPOSIT', 'SILVER_SMART'];
@@ -29,6 +30,10 @@ function parseHamper(input: any): ISchemeHamper | undefined {
   };
 }
 
+/** FLEXIBLE plans carry their month-by-month interest % so clients show the one table. */
+const withInterestTable = (plan: ISchemePlan) =>
+  plan.paymentMode === 'FLEXIBLE' ? { ...plan, monthlyInterestPercent: FLEXIBLE_INTEREST_PERCENT } : plan;
+
 export class SchemePlanService {
   private repository: SchemePlanRepository;
 
@@ -38,12 +43,12 @@ export class SchemePlanService {
 
   /** Public storefront catalog — active plans only. */
   public async getActivePlans() {
-    return this.repository.findActive();
+    return (await this.repository.findActive()).map(withInterestTable);
   }
 
   /** Admin catalog — includes inactive/draft plans. */
   public async getAllPlans() {
-    return this.repository.findAll();
+    return (await this.repository.findAll()).map(withInterestTable);
   }
 
   public async getByType(type: SchemeType) {

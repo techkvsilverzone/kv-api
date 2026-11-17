@@ -138,16 +138,41 @@ async function postToMeta(recipient: string, message: Record<string, unknown>): 
 }
 
 /**
+ * Ops alert to the admin number (`config.rateAlertRecipient`) through the approved UTILITY
+ * template `config.whatsappAdminTemplate`, so it delivers outside the 24h window. Falls back to
+ * free text if the template send is refused (e.g. not approved yet). Never throws.
+ */
+export async function sendAdminAlert(summary: string, kind: string): Promise<WhatsAppSendResult> {
+  // Template parameters may not contain newlines, tabs or runs of 4+ spaces.
+  const text = summary.replace(/\s+/g, ' ').trim().slice(0, 900);
+  const template = {
+    type: 'template',
+    template: {
+      name: config.whatsappAdminTemplate,
+      language: { code: config.whatsappAdminTemplateLanguage },
+      components: [{ type: 'body', parameters: [{ type: 'text', text }] }],
+    },
+  };
+  const result = await sendWhatsAppMessage(config.rateAlertRecipient, template, kind, text);
+  return result.sent ? result : sendWhatsAppText(config.rateAlertRecipient, `KV Silver Zone admin alert: ${text}`, kind);
+}
+
+/** Fire-and-forget `sendAdminAlert` for request handlers: the customer never waits on it. */
+export function notifyAdmin(summary: string, kind: string): void {
+  void sendAdminAlert(summary, kind).catch((error) => Logger.error(`[whatsapp] admin alert failed: ${String(error)}`));
+}
+
+/**
  * Build and send the daily "rate not updated" reminder for the given stale metals.
  */
 export async function sendRateUpdateReminder(staleMetals: string[]): Promise<WhatsAppSendResult> {
   const metals = staleMetals
     .map((m) => m.charAt(0).toUpperCase() + m.slice(1).toLowerCase())
     .join(' & ');
-  const body =
-    `⚠️ KV Silver Zone: Today's ${metals} rate has not been updated. ` +
-    `The admin panel is locked for admin/staff until it is recorded. Please update it now.`;
-  return sendWhatsAppText(config.rateAlertRecipient, body, 'rate_update_reminder');
+  return sendAdminAlert(
+    `⚠️ Today's ${metals} rate has not been updated; the admin panel stays locked for admin/staff until it is recorded`,
+    'rate_update_reminder',
+  );
 }
 
 /**
@@ -156,11 +181,10 @@ export async function sendRateUpdateReminder(staleMetals: string[]): Promise<Wha
  * guard finds every metal fresh.
  */
 export async function sendRateUpdateSuccessNotice(rates: { metal: string; ratePerGram: number }[]): Promise<WhatsAppSendResult> {
-  const lines = rates
-    .map((r) => `• ${r.metal.charAt(0).toUpperCase() + r.metal.slice(1).toLowerCase()}: ₹${r.ratePerGram}/g`)
-    .join('\n');
-  const body = `✅ KV Silver Zone: Today's rates are live —\n${lines}`;
-  return sendWhatsAppText(config.rateAlertRecipient, body, 'rate_update_success');
+  const list = rates
+    .map((r) => `${r.metal.charAt(0).toUpperCase() + r.metal.slice(1).toLowerCase()} ₹${r.ratePerGram}/g`)
+    .join(', ');
+  return sendAdminAlert(`✅ Today's rates are live: ${list}`, 'rate_update_success');
 }
 
 /** Order payment confirmed — sent to the customer's phone from their shipping address. */

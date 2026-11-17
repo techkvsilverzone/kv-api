@@ -4,10 +4,11 @@ import { UserRepository } from '../repositories/user.repository';
 import { PricingService } from './pricing.service';
 import { OtpService } from './otp.service';
 import { ISavings, ISchemePlan, SchemeType } from '../domain/savings';
-import { sendSavingsPaymentSuccess, sendDiwaliSchemeCompleted, sendDiwaliRedemptionReady } from '../utils/whatsapp';
+import { sendSavingsPaymentSuccess, sendDiwaliSchemeCompleted, sendDiwaliRedemptionReady, notifyAdmin } from '../utils/whatsapp';
 import { createRazorpayOrder, fetchRazorpayOrder, verifyRazorpaySignature } from '../utils/razorpay';
 import { AppError } from '../utils/appError';
 import { addMonths, istMonthKey } from '../utils/time';
+import { flexibleInterestPercent } from '../utils/flexibleInterest';
 import Logger from '../utils/logger';
 import { notifySavingsPayment } from './customerNotifications';
 
@@ -110,7 +111,7 @@ export class SavingsService {
         }
       : undefined;
 
-    return await this.savingsRepository.create({
+    const created = await this.savingsRepository.create({
       user: userId,
       schemeType: plan.type,
       planId: plan._id,
@@ -123,6 +124,12 @@ export class SavingsService {
       maturityBenefits,
       startDate: data.startDate,
     });
+    const customer = await this.userRepository.findById(userId).catch(() => null);
+    notifyAdmin(
+      `New savings enrolment: ${plan.name}${plan.paymentMode === 'FLEXIBLE' ? '' : ` at ₹${monthlyAmount}/month`} by ${customer?.name ?? 'a customer'}${customer?.phone ? ` (${customer.phone})` : ''}`,
+      'admin_savings_enrolment',
+    );
+    return created;
   }
 
   public async getMySchemes(userId: string) {
@@ -209,6 +216,9 @@ export class SavingsService {
 
     const month = scheme.payments.length + 1;
     const materialWeight = metal ? round3(amount / rate) : 0;
+    // FLEXIBLE plans earn the month's interest % as extra metal at the same rate.
+    const interestPercent = isFlexible && metal ? flexibleInterestPercent(scheme.startDate, new Date()) : 0;
+    const devidentAmount = round2((amount * interestPercent) / 100);
     const isFirstPayment = scheme.payments.length === 0 && !scheme.passbookNumber;
 
     const updated = await this.savingsRepository.recordPayment(
@@ -218,6 +228,9 @@ export class SavingsService {
         amount,
         materialRate: rate,
         materialWeight,
+        devidentAmount,
+        devidentMaterialRate: devidentAmount > 0 ? rate : 0,
+        devidentMaterialWeight: devidentAmount > 0 ? round3(devidentAmount / rate) : 0,
         method: opts.method,
         razorpayOrderId: opts.razorpayOrderId,
         razorpayPaymentId: opts.razorpayPaymentId,
@@ -230,6 +243,10 @@ export class SavingsService {
       passbookPrefix,
     );
     if (!updated) throw new AppError('Savings scheme not found', 404);
+    notifyAdmin(
+      `Savings payment ₹${amount} ${opts.method === 'CASH' ? 'collected in cash' : 'paid online'}: ${updated.planName}, passbook ${updated.passbookNumber ?? '-'}${metal ? `, ${materialWeight} g at ₹${rate}/g` : ''}`,
+      'admin_savings_payment',
+    );
 
     const realPaymentsNow = updated.payments.filter((p) => p.amount > 0).length;
     const alreadyHasDevident = updated.payments.some((p) => p.devidentAmount > 0);
@@ -434,6 +451,7 @@ export class SavingsService {
       cancelledBy,
     });
     if (!updated) throw new AppError('Savings scheme not found', 404);
+    notifyAdmin(`Savings scheme cancelled: ${updated.planName}, passbook ${updated.passbookNumber ?? '-'}, ₹${updated.totalPaid} paid`, 'admin_savings_cancelled');
     return updated;
   }
 

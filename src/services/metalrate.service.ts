@@ -1,4 +1,5 @@
 import { AppError } from '../utils/appError';
+import { notifyAdmin } from '../utils/whatsapp';
 import { IMetalRate, MetalType } from '../domain/rates';
 import { MetalRateRepository } from '../repositories/metalrate.repository';
 import { istDayKey, istMidnightUtc } from '../utils/time';
@@ -55,6 +56,10 @@ export class MetalRateService {
       updatedBy,
     });
 
+    notifyAdmin(
+      `${normalized.metal === 'GOLD' ? 'Gold 22K' : 'Silver'} rate set to ₹${normalized.ratePerGram}/g for ${istDayKey(normalized.date)}${updatedBy ? ` by ${updatedBy}` : ''}`,
+      'admin_rate_updated',
+    );
     return this.toResponse(rate);
   }
 
