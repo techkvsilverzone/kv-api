@@ -669,7 +669,9 @@ describe('SavingsService — FLEXIBLE payment mode (item 4, KV Smart Purchase Pl
 
     expect(recordSpy).toHaveBeenCalledWith(
       's1',
-      expect.objectContaining({ month: 2, amount: 300, dueMonthKey: currentMonthKey() }),
+      // null: the DB's one-real-payment-per-month unique index must not apply to FLEXIBLE plans
+      // (a month key here made every second payment in a month fail after Razorpay captured it).
+      expect.objectContaining({ month: 2, amount: 300, dueMonthKey: null }),
       false,
       'SMT',
     );

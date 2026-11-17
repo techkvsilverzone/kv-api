@@ -545,11 +545,12 @@ export class ProductService {
       // Drop fully-empty rows (mirrors the frontend normalization).
       if (!label && !weight && !height && !breadth) continue;
 
-      if (!label || !weight) {
-        throw new AppError('each variant requires both label and weight', 400);
+      // Weight prices the line, so it's required; a size sold only by weight needs no label.
+      if (!weight) {
+        throw new AppError(`Size ${label ? `"${label}"` : normalized.length + 1} needs a weight`, 400);
       }
 
-      const row: Record<string, string> = { label, weight };
+      const row: Record<string, string> = { label: label || weight, weight };
       if (height) row.height = height;
       if (breadth) row.breadth = breadth;
       normalized.push(row);

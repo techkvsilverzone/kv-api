@@ -53,25 +53,25 @@ describe('PricingService.computeUnitPrice', () => {
     const zero = makeProduct({ price: 650, weight: 4.2, purity: '999', makingCharges: 0, makingChargePercent: null, makingChargePerGram: null } as unknown as Partial<IProduct>);
     expect(service.computeUnitPrice(zero, 230).basis).toBe('live');
     const perGram = makeProduct({ weight: 10, purity: '925', makingChargePercent: null, makingChargePerGram: 50, makingCharges: null } as unknown as Partial<IProduct>);
-    // metal 925 + making 50 x 10 = 1425: per-gram wins over a null percent.
-    expect(service.computeUnitPrice(perGram, 100).unitPrice).toBeCloseTo(1425);
+    // metal 1000 + making 50 x 10 = 1500: per-gram wins over a null percent.
+    expect(service.computeUnitPrice(perGram, 100).unitPrice).toBeCloseTo(1500);
   });
 
-  it('computes live price = weight x rate x purity + making% ', () => {
+  it('computes live price = weight x rate + making% (purity is not applied: the rate is already for the purity sold)', () => {
     const product = makeProduct({ weight: 10, purity: '925', makingChargePercent: 10 });
     const b = service.computeUnitPrice(product, 100); // 100/g
-    // metalValue = 10 * 100 * 0.925 = 925; making = 92.5; unit = 1017.5
+    // metalValue = 10 * 100 = 1000; making = 100; unit = 1100
     expect(b.basis).toBe('live');
-    expect(b.metalValue).toBeCloseTo(925);
-    expect(b.makingCharge).toBeCloseTo(92.5);
-    expect(b.unitPrice).toBeCloseTo(1017.5);
+    expect(b.metalValue).toBeCloseTo(1000);
+    expect(b.makingCharge).toBeCloseTo(100);
+    expect(b.unitPrice).toBeCloseTo(1100);
   });
 
   it('uses making charge per gram when provided', () => {
     const product = makeProduct({ weight: 10, purity: '925', makingChargePerGram: 50 });
     const b = service.computeUnitPrice(product, 100);
-    // metalValue = 925; making = 50 * 10 = 500; unit = 1425
-    expect(b.unitPrice).toBeCloseTo(1425);
+    // metalValue = 1000; making = 50 * 10 = 500; unit = 1500
+    expect(b.unitPrice).toBeCloseTo(1500);
   });
 
   it('falls back to static listed price when no silver rate is available', () => {
@@ -110,12 +110,12 @@ describe('PricingService.computeUnitPrice', () => {
       wastage: { type: 'percentage', value: 5 },
     });
     const b = service.computeUnitPrice(product, 100);
-    // metalValue = 925; making = 92.5; wastage = 46.25; unit = 1063.75
+    // metalValue = 1000; making = 100; wastage = 50; unit = 1150
     expect(b.basis).toBe('live');
-    expect(b.metalValue).toBeCloseTo(925);
-    expect(b.makingCharge).toBeCloseTo(92.5);
-    expect(b.wastage).toBeCloseTo(46.25);
-    expect(b.unitPrice).toBeCloseTo(1063.75);
+    expect(b.metalValue).toBeCloseTo(1000);
+    expect(b.makingCharge).toBeCloseTo(100);
+    expect(b.wastage).toBeCloseTo(50);
+    expect(b.unitPrice).toBeCloseTo(1150);
   });
 
   it('applies makingCharge config as a flat amount and wastage as percentage', () => {
@@ -126,10 +126,10 @@ describe('PricingService.computeUnitPrice', () => {
       wastage: { type: 'amount', value: 50 },
     });
     const b = service.computeUnitPrice(product, 100);
-    // metalValue = 925; making = 300; wastage = 50; unit = 1275
+    // metalValue = 1000; making = 300; wastage = 50; unit = 1350
     expect(b.makingCharge).toBeCloseTo(300);
     expect(b.wastage).toBeCloseTo(50);
-    expect(b.unitPrice).toBeCloseTo(1275);
+    expect(b.unitPrice).toBeCloseTo(1350);
   });
 
   it('prefers the new makingCharge config over legacy making fields', () => {
@@ -140,16 +140,23 @@ describe('PricingService.computeUnitPrice', () => {
       makingCharge: { type: 'percentage', value: 20 },
     });
     const b = service.computeUnitPrice(product, 100);
-    // making = 20% of 925 = 185 (not the legacy 92.5)
-    expect(b.makingCharge).toBeCloseTo(185);
+    // making = 20% of 1000 = 200 (not the legacy 100)
+    expect(b.makingCharge).toBeCloseTo(200);
   });
 
   it('honours a selected size-variant weight override', () => {
     const product = makeProduct({ weight: 10, purity: '925', makingChargePercent: 10 });
     const b = service.computeUnitPrice(product, 100, 20); // 20g variant
-    // metalValue = 20 * 100 * 0.925 = 1850; making = 185; unit = 2035
-    expect(b.metalValue).toBeCloseTo(1850);
-    expect(b.unitPrice).toBeCloseTo(2035);
+    // metalValue = 20 * 100 = 2000; making = 200; unit = 2200
+    expect(b.metalValue).toBeCloseTo(2000);
+    expect(b.unitPrice).toBeCloseTo(2200);
+  });
+});
+
+describe('owner example', () => {
+  it('16.8 g at ₹190/g is ₹3,192 (not ₹2,953 after a purity factor)', () => {
+    const b = new PricingService().computeUnitPrice(makeProduct({ weight: 16.8, purity: '925', makingChargePercent: 0 }), 190);
+    expect(b.unitPrice).toBe(3192);
   });
 });
 
@@ -198,13 +205,13 @@ describe('PricingService.computeCheckout — variant weight passthrough', () => 
       ],
     });
 
-    // Base: metalValue = 10*100*0.925 = 925, making 10% = 92.5, unit = 1017.5
+    // Base: metalValue = 10*100 = 1000, making 10% = 100, unit = 1100
     expect(breakdown.items[0].weight).toBe(10);
-    expect(breakdown.items[0].price).toBeCloseTo(1017.5);
-    // 20g variant: metalValue = 20*100*0.925 = 1850, making 10% = 185, unit = 2035
+    expect(breakdown.items[0].price).toBeCloseTo(1100);
+    // 20g variant: metalValue = 20*100 = 2000, making 10% = 200, unit = 2200
     expect(breakdown.items[1].weight).toBe(20);
-    expect(breakdown.items[1].price).toBeCloseTo(2035);
-    expect(breakdown.subtotal).toBeCloseTo(1017.5 + 2035);
+    expect(breakdown.items[1].price).toBeCloseTo(2200);
+    expect(breakdown.subtotal).toBeCloseTo(1100 + 2200);
   });
 });
 
@@ -241,7 +248,7 @@ describe('gold pricing', () => {
   const service = new PricingService();
   afterEach(() => jest.restoreAllMocks());
 
-  it('reads karat purity out of 24 and picks the gold rate for gold materials', () => {
+  it('picks the gold rate for gold materials (karat purity is still parsed for display)', () => {
     expect(resolvePurityFraction('22K', 'Gold')).toBeCloseTo(22 / 24);
     expect(resolvePurityFraction('18 kt', 'Gold')).toBeCloseTo(0.75);
     expect(resolvePurityFraction('916', 'Gold')).toBeCloseTo(0.916);
@@ -257,8 +264,8 @@ describe('gold pricing', () => {
     );
     jest.spyOn(PricingConfigRepository.prototype, 'getGstPercent').mockResolvedValue(3);
     const b = await service.computeCheckout({ items: [{ product: 'g1', quantity: 1 }] });
-    // 2 g × 7000 × 22/24 = 12833.33 + 10% = 14116.67
-    expect(b.items[0].price).toBeCloseTo(14116.67, 1);
+    // 2 g × 7000 (the 22K rate) = 14000 + 10% = 15400
+    expect(b.items[0].price).toBeCloseTo(15400, 1);
     expect(rate).toHaveBeenCalledWith('GOLD');
   });
 });

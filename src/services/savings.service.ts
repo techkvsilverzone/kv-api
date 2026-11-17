@@ -222,7 +222,9 @@ export class SavingsService {
         razorpayOrderId: opts.razorpayOrderId,
         razorpayPaymentId: opts.razorpayPaymentId,
         recordedBy: opts.recordedBy,
-        dueMonthKey: collectionMonthKey,
+        // FLEXIBLE plans may pay several times a month; uq_savings_real_installment_month
+        // (one real payment per account per month) skips rows with a null key.
+        dueMonthKey: isFlexible ? null : collectionMonthKey,
       },
       isFirstPayment,
       passbookPrefix,

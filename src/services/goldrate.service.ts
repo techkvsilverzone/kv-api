@@ -41,12 +41,13 @@ export class GoldRateService {
     return rates.map((rate) => this.toLegacyGoldRate(rate));
   }
 
-  public async upsertRate(ratePerGram: number, _purity: string, updatedBy?: string) {
+  /** `date` (YYYY-MM-DD) back-fills a past day; omitted = today. */
+  public async upsertRate(ratePerGram: number, _purity: string, updatedBy?: string, date?: string) {
     // IST calendar day, not UTC — see silverrate.service.ts for why this matters.
     const today = istDayKey();
     const rate = await this.metalRateService.upsertRate(
       {
-        date: today,
+        date: date || today,
         metal: 'GOLD',
         karat: GOLD_KARAT,
         ratePerGram,

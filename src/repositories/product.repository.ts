@@ -259,9 +259,9 @@ export class ProductRepository {
     for (const entry of variants) {
       if (!entry || typeof entry !== 'object') continue;
       const raw = entry as Record<string, unknown>;
-      const label = String(raw.label ?? '').trim();
       const weight = String(raw.weight ?? '').trim();
-      if (!label || !weight) continue;
+      const label = String(raw.label ?? '').trim() || weight;
+      if (!weight) continue;
 
       // eslint-disable-next-line no-await-in-loop
       await client.query(

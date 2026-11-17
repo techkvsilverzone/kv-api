@@ -70,8 +70,12 @@ export class MetalRateService {
     // lands under yesterday's key during the UTC/IST offset window.
     const dayKey = String(payload.date || '').slice(0, 10);
     const parsedDate = dayKey ? istMidnightUtc(dayKey) : new Date(NaN);
-    if (!payload.date || Number.isNaN(parsedDate.getTime())) {
+    if (!payload.date || !/^\d{4}-\d{2}-\d{2}$/.test(dayKey) || Number.isNaN(parsedDate.getTime())) {
       throw new AppError('date must be a valid ISO date (YYYY-MM-DD)', 400);
+    }
+    // Past days can be back-filled; a future day's rate isn't known yet.
+    if (dayKey > istDayKey()) {
+      throw new AppError('date cannot be in the future', 400);
     }
 
     if (payload.metal !== 'SILVER' && payload.metal !== 'GOLD') {

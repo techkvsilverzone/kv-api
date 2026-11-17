@@ -203,7 +203,8 @@ export class PricingService {
    *
    * - Fixed-price products (`isFixedPrice`): the listed `price` IS the pre-GST
    *   price — no metal-value calc, no making/wastage.
-   * - Dynamic products: metalValue = weight(g) x silver rate/g x purity, then
+   * - Dynamic products: metalValue = weight(g) x rate/g (the day's rate is already for the
+   *   purity sold, so purity is not applied again), then
    *   + making charge + wastage. Making/wastage prefer the admin-config
    *   `{ type, value }` objects (percentage taken against metal value, amount =
    *   flat rupees), falling back to the legacy making-charge fields.
@@ -261,7 +262,7 @@ export class PricingService {
       };
     }
 
-    const metalValue = weight * (silverRatePerGram as number) * purityFraction;
+    const metalValue = weight * (silverRatePerGram as number);
 
     let makingCharge = 0;
     if (product.makingCharge) {

@@ -439,7 +439,7 @@ export class SavingsRepository {
       razorpayOrderId?: string;
       razorpayPaymentId?: string;
       recordedBy?: string;
-      dueMonthKey: string;
+      dueMonthKey: string | null;
     },
     assignPassbook = false,
     passbookPrefix?: string,

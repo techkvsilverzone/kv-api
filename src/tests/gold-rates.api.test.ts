@@ -71,7 +71,7 @@ describe('Gold rate endpoints (#25 B1)', () => {
       .send({ ratePerGram: 6500, purity: '916' });
 
     expect(res.status).toBe(201);
-    expect(spy).toHaveBeenCalledWith(6500, '916', 'Admin User');
+    expect(spy).toHaveBeenCalledWith(6500, '916', 'Admin User', undefined);
     expect(res.body.ratePerKg).toBe(6500000);
   });
 

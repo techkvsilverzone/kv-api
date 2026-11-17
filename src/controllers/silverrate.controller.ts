@@ -39,9 +39,9 @@ export class SilverRateController {
 
   public upsertRate = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { ratePerGram, purity } = req.body;
+      const { ratePerGram, purity, date } = req.body;
       const updatedBy = req.user?.name;
-      const rate = await this.silverRateService.upsertRate(Number(ratePerGram), String(purity), updatedBy);
+      const rate = await this.silverRateService.upsertRate(Number(ratePerGram), String(purity), updatedBy, date ? String(date) : undefined);
       res.status(201).json(rate);
     } catch (error) {
       next(error);

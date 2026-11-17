@@ -33,14 +33,15 @@ export class SilverRateService {
     return rates.map((rate) => this.toLegacySilverRate(rate));
   }
 
-  public async upsertRate(ratePerGram: number, _purity: string, updatedBy?: string) {
+  /** `date` (YYYY-MM-DD) back-fills a past day; omitted = today. */
+  public async upsertRate(ratePerGram: number, _purity: string, updatedBy?: string, date?: string) {
     // IST calendar day, not UTC — must agree with the rate-freshness guard's
     // day comparison, or a rate saved between 00:00-05:30 IST silently lands
     // under yesterday's date and the admin panel stays locked.
     const today = istDayKey();
     const rate = await this.metalRateService.upsertRate(
       {
-        date: today,
+        date: date || today,
         metal: 'SILVER',
         karat: null,
         ratePerGram,
