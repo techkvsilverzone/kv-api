@@ -44,11 +44,17 @@ export const errorMiddleware = (
   } else {
     Logger.error(`${err.name}: ${err.message}\n${err.stack}`);
   }
+  // Refused requests were invisible in the logs; 401 is skipped (every guest page view probes /users/me).
+  if (statusCode >= 400 && statusCode < 500 && statusCode !== 401) {
+    Logger.warn(`[refused] ${req.method} ${req.originalUrl} → ${statusCode}: ${message}`);
+  }
+  const field = err instanceof AppError ? err.field : undefined;
 
   res.status(statusCode).json({
     status: 'error',
     statusCode,
     message,
+    ...(field && { field }),
     ...(config.exposeErrorStack && { stack: err.stack }),
   });
 };

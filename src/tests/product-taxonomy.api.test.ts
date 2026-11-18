@@ -35,6 +35,7 @@ describe('Product taxonomy, tags, and fixed-price weight rules', () => {
       stubRepo(capture);
 
       const response = await request(app).post('/api/v1/admin/products').send({
+        images: ['data:image/png;base64,AA'],
         name: 'Gift Voucher Coin',
         category: 'Coins',
         isFixedPrice: true,
@@ -47,6 +48,7 @@ describe('Product taxonomy, tags, and fixed-price weight rules', () => {
 
     it('rejects a dynamic-priced product with no weight', async () => {
       const response = await request(app).post('/api/v1/admin/products').send({
+        images: ['data:image/png;base64,AA'],
         name: 'Silver Ring',
         category: 'Jewellery',
         price: 0,
@@ -58,6 +60,7 @@ describe('Product taxonomy, tags, and fixed-price weight rules', () => {
 
     it('rejects a negative weight even for a fixed-price product', async () => {
       const response = await request(app).post('/api/v1/admin/products').send({
+        images: ['data:image/png;base64,AA'],
         name: 'Gift Voucher Coin',
         category: 'Coins',
         isFixedPrice: true,
@@ -76,6 +79,7 @@ describe('Product taxonomy, tags, and fixed-price weight rules', () => {
       stubRepo(capture);
 
       const response = await request(app).post('/api/v1/admin/products').send({
+        images: ['data:image/png;base64,AA'],
         name: 'Ganesha Idol',
         category: 'Idols',
         isFixedPrice: true,
@@ -93,6 +97,7 @@ describe('Product taxonomy, tags, and fixed-price weight rules', () => {
       stubRepo(capture);
 
       const response = await request(app).post('/api/v1/admin/products').send({
+        images: ['data:image/png;base64,AA'],
         name: "Men's Chain",
         category: 'Jewellery',
         subcategory: 'Mens',
@@ -108,6 +113,7 @@ describe('Product taxonomy, tags, and fixed-price weight rules', () => {
       stubCategories([{ name: 'Jewellery', parent: null }, { name: 'Mens', parent: 'Jewellery' }]);
 
       const response = await request(app).post('/api/v1/admin/products').send({
+        images: ['data:image/png;base64,AA'],
         name: 'Mismatched Product',
         category: 'Coins',
         subcategory: 'Mens',
@@ -126,6 +132,7 @@ describe('Product taxonomy, tags, and fixed-price weight rules', () => {
       stubRepo(capture);
 
       const response = await request(app).post('/api/v1/admin/products').send({
+        images: ['data:image/png;base64,AA'],
         name: 'Tagged Product',
         category: 'Coins',
         isFixedPrice: true,
@@ -142,6 +149,7 @@ describe('Product taxonomy, tags, and fixed-price weight rules', () => {
       stubRepo(capture);
 
       const response = await request(app).post('/api/v1/admin/products').send({
+        images: ['data:image/png;base64,AA'],
         name: 'Tagged Product',
         category: 'Coins',
         isFixedPrice: true,
@@ -158,6 +166,7 @@ describe('Product taxonomy, tags, and fixed-price weight rules', () => {
       stubRepo(capture);
 
       const response = await request(app).post('/api/v1/admin/products').send({
+        images: ['data:image/png;base64,AA'],
         name: 'Untagged Product',
         category: 'Coins',
         isFixedPrice: true,

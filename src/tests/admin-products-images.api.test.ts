@@ -57,7 +57,7 @@ describe('Product images write-side normalization', () => {
     ).rejects.toMatchObject({ statusCode: 400 });
   });
 
-  it('full-replaces images on update and clears them with an empty array', async () => {
+  it('full-replaces images on update and refuses to remove the last photo', async () => {
     const spy = jest
       .spyOn(ProductRepository.prototype, 'update')
       .mockImplementation(async (_id: string, data: any) => ({ _id, ...data }) as never);
@@ -68,7 +68,14 @@ describe('Product images write-side normalization', () => {
       { variantName: 'Default view', imageBase64: 'y', sortOrder: 1 },
     ]);
 
-    await new ProductService().updateProduct('p1', { images: [] });
-    expect((spy.mock.calls[1][1] as any).images).toEqual([]);
+    await expect(new ProductService().updateProduct('p1', { images: [] })).rejects.toMatchObject({ field: 'images', statusCode: 400 });
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it('refuses to create a product with no photo, naming the field', async () => {
+    await expect(new ProductService().createProduct({ ...baseCreate, images: [] })).rejects.toMatchObject({
+      message: 'Add at least one product photo',
+      field: 'images',
+    });
   });
 });

@@ -191,7 +191,7 @@ export class ProductService {
 
     const name = String(payload.itemName || payload.name || '').trim();
     if (!name) {
-      throw new AppError('name is required', 400);
+      throw new AppError('name is required', 400, true, 'name');
     }
 
     // Auto-generate productGroupCode from name + timestamp when not provided by frontend
@@ -222,32 +222,32 @@ export class ProductService {
       : 0;
     if (isFixedPrice) {
       if (hasWeight && (!Number.isFinite(weight) || weight < 0)) {
-        throw new AppError('weight must be a non-negative number', 400);
+        throw new AppError('weight must be a non-negative number', 400, true, 'weight');
       }
     } else if (!Number.isFinite(weight) || weight <= 0) {
-      throw new AppError('weight must be a positive number', 400);
+      throw new AppError('weight must be a positive number', 400, true, 'weight');
     }
 
     const price = Number(payload.price);
     if (isFixedPrice) {
       if (!Number.isFinite(price) || price <= 0) {
-        throw new AppError('price must be a positive number', 400);
+        throw new AppError('price must be a positive number', 400, true, 'price');
       }
     } else if (payload.price !== undefined && payload.price !== '' && payload.price !== null) {
       if (!Number.isFinite(price) || price < 0) {
-        throw new AppError('price must be a non-negative number', 400);
+        throw new AppError('price must be a non-negative number', 400, true, 'price');
       }
     }
     const normalizedPrice = Number.isFinite(price) ? price : 0;
 
     const quantity = payload.quantity === undefined ? 1 : Number(payload.quantity);
     if (!Number.isInteger(quantity) || quantity < 0) {
-      throw new AppError('quantity must be a whole number greater than or equal to 0', 400);
+      throw new AppError('quantity must be a whole number greater than or equal to 0', 400, true, 'quantity');
     }
 
     const image = payload.imageBase64 || payload.image || payload.imageUrl;
     if (image !== undefined && typeof image !== 'string') {
-      throw new AppError('image must be a string (base64 or URL)', 400);
+      throw new AppError('image must be a string (base64 or URL)', 400, true, 'image');
     }
 
     // isActive can come from field `isActive` (boolean) or `inStock` (boolean)
@@ -280,6 +280,9 @@ export class ProductService {
     } else if (typeof image === 'string' && image.trim()) {
       result.images = this.normalizeImages([image]);
     }
+    if (!Array.isArray(result.images) || result.images.length === 0) {
+      throw new AppError('Add at least one product photo', 400, true, 'images');
+    }
 
     // Pricing config: a fixed-price product has no making charge / wastage.
     result.isFixedPrice = isFixedPrice;
@@ -294,7 +297,7 @@ export class ProductService {
     if (payload.makingChargePercent !== undefined) {
       const pct = Number(payload.makingChargePercent);
       if (!Number.isFinite(pct) || pct < 0) {
-        throw new AppError('makingChargePercent must be a non-negative number', 400);
+        throw new AppError('makingChargePercent must be a non-negative number', 400, true, 'makingChargePercent');
       }
       result.makingChargePercent = pct;
     }
@@ -302,7 +305,7 @@ export class ProductService {
     if (payload.makingChargePerGram !== undefined) {
       const perGram = Number(payload.makingChargePerGram);
       if (!Number.isFinite(perGram) || perGram < 0) {
-        throw new AppError('makingChargePerGram must be a non-negative number', 400);
+        throw new AppError('makingChargePerGram must be a non-negative number', 400, true, 'makingChargePerGram');
       }
       result.makingChargePerGram = perGram;
     }
@@ -321,7 +324,7 @@ export class ProductService {
 
     if (payload.name !== undefined || payload.itemName !== undefined) {
       const name = String(payload.name ?? payload.itemName).trim();
-      if (!name) throw new AppError('name must be a non-empty string', 400);
+      if (!name) throw new AppError('name must be a non-empty string', 400, true, 'name');
       update.name = name;
     }
 
@@ -338,7 +341,7 @@ export class ProductService {
       // that touches subcategory must also send category (the admin edit form always
       // sends both together).
       if (payload.category === undefined) {
-        throw new AppError('category is required alongside subcategory', 400);
+        throw new AppError('category is required alongside subcategory', 400, true, 'category');
       }
       update.subcategory = await this.resolveSubcategory(String(payload.category).trim(), payload.subcategory);
     }
@@ -355,10 +358,10 @@ export class ProductService {
         : 0;
       if (isFixedPrice) {
         if (hasWeight && (!Number.isFinite(weight) || weight < 0)) {
-          throw new AppError('weight must be a non-negative number', 400);
+          throw new AppError('weight must be a non-negative number', 400, true, 'weight');
         }
       } else if (!Number.isFinite(weight) || weight <= 0) {
-        throw new AppError('weight must be a positive number', 400);
+        throw new AppError('weight must be a positive number', 400, true, 'weight');
       }
       update.weight = weight;
     }
@@ -370,11 +373,11 @@ export class ProductService {
       const price = Number(payload.price);
       if (isFixedPrice) {
         if (!Number.isFinite(price) || price <= 0) {
-          throw new AppError('price must be a positive number', 400);
+          throw new AppError('price must be a positive number', 400, true, 'price');
         }
       } else if (payload.price !== '' && payload.price !== null) {
         if (!Number.isFinite(price) || price < 0) {
-          throw new AppError('price must be a non-negative number', 400);
+          throw new AppError('price must be a non-negative number', 400, true, 'price');
         }
       }
       update.price = Number.isFinite(price) ? price : 0;
@@ -383,7 +386,7 @@ export class ProductService {
     if (payload.quantity !== undefined) {
       const quantity = Number(payload.quantity);
       if (!Number.isInteger(quantity) || quantity < 0) {
-        throw new AppError('quantity must be a whole number greater than or equal to 0', 400);
+        throw new AppError('quantity must be a whole number greater than or equal to 0', 400, true, 'quantity');
       }
       update.quantity = quantity;
     }
@@ -403,7 +406,7 @@ export class ProductService {
     if (payload.makingChargePercent !== undefined) {
       const pct = Number(payload.makingChargePercent);
       if (!Number.isFinite(pct) || pct < 0) {
-        throw new AppError('makingChargePercent must be a non-negative number', 400);
+        throw new AppError('makingChargePercent must be a non-negative number', 400, true, 'makingChargePercent');
       }
       update.makingChargePercent = pct;
     }
@@ -411,7 +414,7 @@ export class ProductService {
     if (payload.makingChargePerGram !== undefined) {
       const perGram = Number(payload.makingChargePerGram);
       if (!Number.isFinite(perGram) || perGram < 0) {
-        throw new AppError('makingChargePerGram must be a non-negative number', 400);
+        throw new AppError('makingChargePerGram must be a non-negative number', 400, true, 'makingChargePerGram');
       }
       update.makingChargePerGram = perGram;
     }
@@ -419,7 +422,7 @@ export class ProductService {
     if (payload.isActive !== undefined || payload.inStock !== undefined) {
       const activeVal = payload.isActive !== undefined ? payload.isActive : payload.inStock;
       if (typeof activeVal !== 'boolean') {
-        throw new AppError('isActive must be a boolean', 400);
+        throw new AppError('isActive must be a boolean', 400, true, 'isActive');
       }
       update.isActive = activeVal;
     }
@@ -438,11 +441,14 @@ export class ProductService {
       const single = payload.imageBase64 ?? payload.image ?? payload.imageUrl;
       if (single !== undefined) {
         if (single !== null && typeof single !== 'string') {
-          throw new AppError('image must be a string (base64 or URL)', 400);
+          throw new AppError('image must be a string (base64 or URL)', 400, true, 'image');
         }
         const value = typeof single === 'string' ? single.trim() : '';
         update.images = value ? this.normalizeImages([value]) : [];
       }
+    }
+    if (Array.isArray(update.images) && update.images.length === 0) {
+      throw new AppError('A product needs at least one photo', 400, true, 'images');
     }
 
     // Pricing config (full replace): an omitted/absent charge clears it, and a
@@ -484,13 +490,13 @@ export class ProductService {
     if (!subcategory) return '';
 
     if (!category) {
-      throw new AppError('subcategory requires a category', 400);
+      throw new AppError('subcategory requires a category', 400, true, 'subcategory');
     }
 
     const registered = await this.categoryRepository.findAll();
     const isValidChild = registered.some((c) => c.parent === category && c.name === subcategory);
     if (!isValidChild) {
-      throw new AppError(`"${subcategory}" is not a registered subcategory of "${category}"`, 400);
+      throw new AppError(`"${subcategory}" is not a registered subcategory of "${category}"`, 400, true, 'subcategory');
     }
 
     return subcategory;
@@ -528,13 +534,13 @@ export class ProductService {
    */
   private normalizeVariants(raw: unknown): Array<Record<string, string>> {
     if (!Array.isArray(raw)) {
-      throw new AppError('variants must be an array', 400);
+      throw new AppError('variants must be an array', 400, true, 'variants');
     }
 
     const normalized: Array<Record<string, string>> = [];
     for (const entry of raw) {
       if (!entry || typeof entry !== 'object') {
-        throw new AppError('each variant must be an object', 400);
+        throw new AppError('each variant must be an object', 400, true, 'variants');
       }
       const e = entry as Record<string, unknown>;
       const label = String(e.label ?? '').trim();
@@ -547,7 +553,7 @@ export class ProductService {
 
       // Weight prices the line, so it's required; a size sold only by weight needs no label.
       if (!weight) {
-        throw new AppError(`Size ${label ? `"${label}"` : normalized.length + 1} needs a weight`, 400);
+        throw new AppError(`Size ${label ? `"${label}"` : normalized.length + 1} needs a weight`, 400, true, 'variants');
       }
 
       const row: Record<string, string> = { label: label || weight, weight };
@@ -569,14 +575,14 @@ export class ProductService {
    */
   private normalizeImages(raw: unknown): Array<{ variantName: string; imageBase64: string; sortOrder: number }> {
     if (!Array.isArray(raw)) {
-      throw new AppError('images must be an array of strings', 400);
+      throw new AppError('images must be an array of strings', 400, true, 'images');
     }
 
     const normalized: Array<{ variantName: string; imageBase64: string; sortOrder: number }> = [];
     for (const entry of raw) {
       if (entry === undefined || entry === null) continue;
       if (typeof entry !== 'string') {
-        throw new AppError('each image must be a string (base64 or URL)', 400);
+        throw new AppError('each image must be a string (base64 or URL)', 400, true, 'images');
       }
       const value = entry.trim();
       if (!value) continue;
@@ -595,7 +601,7 @@ export class ProductService {
   private normalizeCharge(raw: unknown, field: string): IProductCharge | null {
     if (raw === undefined || raw === null) return null;
     if (typeof raw !== 'object') {
-      throw new AppError(`${field} must be an object with type and value`, 400);
+      throw new AppError(`${field} must be an object with type and value`, 400, true, field);
     }
 
     const c = raw as Record<string, unknown>;

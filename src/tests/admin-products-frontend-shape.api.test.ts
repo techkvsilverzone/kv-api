@@ -94,6 +94,7 @@ describe('POST /admin/products – frontend-shaped payload', () => {
 
     expect(response.status).toBe(400);
     expect(response.body.message).toContain('name');
+    expect(response.body.field).toBe('name'); // lets the admin form highlight the input
   });
 
   it('returns 400 for negative price', async () => {
@@ -113,7 +114,7 @@ describe('POST /admin/products – frontend-shaped payload', () => {
     const response = await request(app)
       .post('/api/v1/admin/products')
       .set('Authorization', 'Bearer admin-token')
-      .send({ name: 'Test', weight: 5, price: 500 });
+      .send({ name: 'Test', weight: 5, price: 500, images: ['data:image/png;base64,AA'] });
 
     expect(response.status).toBe(201);
     expect(capture.payload.category).toBe('');
